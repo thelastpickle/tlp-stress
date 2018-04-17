@@ -45,6 +45,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.datastax.cassandra/cassandra-driver-core
     compile group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.4.0'
+    compile 'io.github.microutils:kotlin-logging:1.5.4'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
