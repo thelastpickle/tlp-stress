@@ -5,7 +5,11 @@ import com.beust.jcommander.Parameter
 import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.profiles.BasicTimeSeries
 import com.thelastpickle.tlpstress.profiles.IStressProfile
+import mu.KotlinLogging
 import org.reflections.Reflections
+
+private val logger = KotlinLogging.logger {}
+
 
 class MainArguments {
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
@@ -13,6 +17,9 @@ class MainArguments {
 
     @Parameter(names = ["--iterations", "-i"], description = "Number of operations")
     var iterations = 1000
+
+    @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
+    var help = false
 }
 
 fun main(argv: Array<String>) {
@@ -51,14 +58,19 @@ fun main(argv: Array<String>) {
     val jc = jcommander.build()
     jc.parse(*argv)
 
+    if (mainArgs.help) {
+        jc.usage()
+    } else {
+        val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+        val runner = ProfileRunner.create(session, 1, profile)
+        runner.execute()
+    }
+
     // hopefully at this point we have a valid stress profile to run
 
-    val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
-    val runner = ProfileRunner.create(session, 1, profile)
-
-    runner.execute()
 
     session.cluster.close()
+    logger.info { "Stress complete." }
 }
 
 
