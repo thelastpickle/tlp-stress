@@ -65,19 +65,19 @@ fun main(argv: Array<String>) {
     } else {
         var threads = mutableListOf<Thread>()
         println("Creating threads")
-        for(i in 1..mainArgs.threads) {
+        for(threadId in 1..mainArgs.threads) {
             val t = thread(start = true) {
-                println("Initializing thread $i")
-                logger.info { "Starting thread $i" }
+                println("Initializing thread $threadId")
+                logger.info { "Starting thread $threadId" }
                 val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
                 // hard coded for now
                 val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
                 val session = cluster.connect()
 
-                val context = StressContext(session, mainArgs)
+                val context = StressContext(session, mainArgs, threadId)
 
 
-                val runner = ProfileRunner.create(context, i, profile)
+                val runner = ProfileRunner.create(context, profile)
                 runner.execute()
                 session.cluster.close()
             }

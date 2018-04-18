@@ -15,11 +15,11 @@ private val logger = KotlinLogging.logger {}
  * Logs all errors along the way
  * Keeps track of useful metrics, per thread
  */
-class ProfileRunner(val context: StressContext, seed: Int, val profile: IStressProfile) {
+class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
 
     companion object {
-        fun create(context: StressContext, seed: Int, profile: IStressProfile) : ProfileRunner {
-            return ProfileRunner(context, seed, profile)
+        fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
+            return ProfileRunner(context, profile)
         }
     }
 
