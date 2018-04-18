@@ -10,4 +10,4 @@
 gradle/
 gradlew.bat
 settings.gradle
-logback.xml
+*.log

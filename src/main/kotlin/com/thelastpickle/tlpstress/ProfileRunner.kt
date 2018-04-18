@@ -15,11 +15,11 @@ private val logger = KotlinLogging.logger {}
  * Logs all errors along the way
  * Keeps track of useful metrics, per thread
  */
-class ProfileRunner(val session: Session, val profile: IStressProfile) {
+class ProfileRunner(val context: StressContext, seed: Int, val profile: IStressProfile) {
 
     companion object {
-        fun create(session: Session, seed: Int, profile: IStressProfile) : ProfileRunner {
-            return ProfileRunner(session, profile)
+        fun create(context: StressContext, seed: Int, profile: IStressProfile) : ProfileRunner {
+            return ProfileRunner(context, seed, profile)
         }
     }
 
@@ -27,8 +27,8 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
      * Main entrypoint for the runner
      */
     fun execute() {
-        session.execute("CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};")
-        session.execute("use tlp_stress")
+        context.session.execute("CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};")
+        context.session.execute("use tlp_stress")
         prepare()
         run()
         verify()
@@ -40,11 +40,12 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
      */
     fun run() {
 
-        val max: Int = 1000
+        val max = context.mainArguments.iterations
+
         var completed = 0
         var errors = 0
 
-        profile.prepare(session)
+        profile.prepare(context.session)
 
         logger.info { "Starting up runner" }
         val inFlight = mutableListOf<ResultSetFuture>()
@@ -62,7 +63,7 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
             when(result) {
                 is Operation.Statement -> {
                     logger.debug { result }
-                    val future = session.executeAsync(result.bound)
+                    val future = context.session.executeAsync(result.bound)
                     inFlight.add(future)
                     completed++
                 }
@@ -76,7 +77,7 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
     }
 
     fun prepare() {
-        profile.prepare(session)
+        profile.prepare(context.session)
     }
 
 

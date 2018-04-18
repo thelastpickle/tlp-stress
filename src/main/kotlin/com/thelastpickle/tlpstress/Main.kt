@@ -3,20 +3,18 @@ package com.thelastpickle.tlpstress
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.Cluster
-import com.thelastpickle.tlpstress.profiles.BasicTimeSeries
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
 import org.reflections.Reflections
 import kotlin.concurrent.thread
-
-private val logger = KotlinLogging.logger {}
+import ch.qos.logback.classic.util.ContextInitializer;
 
 
 class MainArguments {
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
     var threads = 1
 
-    @Parameter(names = ["--iterations", "-i"], description = "Number of operations")
+    @Parameter(names = ["--iterations", "-i"], description = "Number of operations to run.")
     var iterations = 1000
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
@@ -27,8 +25,12 @@ class MainArguments {
 }
 
 fun main(argv: Array<String>) {
+
     println("Starting up")
 
+    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.xml")
+
+    val logger = KotlinLogging.logger {}
 
 
     // JCommander set up
@@ -62,25 +64,29 @@ fun main(argv: Array<String>) {
         jc.usage()
     } else {
         var threads = mutableListOf<Thread>()
-        for(i in 0..mainArgs.threads) {
+        println("Creating threads")
+        for(i in 1..mainArgs.threads) {
             val t = thread(start = true) {
+                println("Initializing thread $i")
                 logger.info { "Starting thread $i" }
                 val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
                 // hard coded for now
                 val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
                 val session = cluster.connect()
 
-                StressContext(session)
+                val context = StressContext(session, mainArgs)
 
 
-                val runner = ProfileRunner.create(session, 1, profile)
+                val runner = ProfileRunner.create(context, i, profile)
                 runner.execute()
                 session.cluster.close()
             }
             threads.add(t)
         }
         logger.info{"${mainArgs.threads} threads created, waiting to join"}
+        println("{$mainArgs.threads} threads created, waiting to join")
         threads.forEach { it.join() }
+        println("All threads complete")
     }
 
     // hopefully at this point we have a valid stress profile to run
