@@ -54,7 +54,6 @@ fun main(argv: Array<String>) {
     // hopefully at this point we have a valid stress profile to run
 
     val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
-
     val runner = ProfileRunner.create(session, 1, profile)
 
     runner.execute()

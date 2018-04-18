@@ -46,7 +46,7 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
 
         profile.prepare(session)
 
-        logger.info { "Starting up" }
+        logger.info { "Starting up runner" }
         val inFlight = mutableListOf<ResultSetFuture>()
 
         for(x in 1..max) {
