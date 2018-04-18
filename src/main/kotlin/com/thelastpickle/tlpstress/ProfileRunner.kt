@@ -23,7 +23,12 @@ class ProfileRunner(val session: Session, val profile: IStressProfile) {
         }
     }
 
+    /**
+     * Main entrypoint for the runner
+     */
     fun execute() {
+        session.execute("CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};")
+        session.execute("use tlp_stress")
         prepare()
         run()
         verify()

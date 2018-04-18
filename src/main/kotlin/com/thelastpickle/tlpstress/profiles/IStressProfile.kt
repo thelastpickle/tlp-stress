@@ -5,6 +5,7 @@ import com.datastax.driver.core.BoundStatement
 
 interface IStressProfile {
 
+    fun getArguments() : Any
     fun prepare(session: Session)
     fun getNextOperation(i: Int) : Operation
 }
