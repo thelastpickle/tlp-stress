@@ -7,6 +7,7 @@ import com.thelastpickle.tlpstress.profiles.BasicTimeSeries
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
 import org.reflections.Reflections
+import kotlin.concurrent.thread
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,16 +21,15 @@ class MainArguments {
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
+
+    @Parameter(names = ["--host", "--hosts"], description = "Cassandra hosts, comma separated.  Used as contact points.")
+    var contactPoints = "127.0.0.1"
 }
 
 fun main(argv: Array<String>) {
     println("Starting up")
 
-    // hard coded for now
-    val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
-    val session = cluster.connect()
 
-    StressContext(session)
 
     // JCommander set up
     val jcommander = JCommander.newBuilder()
@@ -61,15 +61,30 @@ fun main(argv: Array<String>) {
     if (mainArgs.help) {
         jc.usage()
     } else {
-        val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
-        val runner = ProfileRunner.create(session, 1, profile)
-        runner.execute()
+        var threads = mutableListOf<Thread>()
+        for(i in 0..mainArgs.threads) {
+            val t = thread(start = true) {
+                logger.info { "Starting thread $i" }
+                val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+                // hard coded for now
+                val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+                val session = cluster.connect()
+
+                StressContext(session)
+
+
+                val runner = ProfileRunner.create(session, 1, profile)
+                runner.execute()
+                session.cluster.close()
+            }
+            threads.add(t)
+        }
+        logger.info{"${mainArgs.threads} threads created, waiting to join"}
+        threads.forEach { it.join() }
     }
 
     // hopefully at this point we have a valid stress profile to run
 
-
-    session.cluster.close()
     logger.info { "Stress complete." }
 }
 
