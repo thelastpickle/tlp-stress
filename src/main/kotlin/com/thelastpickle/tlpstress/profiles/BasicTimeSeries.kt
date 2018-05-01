@@ -2,10 +2,8 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.ResultSetFuture
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.randomString
-import com.thelastpickle.tlpstress.round
 import java.util.concurrent.ThreadLocalRandom
 
 /**
