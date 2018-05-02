@@ -25,6 +25,11 @@ class MainArguments {
 
     @Parameter(names = ["--host", "--hosts"], description = "Cassandra hosts, comma separated.  Used as contact points.")
     var contactPoints = "127.0.0.1"
+
+    @Parameter(names = ["--compaction"], description = "Compaction option to use")
+    var compaction = ""
+
+
 }
 
 fun main(argv: Array<String>) {
