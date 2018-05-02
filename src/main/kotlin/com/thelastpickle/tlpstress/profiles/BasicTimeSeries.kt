@@ -17,7 +17,8 @@ class BasicTimeSeries : IStressProfile {
     lateinit var prepared: PreparedStatement
 
     class Arguments {
-
+        @Parameter(names=["max_id"], description = "Max id of the sensor")
+        var maxId = 10000
     }
 
     override fun getArguments() : Any {
