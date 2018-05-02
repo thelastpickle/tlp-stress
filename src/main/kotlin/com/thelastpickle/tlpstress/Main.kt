@@ -20,6 +20,9 @@ class MainArguments {
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
 
+    @Parameter(names = ["--replication"], description = "Replication options")
+    var replication = "{'class': 'SimpleStrategy', 'replication_factor':3"
+
     @Parameter(names = ["--host", "--hosts"], description = "Cassandra hosts, comma separated.  Used as contact points.")
     var contactPoints = "127.0.0.1"
 }
