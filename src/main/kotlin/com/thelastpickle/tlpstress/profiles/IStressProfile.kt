@@ -3,11 +3,16 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
 
+interface IStressRunner {
+    fun getNextOperation(i: Int) : Operation
+}
+
 interface IStressProfile {
 
     fun getArguments() : Any
     fun prepare(session: Session)
-    fun getNextOperation(i: Int) : Operation
+    fun schema(): List<String>
+    fun getRunner(): IStressRunner
 }
 
 

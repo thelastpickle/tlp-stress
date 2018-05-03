@@ -24,18 +24,6 @@ class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
     }
 
     /**
-     * Main entrypoint for the runner
-     */
-    fun execute() {
-        context.session.execute("CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};")
-        context.session.execute("use tlp_stress")
-        prepare()
-        run()
-        verify()
-
-    }
-
-    /**
 
      */
     fun run() {
@@ -58,12 +46,13 @@ class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
             // I should be able to just tell the runner to inject gossip failures in any test
             // without having to write that code in the profile
 
-            val result = profile.getNextOperation(x)
+            val runner = profile.getRunner()
+            val op = runner.getNextOperation(x)
 
-            when(result) {
+            when(op) {
                 is Operation.Statement -> {
-                    logger.debug { result }
-                    val future = context.session.executeAsync(result.bound)
+                    logger.debug { op }
+                    val future = context.session.executeAsync(op.bound)
                     inFlight.add(future)
                     completed++
                 }

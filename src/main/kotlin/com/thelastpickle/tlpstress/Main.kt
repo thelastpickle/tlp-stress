@@ -29,6 +29,11 @@ class MainArguments {
     @Parameter(names = ["--compaction"], description = "Compaction option to use")
     var compaction = ""
 
+    @Parameter(names = ["--keyspace"], description = "Keyspace to use")
+    var keyspace = "tlp-stress"
+
+    @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
+    var id = "001"
 
 }
 
@@ -70,32 +75,67 @@ fun main(argv: Array<String>) {
 
     if (mainArgs.help) {
         jc.usage()
-    } else {
-        var threads = mutableListOf<Thread>()
-        println("Creating threads")
-        for(threadId in 1..mainArgs.threads) {
-            val t = thread(start = true) {
-                println("Initializing thread $threadId")
-                logger.info { "Starting thread $threadId" }
-                val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
-                // hard coded for now
-                val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
-                val session = cluster.connect()
-
-                val context = StressContext(session, mainArgs, threadId)
-
-
-                val runner = ProfileRunner.create(context, profile)
-                runner.execute()
-                session.cluster.close()
-            }
-            threads.add(t)
-        }
-        logger.info{"${mainArgs.threads} threads created, waiting to join"}
-        println("{$mainArgs.threads} threads created, waiting to join")
-        threads.forEach { it.join() }
-        println("All threads complete")
+        System.exit(0)
     }
+
+
+    // we're going to build one session per thread for now
+    // will be configurable because why not
+    val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+    // set up the keyspace
+
+    val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+    // get all the initial schema
+    println("Creating schema")
+
+    val session = cluster.connect()
+
+    session.execute("""CREATE KEYSPACE ${mainArgs.keyspace}
+                        |WITH replication =
+                        |{'class': 'SimpleStrategy',
+                        |'replication_factor':3})
+        |""".trimMargin())
+
+    session.execute("use ${mainArgs.keyspace}")
+
+    for(statement in profile.schema()) {
+        session.execute(statement)
+    }
+
+    // run the prepare for each
+    IntRange(0, mainArgs.threads).map {
+        val session = cluster.connect()
+        val context = StressContext(session, mainArgs, it)
+        ProfileRunner.create(context, profile)
+    }.parallelStream().map {
+        it.prepare()
+        it
+    }.parallel().map {
+        it.run()
+        it
+    }
+
+
+    var threads = mutableListOf<Thread>()
+
+    for(threadId in 1..mainArgs.threads) {
+        val t = thread(start = true) {
+            logger.info { "Starting thread $threadId" }
+
+
+        }
+        threads.add(t)
+    }
+
+    // should move this into the profile runner
+
+
+
+
+    logger.info{"${mainArgs.threads} threads created, waiting to join"}
+    println("{$mainArgs.threads} threads created, waiting to join")
+    threads.forEach { it.join() }
+    println("All threads complete")
 
     // hopefully at this point we have a valid stress profile to run
 

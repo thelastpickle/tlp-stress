@@ -13,6 +13,9 @@ import java.util.concurrent.ThreadLocalRandom
  * TODO make it use TWCS
  */
 class BasicTimeSeries : IStressProfile {
+    override fun schema(): List<String> {
+        return listOf()
+    }
 
     lateinit var prepared: PreparedStatement
 
@@ -39,11 +42,20 @@ class BasicTimeSeries : IStressProfile {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, now(), ?)")
     }
 
-    override fun getNextOperation(i: Int) : Operation {
-        val sensorId = ThreadLocalRandom.current().nextInt(1, 1000)
+    class TimeSeriesRunner(val insert: PreparedStatement) : IStressRunner {
+        override fun getNextOperation(i: Int) : Operation {
+            val sensorId = ThreadLocalRandom.current().nextInt(1, 1000)
 
-        val bound = prepared.bind(sensorId, randomString(100))
-        return Operation.Statement(bound)
+            val bound = insert.bind(sensorId, randomString(100))
+            return Operation.Statement(bound)
+        }
+
     }
+
+
+    override fun getRunner(): IStressRunner {
+        return TimeSeriesRunner(prepared)
+    }
+
 
 }
