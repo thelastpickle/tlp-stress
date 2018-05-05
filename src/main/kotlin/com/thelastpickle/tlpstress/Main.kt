@@ -6,7 +6,6 @@ import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
 import org.reflections.Reflections
-import kotlin.concurrent.thread
 import ch.qos.logback.classic.util.ContextInitializer;
 
 
@@ -30,7 +29,7 @@ class MainArguments {
     var compaction = ""
 
     @Parameter(names = ["--keyspace"], description = "Keyspace to use")
-    var keyspace = "tlp-stress"
+    var keyspace = "tlp_stress"
 
     @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
     var id = "001"
@@ -62,7 +61,6 @@ fun main(argv: Array<String>) {
     var commands = mutableMapOf<String, Class<out IStressProfile>>()
 
     for(m in modules) {
-//        Class.forName(m.canonicalName)
         val args = m.getConstructor().newInstance().getArguments()
         // name
         jcommander.addCommand(m.simpleName, args)
@@ -73,7 +71,10 @@ fun main(argv: Array<String>) {
     val jc = jcommander.build()
     jc.parse(*argv)
 
-    if (mainArgs.help) {
+    if (mainArgs.help || jc.parsedCommand == null) {
+        if (jc.parsedCommand == null) {
+            println("Please provide a workload.")
+        }
         jc.usage()
         System.exit(0)
     }
@@ -90,11 +91,13 @@ fun main(argv: Array<String>) {
 
     val session = cluster.connect()
 
-    session.execute("""CREATE KEYSPACE ${mainArgs.keyspace}
-                        |WITH replication =
-                        |{'class': 'SimpleStrategy',
-                        |'replication_factor':3})
-        |""".trimMargin())
+    val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS ${mainArgs.keyspace}
+                        | WITH replication =
+                        | {'class': 'SimpleStrategy',
+                        | 'replication_factor':3} """.trimMargin()
+
+    logger.debug { createKeyspace }
+    session.execute(createKeyspace)
 
     session.execute("use ${mainArgs.keyspace}")
 
@@ -103,43 +106,32 @@ fun main(argv: Array<String>) {
     }
 
     // run the prepare for each
-    IntRange(0, mainArgs.threads).map {
+    val runners = IntRange(0, mainArgs.threads-1).map {
+        println("Connecting")
         val session = cluster.connect()
+        session.execute("use ${mainArgs.keyspace}")
+
+        println("Connected")
         val context = StressContext(session, mainArgs, it)
         ProfileRunner.create(context, profile)
-    }.parallelStream().map {
+    }
+
+    val executed = runners.parallelStream().map {
+        println("Preparing")
         it.prepare()
-        it
-    }.parallel().map {
+    }.count()
+
+    println("$executed threads prepared.")
+
+    val runnersExecuted = runners.parallelStream().map {
+        println("Running")
         it.run()
-        it
-    }
-
-
-    var threads = mutableListOf<Thread>()
-
-    for(threadId in 1..mainArgs.threads) {
-        val t = thread(start = true) {
-            logger.info { "Starting thread $threadId" }
-
-
-        }
-        threads.add(t)
-    }
-
-    // should move this into the profile runner
-
-
-
-
-    logger.info{"${mainArgs.threads} threads created, waiting to join"}
-    println("{$mainArgs.threads} threads created, waiting to join")
-    threads.forEach { it.join() }
-    println("All threads complete")
+    }.count()
 
     // hopefully at this point we have a valid stress profile to run
+    println("Stress complete, $runnersExecuted.")
 
-    logger.info { "Stress complete." }
+    // dump out metrics
 }
 
 
