@@ -54,11 +54,12 @@ class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
                     logger.debug { op }
                     val future = context.session.executeAsync(op.bound)
                     inFlight.add(future)
-                    completed++
+                    context.requests.mark()
                 }
             }
         }
-        logger.info { "Done" }
+
+        println("Done, queries: $completed ")
     }
 
     fun verify() {

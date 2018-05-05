@@ -7,6 +7,9 @@ import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
 import org.reflections.Reflections
 import ch.qos.logback.classic.util.ContextInitializer;
+import com.codahale.metrics.MetricRegistry
+import java.util.concurrent.TimeUnit
+import com.codahale.metrics.ConsoleReporter
 
 
 class MainArguments {
@@ -44,6 +47,14 @@ fun main(argv: Array<String>) {
 
     val logger = KotlinLogging.logger {}
 
+    val metrics = MetricRegistry()
+
+    val reporter = ConsoleReporter.forRegistry(metrics)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .build()
+
+    reporter.start(1, TimeUnit.SECONDS)
 
     // JCommander set up
     val jcommander = JCommander.newBuilder()
@@ -99,11 +110,13 @@ fun main(argv: Array<String>) {
     logger.debug { createKeyspace }
     session.execute(createKeyspace)
 
-    session.execute("use ${mainArgs.keyspace}")
+    session.execute("USE ${mainArgs.keyspace}")
 
     for(statement in profile.schema()) {
         session.execute(statement)
     }
+
+    val requests = metrics.meter("requests")
 
     // run the prepare for each
     val runners = IntRange(0, mainArgs.threads-1).map {
@@ -112,7 +125,7 @@ fun main(argv: Array<String>) {
         session.execute("use ${mainArgs.keyspace}")
 
         println("Connected")
-        val context = StressContext(session, mainArgs, it)
+        val context = StressContext(session, mainArgs, it, requests)
         ProfileRunner.create(context, profile)
     }
 
@@ -132,6 +145,7 @@ fun main(argv: Array<String>) {
     println("Stress complete, $runnersExecuted.")
 
     // dump out metrics
+    System.exit(0)
 }
 
 
