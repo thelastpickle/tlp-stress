@@ -25,8 +25,8 @@ class MainArguments {
     @Parameter(names = ["--replication"], description = "Replication options")
     var replication = "{'class': 'SimpleStrategy', 'replication_factor':3"
 
-    @Parameter(names = ["--host", "--hosts"], description = "Cassandra hosts, comma separated.  Used as contact points.")
-    var contactPoints = "127.0.0.1"
+    @Parameter(names = ["--host"], description = "Cassandra host for first contact point.")
+    var host = "127.0.0.1"
 
     @Parameter(names = ["--compaction"], description = "Compaction option to use")
     var compaction = ""
@@ -36,6 +36,8 @@ class MainArguments {
 
     @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
     var id = "001"
+
+
 
 }
 
@@ -93,7 +95,7 @@ fun main(argv: Array<String>) {
 
     // we're going to build one session per thread for now
     // will be configurable because why not
-    val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+    val cluster = Cluster.builder().addContactPoint(mainArgs.host).build()
     // set up the keyspace
 
     val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
