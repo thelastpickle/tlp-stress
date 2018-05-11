@@ -30,9 +30,6 @@ class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
 
         val max = context.mainArguments.iterations
 
-        var completed = 0
-        var errors = 0
-
         profile.prepare(context.session)
 
         logger.info { "Starting up runner" }
@@ -58,8 +55,6 @@ class ProfileRunner(val context: StressContext, val profile: IStressProfile) {
                 }
             }
         }
-
-        println("Done, queries: $completed ")
     }
 
     fun verify() {

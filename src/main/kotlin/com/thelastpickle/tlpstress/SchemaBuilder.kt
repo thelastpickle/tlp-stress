@@ -2,8 +2,8 @@ package com.thelastpickle.tlpstress
 
 
 class SchemaBuilder(var baseStatement : String) {
-    var compaction : String? = null
-    var compression : String? = null
+    private var compaction = ""
+    private var compression = ""
 
     companion object {
         fun create(baseStatement: String) : SchemaBuilder {
@@ -12,12 +12,12 @@ class SchemaBuilder(var baseStatement : String) {
     }
 
     fun withCompaction(compaction: String) : SchemaBuilder {
-        this.compaction = compaction
+        this.compaction = compaction.trim()
         return this
     }
 
     fun withCompression(compression: String) : SchemaBuilder {
-        this.compression = compression
+        this.compression = compression.trim()
         return this
     }
 
@@ -26,16 +26,22 @@ class SchemaBuilder(var baseStatement : String) {
 
         val parts = mutableListOf<String>()
 
-        if(compaction != null)
+        if(compaction.length > 0)
             parts.add("compaction = $compaction")
-        if(compression != null)
+        if(compression.length > 0)
             parts.add("compression = $compression")
 
         val stuff = parts.joinToString(" AND ")
-        if(stuff.count() > 0) {
+
+        if(stuff.count() > 0 && baseStatement
+                        .toLowerCase()
+                        .contains(" with ")) {
             sb.append(" WITH ")
-            sb.append(stuff)
+        } else if(stuff.count() > 0) {
+            sb.append(" AND ")
         }
+
+        sb.append(stuff)
 
         return sb.toString()
     }

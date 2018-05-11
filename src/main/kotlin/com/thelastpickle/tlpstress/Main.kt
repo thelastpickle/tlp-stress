@@ -23,13 +23,16 @@ class MainArguments {
     var help = false
 
     @Parameter(names = ["--replication"], description = "Replication options")
-    var replication = "{'class': 'SimpleStrategy', 'replication_factor':3"
+    var replication = "{'class': 'SimpleStrategy', 'replication_factor':3 }"
 
     @Parameter(names = ["--host"], description = "Cassandra host for first contact point.")
     var host = "127.0.0.1"
 
     @Parameter(names = ["--compaction"], description = "Compaction option to use")
     var compaction = ""
+
+    @Parameter(names = ["--compression"], description = "Compression options")
+    var compression = ""
 
     @Parameter(names = ["--keyspace"], description = "Keyspace to use")
     var keyspace = "tlp_stress"
@@ -49,14 +52,6 @@ fun main(argv: Array<String>) {
 
     val logger = KotlinLogging.logger {}
 
-    val metrics = MetricRegistry()
-
-    val reporter = ConsoleReporter.forRegistry(metrics)
-            .convertRatesTo(TimeUnit.SECONDS)
-            .convertDurationsTo(TimeUnit.MILLISECONDS)
-            .build()
-
-    reporter.start(1, TimeUnit.SECONDS)
 
     // JCommander set up
     val jcommander = JCommander.newBuilder()
@@ -115,8 +110,22 @@ fun main(argv: Array<String>) {
     session.execute("USE ${mainArgs.keyspace}")
 
     for(statement in profile.schema()) {
-        session.execute(statement)
+        val s = SchemaBuilder.create(statement)
+                    .withCompaction(mainArgs.compaction)
+                    .withCompression(mainArgs.compression)
+                    .build()
+        println(s)
+        session.execute(s)
     }
+
+    val metrics = MetricRegistry()
+
+    val reporter = ConsoleReporter.forRegistry(metrics)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .build()
+
+    reporter.start(1, TimeUnit.SECONDS)
 
     val requests = metrics.meter("requests")
 
@@ -145,6 +154,8 @@ fun main(argv: Array<String>) {
 
     // hopefully at this point we have a valid stress profile to run
     println("Stress complete, $runnersExecuted.")
+
+    reporter.report()
 
     // dump out metrics
     System.exit(0)

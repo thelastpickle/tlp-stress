@@ -12,14 +12,23 @@ import java.util.concurrent.ThreadLocalRandom
  */
 class BasicTimeSeries : IStressProfile {
     override fun schema(): List<String> {
-        return listOf()
+        val query = """CREATE TABLE IF NOT EXISTS sensor_data (
+                            |sensor_id int,
+                            |timestamp timeuuid,
+                            |data text,
+                            |primary key(sensor_id, timestamp))
+                            |WITH CLUSTERING ORDER BY (timestamp DESC)
+                            |
+                            |""".trimMargin()
+
+        return listOf(query)
     }
 
     lateinit var prepared: PreparedStatement
 
     class Arguments {
         @Parameter(names=["max_id"], description = "Max id of the sensor")
-        var maxId = 10000
+        var maxId = 100000
     }
 
     override fun getArguments() : Any {
@@ -28,15 +37,6 @@ class BasicTimeSeries : IStressProfile {
 
 
     override fun prepare(session: Session) {
-        session.execute("""CREATE TABLE IF NOT EXISTS sensor_data (
-                            |sensor_id int,
-                            |timestamp timeuuid,
-                            |data text,
-                            |primary key(sensor_id, timestamp))
-                            |WITH CLUSTERING ORDER BY (timestamp DESC)
-                            |
-                            |""".trimMargin())
-
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, now(), ?)")
     }
 

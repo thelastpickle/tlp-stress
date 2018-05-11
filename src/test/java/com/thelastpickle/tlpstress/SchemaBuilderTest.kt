@@ -33,4 +33,23 @@ internal class SchemaBuilderTest {
         val result = createTable.withCompression(c).build()
         assertThat(result).contains(c)
     }
+
+    @Test
+    fun clusteringOrderTest() {
+        val base = """CREATE TABLE IF NOT EXISTS sensor_data (
+                            |sensor_id int,
+                            |timestamp timeuuid,
+                            |data text,
+                            |primary key(sensor_id, timestamp))
+                            |WITH CLUSTERING ORDER BY (timestamp DESC)
+                            |
+                            |""".trimMargin()
+
+        val query = SchemaBuilder.create(base)
+                .withCompression("{'enabled':enabled}")
+                .build()
+
+        assertThat(query).containsOnlyOnce("WITH")
+
+    }
 }
