@@ -76,10 +76,10 @@ class BasicTimeSeries : IStressProfile {
     }
 
 
-    class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, limit: Int) : IStressRunner {
+    class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
         override fun getNextSelect(partitionKey: String): Operation {
 
-            val bound = select.bind(partitionKey, 50)
+            val bound = select.bind(partitionKey, limit)
             return Operation.SelectStatement(bound)
         }
 

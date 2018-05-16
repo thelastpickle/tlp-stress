@@ -41,12 +41,9 @@ class ProfileRunner(val context: StressContext,
      */
     fun run() {
 
-        profile.prepare(context.session)
-
         logger.info { "Starting up runner" }
 
         // need to add a warmup / populate phase
-
 
         executeOperations(context.mainArguments.iterations)
 
@@ -60,10 +57,10 @@ class ProfileRunner(val context: StressContext,
      */
     private fun executeOperations(iterations: Long) {
         // we're going to (for now) only keep 1000 in flight queries per session
-        val permits = 1000
-        var sem = Semaphore(permits)
+
 
         var operations = 0
+        val sem = context.semaphore
 
         val runner = profile.getRunner(context.profileArguments)
 
@@ -88,18 +85,18 @@ class ProfileRunner(val context: StressContext,
                 is Operation.Mutation -> {
                     logger.debug { op }
 
-                    sem.acquire()
+                    context.semaphore.acquire()
 
                     val future = context.session.executeAsync(op.bound)
 
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
-                            sem.release()
+                            context.semaphore.release()
                             context.metrics.errors.mark()
                         }
 
                         override fun onSuccess(result: ResultSet?) {
-                            sem.release()
+                            context.semaphore.release()
                             // if the key returned in the Mutation exists in the sampler, store the fields
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
@@ -109,15 +106,33 @@ class ProfileRunner(val context: StressContext,
                         }
                     })
                 }
-                is Operation.SelectStatement -> {
 
+                is Operation.SelectStatement -> {
+                    val future = context.session.executeAsync(op.bound)
+                    Futures.addCallback(future, object : FutureCallback<ResultSet> {
+                        override fun onFailure(t: Throwable?) {
+                            context.semaphore.release()
+                            context.metrics.errors.mark()
+                            logger.error { t }
+                        }
+
+                        override fun onSuccess(result: ResultSet?) {
+                            context.semaphore.release()
+                            // if the key returned in the Mutation exists in the sampler, store the fields
+                            // if not, use the sampler frequency
+                            // need to be mindful of memory, frequency is a stopgap
+                            context.metrics.selects.mark()
+
+                        }
+                    })
                 }
             }
             operations++
         }
 
         // block until all the queries are finished
-        sem.acquireUninterruptibly(permits)
+        sem.acquireUninterruptibly(context.permits)
+
         print("Operations: $operations")
 
         // wait for outstanding operations to complete

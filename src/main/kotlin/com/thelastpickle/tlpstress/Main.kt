@@ -11,6 +11,7 @@ import com.beust.jcommander.Parameters
 import com.codahale.metrics.MetricRegistry
 import java.util.concurrent.TimeUnit
 import com.codahale.metrics.ConsoleReporter
+import java.util.concurrent.Semaphore
 
 @Parameters(commandDescription = "tlp-stress")
 class MainArguments {
@@ -132,17 +133,19 @@ fun main(argv: Array<String>) {
         session.execute(s)
     }
 
+    profile.prepare(session)
 
 
     val metrics = Metrics()
 
+    val permits = 250
+    var sem = Semaphore(permits)
+
     // run the prepare for each
     val runners = IntRange(0, mainArgs.threads-1).map {
         println("Connecting")
-        val session = cluster.connect(mainArgs.keyspace)
-
         println("Connected")
-        val context = StressContext(session, mainArgs, commandArgs, it,  metrics)
+        val context = StressContext(session, mainArgs, commandArgs, it,  metrics, sem, permits)
         ProfileRunner.create(context, profile)
     }
 
