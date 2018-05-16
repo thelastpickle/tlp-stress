@@ -94,6 +94,7 @@ class ProfileRunner(val context: StressContext,
                         override fun onFailure(t: Throwable?) {
                             context.semaphore.release()
                             context.metrics.errors.mark()
+                            logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
