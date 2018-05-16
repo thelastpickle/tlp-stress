@@ -40,6 +40,9 @@ class MainArguments {
     @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
     var id = "001"
 
+    @Parameter(names = ["--partitionValues", "--pv"], description = "Max value of integer component of first partition key.")
+    var partitionValues = 1000000
+
 
 
 }
@@ -128,15 +131,15 @@ fun main(argv: Array<String>) {
     reporter.start(1, TimeUnit.SECONDS)
 
     val requests = metrics.meter("requests")
+    val errors = metrics.meter("errors")
 
     // run the prepare for each
     val runners = IntRange(0, mainArgs.threads-1).map {
         println("Connecting")
-        val session = cluster.connect()
-        session.execute("use ${mainArgs.keyspace}")
+        val session = cluster.connect(mainArgs.keyspace)
 
         println("Connected")
-        val context = StressContext(session, mainArgs, it, requests)
+        val context = StressContext(session, mainArgs, it, requests, errors)
         ProfileRunner.create(context, profile)
     }
 
@@ -155,10 +158,11 @@ fun main(argv: Array<String>) {
     // hopefully at this point we have a valid stress profile to run
     println("Stress complete, $runnersExecuted.")
 
+    Thread.sleep(1000)
+
     reporter.report()
 
     // dump out metrics
     System.exit(0)
 }
-
 

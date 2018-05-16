@@ -1,34 +1,63 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.beust.jcommander.Parameter
+import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.utils.UUIDs
+import com.thelastpickle.tlpstress.samplers.PrimaryKeySampler
 import com.thelastpickle.tlpstress.randomString
-import java.util.concurrent.ThreadLocalRandom
+import com.thelastpickle.tlpstress.samplers.Fields
+import com.thelastpickle.tlpstress.samplers.ISampler
+import com.thelastpickle.tlpstress.samplers.ValidationResult
+import java.util.*
+
+data class PrimaryKey(val first: String, val timestamp: UUID)
 
 /**
  * Create a simple time series use case with some number of partitions
  * TODO make it use TWCS
  */
+@Parameters(commandDescription = "Basic Time Series workload defaulting to TWCS.")
 class BasicTimeSeries : IStressProfile {
+
+
+    // TODO maybe move to the runner?
+    override fun getSampler(session: Session): ISampler {
+
+        val validate = fun (primaryKey: Any, fields: Fields) : ValidationResult {
+            if(primaryKey is PrimaryKey) {
+                val bound = getRow.bind(primaryKey.first, primaryKey.timestamp)
+                val result = session.execute(bound).one()
+                if(result.getString("data") == fields.get("data"))
+                    return ValidationResult.Correct()
+            }
+            return ValidationResult.Incorrect()
+        }
+
+        return PrimaryKeySampler(0.1, validate)
+    }
+
+
+
     override fun schema(): List<String> {
         val query = """CREATE TABLE IF NOT EXISTS sensor_data (
-                            |sensor_id int,
-                            |timestamp timeuuid,
-                            |data text,
-                            |primary key(sensor_id, timestamp))
-                            |WITH CLUSTERING ORDER BY (timestamp DESC)
-                            |
-                            |""".trimMargin()
+                            sensor_id text,
+                            timestamp timeuuid,
+                            data text,
+                            primary key(sensor_id, timestamp))
+                            WITH CLUSTERING ORDER BY (timestamp DESC)
+                           """.trimIndent()
 
         return listOf(query)
     }
 
     lateinit var prepared: PreparedStatement
+    lateinit var getRow: PreparedStatement
 
+
+    // jcommander arguments
     class Arguments {
-        @Parameter(names=["max_id"], description = "Max id of the sensor")
-        var maxId = 100000
+
     }
 
     override fun getArguments() : Any {
@@ -37,15 +66,17 @@ class BasicTimeSeries : IStressProfile {
 
 
     override fun prepare(session: Session) {
-        prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, now(), ?)")
+        prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
+        getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
     }
 
     class TimeSeriesRunner(val insert: PreparedStatement) : IStressRunner {
-        override fun getNextOperation(i: Int) : Operation {
-            val sensorId = ThreadLocalRandom.current().nextInt(1, 1000)
-
-            val bound = insert.bind(sensorId, randomString(100))
-            return Operation.Statement(bound)
+        override fun getNextOperation(partitionKey: String) : Operation {
+            val data = randomString(100)
+            val timestamp = UUIDs.timeBased()
+            val bound = insert.bind(partitionKey,timestamp, data)
+            val fields = mapOf("data" to data)
+            return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
         }
 
     }
