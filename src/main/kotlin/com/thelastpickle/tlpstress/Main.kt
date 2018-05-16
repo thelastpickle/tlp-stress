@@ -17,7 +17,7 @@ class MainArguments {
     var threads = 1
 
     @Parameter(names = ["--iterations", "-i"], description = "Number of operations to run.")
-    var iterations = 1000
+    var iterations : Long = 1000
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
@@ -40,7 +40,7 @@ class MainArguments {
     @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
     var id = "001"
 
-    @Parameter(names = ["--partitionValues", "--pv"], description = "Max value of integer component of first partition key.")
+    @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.")
     var partitionValues = 1000000
 
 

@@ -23,8 +23,8 @@ class PartitionKeyGenerator(
     }
 
 
-    fun generateKey(total: Int, maxId: Int = 100000) = buildSequence {
-        var i = 0
+    fun generateKey(total: Long, maxId: Int = 100000) = buildSequence {
+        var i : Long = 0
         while(true) {
             val tmp = genFunc(maxId)
             val result = prefix + tmp.toString()

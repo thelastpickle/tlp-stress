@@ -59,7 +59,7 @@ class ProfileRunner(val context: StressContext,
     /**
      * Used for both pre-populating data and for performing the actual runner
      */
-    private fun executeOperations(iterations: Int) {
+    private fun executeOperations(iterations: Long) {
         val permits = 1000
         var sem = Semaphore(permits)
 
