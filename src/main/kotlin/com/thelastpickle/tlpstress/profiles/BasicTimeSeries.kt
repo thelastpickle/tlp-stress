@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress.profiles
 
+import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
@@ -53,10 +54,13 @@ class BasicTimeSeries : IStressProfile {
 
     lateinit var prepared: PreparedStatement
     lateinit var getRow: PreparedStatement
+    lateinit var getPartitionHead: PreparedStatement
 
 
     // jcommander arguments
     class Arguments {
+        @Parameter(names = ["--limit"], description = "Number of rows to return per partition.")
+        var limit = 50
 
     }
 
@@ -68,10 +72,18 @@ class BasicTimeSeries : IStressProfile {
     override fun prepare(session: Session) {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
+        getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
     }
 
-    class TimeSeriesRunner(val insert: PreparedStatement) : IStressRunner {
-        override fun getNextOperation(partitionKey: String) : Operation {
+
+    class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, limit: Int) : IStressRunner {
+        override fun getNextSelect(partitionKey: String): Operation {
+
+            val bound = select.bind(partitionKey, 50)
+            return Operation.SelectStatement(bound)
+        }
+
+        override fun getNextMutation(partitionKey: String) : Operation {
             val data = randomString(100)
             val timestamp = UUIDs.timeBased()
             val bound = insert.bind(partitionKey,timestamp, data)
@@ -79,11 +91,16 @@ class BasicTimeSeries : IStressProfile {
             return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
         }
 
+
+
     }
 
 
-    override fun getRunner(): IStressRunner {
-        return TimeSeriesRunner(prepared)
+    override fun getRunner(profileArguments: Any): IStressRunner {
+        if(profileArguments is Arguments)
+            return TimeSeriesRunner(prepared, getPartitionHead, profileArguments.limit)
+
+        throw Exception("runner arguments not found")
     }
 
 

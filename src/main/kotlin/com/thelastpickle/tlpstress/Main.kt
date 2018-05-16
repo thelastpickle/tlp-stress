@@ -7,11 +7,12 @@ import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
 import org.reflections.Reflections
 import ch.qos.logback.classic.util.ContextInitializer;
+import com.beust.jcommander.Parameters
 import com.codahale.metrics.MetricRegistry
 import java.util.concurrent.TimeUnit
 import com.codahale.metrics.ConsoleReporter
 
-
+@Parameters(commandDescription = "tlp-stress")
 class MainArguments {
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
     var threads = 1
@@ -43,6 +44,12 @@ class MainArguments {
     @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.")
     var partitionValues = 1000000
 
+    @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
+    var sampleRate = 0.1
+
+    @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
+    var readRate = 0.01
+
 
 
 }
@@ -70,12 +77,14 @@ fun main(argv: Array<String>) {
     val modules = r.getSubTypesOf(IStressProfile::class.java)
 
     var commands = mutableMapOf<String, Class<out IStressProfile>>()
+    var argMap = mutableMapOf<String, Any>()
 
     for(m in modules) {
         val args = m.getConstructor().newInstance().getArguments()
         // name
         jcommander.addCommand(m.simpleName, args)
         commands[m.simpleName] = m
+        argMap[m.simpleName] = args
 
     }
 
@@ -92,11 +101,13 @@ fun main(argv: Array<String>) {
 
 
     // we're going to build one session per thread for now
-    // will be configurable because why not
     val cluster = Cluster.builder().addContactPoint(mainArgs.host).build()
-    // set up the keyspace
 
+    // set up the keyspace
     val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+
+    val commandArgs = argMap[jc.parsedCommand]!!
+
     // get all the initial schema
     println("Creating schema")
 
@@ -121,17 +132,9 @@ fun main(argv: Array<String>) {
         session.execute(s)
     }
 
-    val metrics = MetricRegistry()
 
-    val reporter = ConsoleReporter.forRegistry(metrics)
-            .convertRatesTo(TimeUnit.SECONDS)
-            .convertDurationsTo(TimeUnit.MILLISECONDS)
-            .build()
 
-    reporter.start(1, TimeUnit.SECONDS)
-
-    val requests = metrics.meter("requests")
-    val errors = metrics.meter("errors")
+    val metrics = Metrics()
 
     // run the prepare for each
     val runners = IntRange(0, mainArgs.threads-1).map {
@@ -139,7 +142,7 @@ fun main(argv: Array<String>) {
         val session = cluster.connect(mainArgs.keyspace)
 
         println("Connected")
-        val context = StressContext(session, mainArgs, it, requests, errors)
+        val context = StressContext(session, mainArgs, commandArgs, it,  metrics)
         ProfileRunner.create(context, profile)
     }
 
@@ -160,7 +163,7 @@ fun main(argv: Array<String>) {
 
     Thread.sleep(1000)
 
-    reporter.report()
+    metrics.reporter.report()
 
     // dump out metrics
     System.exit(0)

@@ -8,6 +8,7 @@ import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.ISampler
 import mu.KotlinLogging
 import java.util.concurrent.Semaphore
+import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
 
@@ -44,10 +45,8 @@ class ProfileRunner(val context: StressContext,
 
         logger.info { "Starting up runner" }
 
-        // populate
+        // need to add a warmup / populate phase
 
-        // we're going to (for now) only keep 1000 in flight queries per session
-        // might move this to the context if i share the session
 
         executeOperations(context.mainArguments.iterations)
 
@@ -60,12 +59,13 @@ class ProfileRunner(val context: StressContext,
      * Used for both pre-populating data and for performing the actual runner
      */
     private fun executeOperations(iterations: Long) {
+        // we're going to (for now) only keep 1000 in flight queries per session
         val permits = 1000
         var sem = Semaphore(permits)
 
         var operations = 0
 
-        val runner = profile.getRunner()
+        val runner = profile.getRunner(context.profileArguments)
 
         for (key in partitionKeyGenerator.generateKey(iterations, context.mainArguments.partitionValues)) {
 
@@ -76,7 +76,12 @@ class ProfileRunner(val context: StressContext,
             // I should be able to just tell the runner to inject gossip failures in any test
             // without having to write that code in the profile
 
-            val op = runner.getNextOperation(key)
+            val op : Operation = if(context.mainArguments.readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
+                runner.getNextSelect(key)
+            } else {
+                runner.getNextMutation(key)
+            }
+
             // TODO: instead of using the context request & errors, pass them in
             // that way this can be reused for the pre-population
             when (op) {
@@ -90,7 +95,7 @@ class ProfileRunner(val context: StressContext,
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
-                            context.errors.mark()
+                            context.metrics.errors.mark()
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -99,10 +104,13 @@ class ProfileRunner(val context: StressContext,
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
                             sampler.maybePut(op.partitionKey, op.fields)
-                            context.requests.mark()
+                            context.metrics.mutations.mark()
 
                         }
                     })
+                }
+                is Operation.SelectStatement -> {
+
                 }
             }
             operations++

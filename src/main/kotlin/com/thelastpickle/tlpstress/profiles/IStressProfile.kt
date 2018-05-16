@@ -5,7 +5,8 @@ import com.datastax.driver.core.BoundStatement
 import com.thelastpickle.tlpstress.samplers.ISampler
 
 interface IStressRunner {
-    fun getNextOperation(partitionKey: String) : Operation
+    fun getNextMutation(partitionKey: String) : Operation
+    fun getNextSelect(partitionKey: String) : Operation
 }
 
 /**
@@ -50,9 +51,12 @@ interface IStressProfile {
      * but then needs to create multiple stress runners
      * this allows the code to be a little cleaner
      */
-    fun getRunner(): IStressRunner
+    fun getRunner(profileArguments: Any): IStressRunner
 
 
+    /**
+     * returns an instance of ISampler.
+     */
     fun getSampler(session: Session) : ISampler
 }
 
