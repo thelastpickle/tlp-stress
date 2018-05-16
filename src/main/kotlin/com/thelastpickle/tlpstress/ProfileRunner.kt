@@ -79,13 +79,14 @@ class ProfileRunner(val context: StressContext,
                 runner.getNextMutation(key)
             }
 
+            context.semaphore.acquire()
+
             // TODO: instead of using the context request & errors, pass them in
             // that way this can be reused for the pre-population
             when (op) {
                 is Operation.Mutation -> {
                     logger.debug { op }
 
-                    context.semaphore.acquire()
 
                     val future = context.session.executeAsync(op.bound)
 
