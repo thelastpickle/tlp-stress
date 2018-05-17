@@ -24,6 +24,7 @@ internal class SchemaBuilderTest {
         val result = createTable.withCompaction("{ 'class': 'LeveledCompactionStrategy', 'sstable_size_in_mb': 100}").build()
         assertThat(result).contains("sstable_size_in_mb': 100")
         assertThat(result).doesNotContain("compression")
+        assertThat(result.toLowerCase()).containsOnlyOnce("with")
     }
 
     @Test
@@ -48,7 +49,7 @@ internal class SchemaBuilderTest {
                 .withCompression("{'enabled':enabled}")
                 .build()
 
-        assertThat(query).containsOnlyOnce("WITH")
+        assertThat(query.toLowerCase()).containsOnlyOnce("with")
 
     }
 }

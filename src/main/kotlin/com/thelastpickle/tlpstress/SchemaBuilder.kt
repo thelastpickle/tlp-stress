@@ -12,7 +12,7 @@ class SchemaBuilder(var baseStatement : String) {
     }
 
     fun withCompaction(compaction: String) : SchemaBuilder {
-        this.compaction = compaction.trim()
+        this.compaction = compaction.trim().replace("\"", "'")
         return this
     }
 
@@ -33,9 +33,7 @@ class SchemaBuilder(var baseStatement : String) {
 
         val stuff = parts.joinToString(" AND ")
 
-        if(stuff.count() > 0 && baseStatement
-                        .toLowerCase()
-                        .contains(" with ")) {
+        if(stuff.length > 0 && !baseStatement.toLowerCase().contains("\\swith\\s".toRegex())) {
             sb.append(" WITH ")
         } else if(stuff.count() > 0) {
             sb.append(" AND ")

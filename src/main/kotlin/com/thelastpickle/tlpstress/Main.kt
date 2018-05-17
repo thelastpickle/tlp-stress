@@ -30,7 +30,7 @@ class MainArguments {
     @Parameter(names = ["--host"], description = "Cassandra host for first contact point.")
     var host = "127.0.0.1"
 
-    @Parameter(names = ["--compaction"], description = "Compaction option to use")
+    @Parameter(names = ["--compaction"], description = "Compaction option to use.  Double quotes will auto convert to single for convenience.")
     var compaction = ""
 
     @Parameter(names = ["--compression"], description = "Compression options")
@@ -58,6 +58,7 @@ class MainArguments {
 fun main(argv: Array<String>) {
 
     println("Starting up")
+    println(argv)
 
     System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.xml")
 
