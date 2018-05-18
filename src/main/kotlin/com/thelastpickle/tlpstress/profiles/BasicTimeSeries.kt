@@ -23,7 +23,7 @@ class BasicTimeSeries : IStressProfile {
 
 
     // TODO maybe move to the runner?
-    override fun getSampler(session: Session): ISampler {
+    override fun getSampler(session: Session, sampleRate: Double): ISampler {
 
         val validate = fun (primaryKey: Any, fields: Fields) : ValidationResult {
             if(primaryKey is PrimaryKey) {
@@ -35,7 +35,7 @@ class BasicTimeSeries : IStressProfile {
             return ValidationResult.Incorrect()
         }
 
-        return PrimaryKeySampler(0.1, validate)
+        return PrimaryKeySampler(sampleRate, validate)
     }
 
 

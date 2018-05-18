@@ -46,7 +46,7 @@ class MainArguments {
     var partitionValues = 1000000
 
     @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
-    var sampleRate = 0.1
+    var sampleRate = 0.001 // .1%..  this might be better as a number, like a million.  reasonable to keep in memory
 
     @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
     var readRate = 0.01
@@ -101,75 +101,81 @@ fun main(argv: Array<String>) {
         System.exit(0)
     }
 
+    try {
 
-    // we're going to build one session per thread for now
-    val cluster = Cluster.builder().addContactPoint(mainArgs.host).build()
 
-    // set up the keyspace
-    val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+        // we're going to build one session per thread for now
+        val cluster = Cluster.builder().addContactPoint(mainArgs.host).build()
 
-    val commandArgs = argMap[jc.parsedCommand]!!
+        // set up the keyspace
+        val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
 
-    // get all the initial schema
-    println("Creating schema")
+        val commandArgs = argMap[jc.parsedCommand]!!
 
-    val session = cluster.connect()
+        // get all the initial schema
+        println("Creating schema")
 
-    val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS ${mainArgs.keyspace}
+        val session = cluster.connect()
+
+        val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS ${mainArgs.keyspace}
                         | WITH replication =
                         | {'class': 'SimpleStrategy',
                         | 'replication_factor':3} """.trimMargin()
 
-    logger.debug { createKeyspace }
-    session.execute(createKeyspace)
+        logger.debug { createKeyspace }
+        session.execute(createKeyspace)
 
-    session.execute("USE ${mainArgs.keyspace}")
+        session.execute("USE ${mainArgs.keyspace}")
 
-    for(statement in profile.schema()) {
-        val s = SchemaBuilder.create(statement)
+        for (statement in profile.schema()) {
+            val s = SchemaBuilder.create(statement)
                     .withCompaction(mainArgs.compaction)
                     .withCompression(mainArgs.compression)
                     .build()
-        println(s)
-        session.execute(s)
+            println(s)
+            session.execute(s)
+        }
+
+        profile.prepare(session)
+
+
+        val metrics = Metrics()
+
+        val permits = 250
+        var sem = Semaphore(permits)
+
+        // run the prepare for each
+        val runners = IntRange(0, mainArgs.threads - 1).map {
+            println("Connecting")
+            println("Connected")
+            val context = StressContext(session, mainArgs, commandArgs, it, metrics, sem, permits)
+            ProfileRunner.create(context, profile)
+        }
+
+        val executed = runners.parallelStream().map {
+            println("Preparing")
+            it.prepare()
+        }.count()
+
+        println("$executed threads prepared.")
+
+        val runnersExecuted = runners.parallelStream().map {
+            println("Running")
+            it.run()
+        }.count()
+
+        // hopefully at this point we have a valid stress profile to run
+        println("Stress complete, $runnersExecuted.")
+
+        Thread.sleep(1000)
+
+        // dump out metrics
+        metrics.reporter.report()
+    } catch (e: Exception) {
+        println(e)
+    } finally {
+        System.exit(0)
     }
 
-    profile.prepare(session)
-
-
-    val metrics = Metrics()
-
-    val permits = 250
-    var sem = Semaphore(permits)
-
-    // run the prepare for each
-    val runners = IntRange(0, mainArgs.threads-1).map {
-        println("Connecting")
-        println("Connected")
-        val context = StressContext(session, mainArgs, commandArgs, it,  metrics, sem, permits)
-        ProfileRunner.create(context, profile)
-    }
-
-    val executed = runners.parallelStream().map {
-        println("Preparing")
-        it.prepare()
-    }.count()
-
-    println("$executed threads prepared.")
-
-    val runnersExecuted = runners.parallelStream().map {
-        println("Running")
-        it.run()
-    }.count()
-
-    // hopefully at this point we have a valid stress profile to run
-    println("Stress complete, $runnersExecuted.")
-
-    Thread.sleep(1000)
-
-    metrics.reporter.report()
-
-    // dump out metrics
-    System.exit(0)
 }
 

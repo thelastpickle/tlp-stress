@@ -7,7 +7,6 @@ import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.ISampler
 import mu.KotlinLogging
-import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
@@ -28,7 +27,7 @@ class ProfileRunner(val context: StressContext,
         fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
             val prefix = context.mainArguments.id + "." + context.thread + "."
             val partitionKeyGenerator = PartitionKeyGenerator.random(prefix)
-            return ProfileRunner(context, profile, partitionKeyGenerator, profile.getSampler(context.session))
+            return ProfileRunner(context, profile, partitionKeyGenerator, profile.getSampler(context.session, context.mainArguments.sampleRate))
         }
     }
 
