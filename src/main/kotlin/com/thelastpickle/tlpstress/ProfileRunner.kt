@@ -158,6 +158,7 @@ class ProfileRunner(val context: StressContext,
 
         // populate the DB with random values
         if(context.mainArguments.populate) {
+            println("prepopulating")
             val sem = Semaphore(context.permits)
             val runner = profile.getRunner(context.profileArguments)
 
