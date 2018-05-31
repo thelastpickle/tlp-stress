@@ -58,6 +58,7 @@ interface IStressProfile {
      * returns an instance of ISampler.
      */
     fun getSampler(session: Session, sampleRate: Double) : ISampler
+
 }
 
 

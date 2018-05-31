@@ -20,6 +20,10 @@ class PartitionKeyGenerator(
         fun random(prefix: String = "test") : PartitionKeyGenerator {
             return PartitionKeyGenerator({max -> ThreadLocalRandom.current().nextInt(1, max) }, prefix)
         }
+        fun sequence(prefix: String = "test") : PartitionKeyGenerator {
+            var current = 0
+            return PartitionKeyGenerator({max -> current++ }, prefix)
+        }
     }
 
 

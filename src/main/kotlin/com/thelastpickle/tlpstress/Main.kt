@@ -51,6 +51,12 @@ class MainArguments {
     @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
     var readRate = 0.01
 
+    @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.")
+    var concurrency = 250
+
+    @Parameter(names = ["--populate"], description = "Pre-population the DB")
+    var populate = false
+
 
 
 }

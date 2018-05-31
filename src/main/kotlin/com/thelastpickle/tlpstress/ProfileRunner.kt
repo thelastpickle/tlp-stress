@@ -7,6 +7,7 @@ import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.ISampler
 import mu.KotlinLogging
+import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
 private val logger = KotlinLogging.logger {}
@@ -152,6 +153,38 @@ class ProfileRunner(val context: StressContext,
 
     fun prepare() {
         profile.prepare(context.session)
+        val prefix = context.mainArguments.id + "." + context.thread + "."
+        val sequenceGenerator = PartitionKeyGenerator.sequence(prefix)
+
+        // populate the DB with random values
+        if(context.mainArguments.populate) {
+            val sem = Semaphore(context.permits)
+            val runner = profile.getRunner(context.profileArguments)
+
+            var inserted = 0
+            // for now, simply generate a single value for each partition key
+            for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues.toLong())) {
+                sem.acquire()
+                val op = runner.getNextMutation(key)
+                if(op is Operation.Mutation) {
+                    val future = context.session.executeAsync(op.bound)
+                    Futures.addCallback(future, object : FutureCallback<ResultSet> {
+                        override fun onFailure(t: Throwable?) {
+                            context.semaphore.release()
+                            inserted++
+                            logger.error { t }
+                        }
+
+                        override fun onSuccess(result: ResultSet?) {
+                            context.semaphore.release()
+                        }
+                    })
+
+                }
+            }
+            sem.acquireUninterruptibly(context.permits)
+            println("pre-populated: $inserted inserts")
+        }
     }
 
 
