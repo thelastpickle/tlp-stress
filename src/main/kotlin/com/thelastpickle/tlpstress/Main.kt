@@ -165,6 +165,8 @@ fun main(argv: Array<String>) {
 
         println("$executed threads prepared.")
 
+        metrics.startReporting()
+
         val runnersExecuted = runners.parallelStream().map {
             println("Running")
             it.run()

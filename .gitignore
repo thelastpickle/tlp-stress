@@ -11,3 +11,4 @@ gradle/
 gradlew.bat
 settings.gradle
 *.log
+*.jar

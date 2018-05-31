@@ -36,6 +36,7 @@ class ProfileRunner(val context: StressContext,
         println("[Thread ${context.thread}]: $message")
 
     }
+    
     /**
 
      */
@@ -171,18 +172,19 @@ class ProfileRunner(val context: StressContext,
                     val future = context.session.executeAsync(op.bound)
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
-                            context.semaphore.release()
+                            sem.release()
                             inserted++
                             logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
-                            context.semaphore.release()
+                            sem.release()
                         }
                     })
 
                 }
             }
+            println("Waiting on permits")
             sem.acquireUninterruptibly(context.permits)
             println("pre-populated: $inserted inserts")
         }

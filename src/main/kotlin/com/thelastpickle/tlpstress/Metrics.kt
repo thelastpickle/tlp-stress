@@ -12,10 +12,10 @@ class Metrics {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build()
 
-    init {
+
+    fun startReporting() {
         reporter.start(1, TimeUnit.SECONDS)
     }
-
 
     val requests = metrics.meter("requests")
     val errors = metrics.meter("errors")
