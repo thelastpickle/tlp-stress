@@ -3,6 +3,13 @@ package com.thelastpickle.tlpstress
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import org.reflections.Reflections
 
+/**
+ * Wrapper for Stress Profile Plugins
+ * Anything found in the class path will be returned.
+ * TODO: Add a caching layer to prevent absurdly slow
+ * reflection time
+ */
+
 data class Plugin (val name: String,
                    val cls: Class<out IStressProfile>,
                    val arguments: Any) {
