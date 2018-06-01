@@ -1,11 +1,8 @@
 package com.thelastpickle.tlpstress
 
-import com.beust.jcommander.JCommander
 import com.datastax.driver.core.Cluster
-import com.thelastpickle.tlpstress.profiles.IStressProfile
 import mu.KotlinLogging
-import org.reflections.Reflections
-import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.classic.util.ContextInitializer
 import java.util.concurrent.Semaphore
 
 fun main(argv: Array<String>) {
