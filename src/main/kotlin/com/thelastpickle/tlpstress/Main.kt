@@ -11,59 +11,25 @@ import java.util.concurrent.Semaphore
 fun main(argv: Array<String>) {
 
     println("Starting up")
-    println(argv)
 
     System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.xml")
 
     val logger = KotlinLogging.logger {}
 
-
-    // JCommander set up
-    val jcommander = JCommander.newBuilder()
-    val mainArgs = MainArguments()
-    jcommander.addObject(mainArgs)
-
-    // get all the objects that implement IStressProfile
-    // add each of them to jcommander as an object
-    // each will show up as a subcommand
-    // this will let us have people drop a jar into a directory
-    // this makes it easy to write plugins and not be concerned with the underlying machinery
-    val r = Reflections()
-    val modules = r.getSubTypesOf(IStressProfile::class.java)
-
-    var commands = mutableMapOf<String, Class<out IStressProfile>>()
-    var argMap = mutableMapOf<String, Any>()
-
-    for(m in modules) {
-        val args = m.getConstructor().newInstance().getArguments()
-        // name
-        jcommander.addCommand(m.simpleName, args)
-        commands[m.simpleName] = m
-        argMap[m.simpleName] = args
-
-    }
-
-    val jc = jcommander.build()
-    jc.parse(*argv)
-
-    if (mainArgs.help || jc.parsedCommand == null) {
-        if (jc.parsedCommand == null) {
-            println("Please provide a workload.")
-        }
-        jc.usage()
-        System.exit(0)
-    }
+    val parser = CommandLineParser.parse(argv)
 
     try {
 
+        val mainArgs = parser.mainArgs
 
         // we're going to build one session per thread for now
         val cluster = Cluster.builder().addContactPoint(mainArgs.host).build()
 
         // set up the keyspace
-        val profile = commands[jc.parsedCommand]!!.getConstructor().newInstance()
+        val profile = parser.getClassInstance()!!
+        val commandArgs = parser.getParsedPlugin()!!.arguments
 
-        val commandArgs = argMap[jc.parsedCommand]!!
+//        val commandArgs = argMap[jc.parsedCommand]!!
 
         // get all the initial schema
         println("Creating schema")
