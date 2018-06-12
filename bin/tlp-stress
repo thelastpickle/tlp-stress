@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -jar build/libs/tlp-stress-1.0-SNAPSHOT.jar "$@"
