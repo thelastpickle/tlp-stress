@@ -37,7 +37,7 @@ class CommandLineParser(val jCommander: JCommander,
     }
 
     fun execute() {
-
+        getCommandInstance().execute()
     }
 
     fun getParsedCommand() : String {

@@ -58,7 +58,7 @@ class Run : IStressCommand {
     var replication = "{'class': 'SimpleStrategy', 'replication_factor':3 }"
 
     
-    fun execute() {
+    override fun execute() {
 
         // we're going to build one session per thread for now
         val cluster = Cluster.builder().addContactPoint(host).build()
