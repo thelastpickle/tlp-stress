@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress.commands
 
 
-class List {
+class List : IStressCommand {
 
 
 }

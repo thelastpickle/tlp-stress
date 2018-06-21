@@ -8,7 +8,7 @@ import mu.KotlinLogging
 import java.util.concurrent.Semaphore
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
-class Run {
+class Run : IStressCommand {
 
     val logger = KotlinLogging.logger {}
 

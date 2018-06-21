@@ -1,4 +1,4 @@
 package com.thelastpickle.tlpstress.commands
 
-class Info {
+class Info : IStressCommand {
 }
