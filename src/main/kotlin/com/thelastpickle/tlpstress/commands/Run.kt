@@ -3,10 +3,7 @@ package com.thelastpickle.tlpstress.commands
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
-import com.thelastpickle.tlpstress.Metrics
-import com.thelastpickle.tlpstress.ProfileRunner
-import com.thelastpickle.tlpstress.SchemaBuilder
-import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.*
 import mu.KotlinLogging
 import java.util.concurrent.Semaphore
 
@@ -84,7 +81,9 @@ class Run {
 
         session.execute("USE $keyspace")
 
-        for (statement in profile.schema()) {
+        val plugin = Plugin.getPlugins().get(profile)!!
+
+        for (statement in plugin.instance.schema()) {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)
                     .withCompression(compression)
@@ -93,7 +92,7 @@ class Run {
             session.execute(s)
         }
 
-        profile.prepare(session)
+        plugin.instance.prepare(session)
 
 
         val metrics = Metrics()
@@ -105,8 +104,8 @@ class Run {
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
             println("Connected")
-            val context = StressContext(session, mainArgs, commandArgs, it, metrics, sem, permits)
-            ProfileRunner.create(context, profile)
+            val context = StressContext(session, this, commandArgs, it, metrics, sem, permits)
+            ProfileRunner.create(context, plugin.instance)
         }
 
         val executed = runners.parallelStream().map {
