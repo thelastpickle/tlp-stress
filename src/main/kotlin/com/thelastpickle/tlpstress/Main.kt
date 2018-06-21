@@ -16,9 +16,7 @@ fun main(argv: Array<String>) {
     val parser = CommandLineParser.parse(argv)
 
     try {
-
-        val mainArgs = parser.mainArgs
-
+        parser.execute()
     } catch (e: Exception) {
         println(e)
     } finally {

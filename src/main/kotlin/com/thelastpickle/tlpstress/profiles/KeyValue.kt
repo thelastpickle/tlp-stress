@@ -55,10 +55,8 @@ class KeyValue : IStressProfile {
 
     }
 
-    override fun getRunner(profileArguments: Any): IStressRunner {
-        if(profileArguments is Arguments)
-            return KeyValueRunner(insert, select)
-        throw Exception("Incorrect args passed.  This should never happen and is an internal bug.")
+    override fun getRunner(): IStressRunner {
+        return KeyValueRunner(insert, select)
     }
 
     override fun getSampler(session: Session, sampleRate: Double): ISampler {

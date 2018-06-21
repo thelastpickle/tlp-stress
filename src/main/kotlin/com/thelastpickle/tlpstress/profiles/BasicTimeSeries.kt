@@ -95,12 +95,13 @@ class BasicTimeSeries : IStressProfile {
 
     }
 
+    /**
+     * need to fix custom arguments
+     */
+    override fun getRunner(): IStressRunner {
 
-    override fun getRunner(profileArguments: Any): IStressRunner {
-        if(profileArguments is Arguments)
-            return TimeSeriesRunner(prepared, getPartitionHead, profileArguments.limit)
+        return TimeSeriesRunner(prepared, getPartitionHead, 500)
 
-        throw Exception("runner arguments not found")
     }
 
 

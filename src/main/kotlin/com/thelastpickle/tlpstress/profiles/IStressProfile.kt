@@ -51,7 +51,7 @@ interface IStressProfile {
      * but then needs to create multiple stress runners
      * this allows the code to be a little cleaner
      */
-    fun getRunner(profileArguments: Any): IStressRunner
+    fun getRunner(): IStressRunner
 
 
     /**

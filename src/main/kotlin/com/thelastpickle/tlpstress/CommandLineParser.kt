@@ -16,30 +16,29 @@ class CommandLineParser(val parsedCommand: String) {
             // JCommander set up
             val jcommander = JCommander.newBuilder()
 
-
             // subcommands
             val run = Run()
             val info = Info()
             val list = com.thelastpickle.tlpstress.commands.List()
             val init = Init()
 
-            jcommander.addCommand(run)
-            jcommander.addCommand(info)
-            jcommander.addCommand(list)
-            jcommander.addCommand(init)
+            jcommander.addCommand("run", run)
+            jcommander.addCommand("info", info)
+            jcommander.addCommand("list", list)
 
             val jc = jcommander.build()
             jc.parse(*arguments)
 
-            if (mainArgs.help || jc.parsedCommand == null) {
-                if (jc.parsedCommand == null) {
-                    println("Please provide a workload.")
-                }
+            if (jc.parsedCommand == null) {
                 jc.usage()
                 System.exit(0)
             }
             return CommandLineParser(jc.parsedCommand)
         }
+    }
+
+    fun execute() {
+
     }
 }
 
