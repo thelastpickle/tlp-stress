@@ -4,13 +4,12 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.*
-import mu.KotlinLogging
 import java.util.concurrent.Semaphore
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
 class Run : IStressCommand {
 
-    val logger = KotlinLogging.logger {}
+//    val logger = KotlinLogging.logger {}
 
     @Parameter(names = ["--host"])
     var host = "127.0.0.1"
@@ -76,7 +75,7 @@ class Run : IStressCommand {
                         | {'class': 'SimpleStrategy',
                         | 'replication_factor':3} """.trimMargin()
 
-        logger.debug { createKeyspace }
+//        logger.debug { createKeyspace }
         session.execute(createKeyspace)
 
         session.execute("USE $keyspace")
@@ -130,4 +129,5 @@ class Run : IStressCommand {
         // dump out metrics
         metrics.reporter.report()
     }
+
 }

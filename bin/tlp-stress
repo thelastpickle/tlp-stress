@@ -1,3 +1,26 @@
 #!/bin/bash
 
-java -jar build/libs/tlp-stress-1.0-SNAPSHOT.jar "$@"
+
+# You may define TLP_STRESS_LOGBACK or let stress figure it out.
+
+dir=$(dirname $0)
+BASE_STRESS_DIR="$(dirname "$dir")"
+
+LOGBACK_CONFIG=""
+
+if [ "x$TLP_STRESS_LOGBACK" == "x" ]; then
+    for logfile in "$HOME/.tlpstress/logback.xml" \
+        "/etc/tlpstress/logback.xml" \
+        "$PWD/logback.xml" \
+        "$BASE_STRESS_DIR/conf/logback.xml" ; do
+        if [ -r "$logfile" ]; then
+            LOGBACK_CONFIG="$logfile"
+            break
+        fi
+    done
+
+elif [ -r "$TLP_STRESS_LOGBACK" ]; then
+    LOGBACK_CONFIG="$TLP_STRESS_LOGBACK"
+fi
+
+java -Dlogback.configurationFile="$LOGBACK_CONFIG" -jar "${BASE_STRESS_DIR}/build/libs/tlp-stress-1.0-SNAPSHOT.jar" "$@"

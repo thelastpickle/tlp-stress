@@ -1,19 +1,12 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.Cluster
-import mu.KotlinLogging
-import ch.qos.logback.classic.util.ContextInitializer
-import java.util.concurrent.Semaphore
+import org.slf4j.LoggerFactory
+
 
 fun main(argv: Array<String>) {
 
-    println("Starting up")
-
-    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.xml")
-
-    val logger = KotlinLogging.logger {}
-
     val parser = CommandLineParser.parse(argv)
+    LoggerFactory.getLogger("main")
 
     try {
         parser.execute()

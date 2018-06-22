@@ -6,11 +6,9 @@ import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.ISampler
-import mu.KotlinLogging
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
-private val logger = KotlinLogging.logger {}
 
 
 /**
@@ -41,8 +39,6 @@ class ProfileRunner(val context: StressContext,
 
      */
     fun run() {
-
-        logger.info { "Starting up runner" }
 
         // need to add a warmup / populate phase
 
@@ -86,7 +82,7 @@ class ProfileRunner(val context: StressContext,
             // that way this can be reused for the pre-population
             when (op) {
                 is Operation.Mutation -> {
-                    logger.debug { op }
+//                    logger.debug { op }
 
 
                     val future = context.session.executeAsync(op.bound)
@@ -95,7 +91,7 @@ class ProfileRunner(val context: StressContext,
                         override fun onFailure(t: Throwable?) {
                             context.semaphore.release()
                             context.metrics.errors.mark()
-                            logger.error { t }
+//                            logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -116,7 +112,7 @@ class ProfileRunner(val context: StressContext,
                         override fun onFailure(t: Throwable?) {
                             context.semaphore.release()
                             context.metrics.errors.mark()
-                            logger.error { t }
+//                            logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -174,7 +170,7 @@ class ProfileRunner(val context: StressContext,
                         override fun onFailure(t: Throwable?) {
                             sem.release()
                             inserted++
-                            logger.error { t }
+//                            logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
