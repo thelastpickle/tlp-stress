@@ -1,20 +1,20 @@
-asldfjasdf
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-      <file>/Users/jhaddad/.tlpstress/stress.log</file>
-    <append>false</append>
-    <!-- set immediateFlush to false for much higher logging throughput -->
-    <immediateFlush>false</immediateFlush>
-    <!-- encoders are assigned the type
-         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+      <pattern>%date %highlight(%-5level) [%thread] %highlight(%class.%method:%line) - %msg%n</pattern>
     </encoder>
   </appender>
 
-  <root level="INFO">
-    <appender-ref ref="FILE" />
+  <!--
+      <logger name="com.mycompany">
+          <level value="DEBUG" />
+      </logger>
+  -->
+
+  <root level="warn">
+    <appender-ref ref="STDOUT"/>
   </root>
 
 </configuration>
