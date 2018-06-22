@@ -1,9 +1,18 @@
 package com.thelastpickle.tlpstress.commands
 
+import com.thelastpickle.tlpstress.Plugin
 
 class List : IStressCommand {
     override fun execute() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        println("Available Workloads:\n")
+
+        val plugins = Plugin.getPlugins()
+        for((key, _) in plugins) {
+            println("$key ")
+        }
+        println("\nDone.")
+
     }
 
 
