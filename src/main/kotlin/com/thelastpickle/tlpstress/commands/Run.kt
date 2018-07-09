@@ -30,7 +30,7 @@ class Run : IStressCommand {
     var id = "001"
 
     @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.")
-    var partitionValues = 1000000
+    var partitionValues = 1000000L
 
     @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
     var sampleRate = 0.001 // .1%..  this might be better as a number, like a million.  reasonable to keep in memory

@@ -163,7 +163,7 @@ class ProfileRunner(val context: StressContext,
 
             var inserted = 0
             // for now, simply generate a single value for each partition key
-            for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues.toLong())) {
+            for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues)) {
                 sem.acquire()
                 val op = runner.getNextMutation(key)
                 if(op is Operation.Mutation) {
@@ -172,7 +172,6 @@ class ProfileRunner(val context: StressContext,
                         override fun onFailure(t: Throwable?) {
                             sem.release()
                             inserted++
-//                            logger.error { t }
                         }
 
                         override fun onSuccess(result: ResultSet?) {
