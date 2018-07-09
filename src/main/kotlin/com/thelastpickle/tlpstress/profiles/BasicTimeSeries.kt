@@ -12,7 +12,6 @@ import com.thelastpickle.tlpstress.samplers.ISampler
 import com.thelastpickle.tlpstress.samplers.ValidationResult
 import java.util.*
 
-data class PrimaryKey(val first: String, val timestamp: UUID)
 
 /**
  * Create a simple time series use case with some number of partitions
@@ -20,6 +19,8 @@ data class PrimaryKey(val first: String, val timestamp: UUID)
  */
 @Parameters(commandDescription = "Basic Time Series workload defaulting to TWCS.")
 class BasicTimeSeries : IStressProfile {
+
+    data class PrimaryKey(val first: String, val timestamp: UUID)
 
 
     // TODO maybe move to the runner?
