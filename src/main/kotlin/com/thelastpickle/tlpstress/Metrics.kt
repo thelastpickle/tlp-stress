@@ -17,8 +17,9 @@ class Metrics {
         reporter.start(1, TimeUnit.SECONDS)
     }
 
-    val requests = metrics.meter("requests")
     val errors = metrics.meter("errors")
-    val mutations = metrics.meter("mutations")
-    val selects = metrics.meter("select")
+    val mutations = metrics.timer("mutations")
+    val selects = metrics.timer("select")
+
+//    val requestTimer = metrics.timer("requestTimer")
 }

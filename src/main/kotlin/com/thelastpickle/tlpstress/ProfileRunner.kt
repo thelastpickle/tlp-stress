@@ -84,14 +84,15 @@ class ProfileRunner(val context: StressContext,
                 is Operation.Mutation -> {
 //                    logger.debug { op }
 
-
+                    val startTime = context.metrics.mutations.time()
                     val future = context.session.executeAsync(op.bound)
 
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             context.semaphore.release()
                             context.metrics.errors.mark()
-//                            logger.error { t }
+                            startTime.stop()
+
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -100,19 +101,20 @@ class ProfileRunner(val context: StressContext,
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
                             sampler.maybePut(op.partitionKey, op.fields)
-                            context.metrics.mutations.mark()
+                            startTime.stop()
 
                         }
                     })
                 }
 
                 is Operation.SelectStatement -> {
+                    val startTime = context.metrics.selects.time()
                     val future = context.session.executeAsync(op.bound)
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             context.semaphore.release()
                             context.metrics.errors.mark()
-//                            logger.error { t }
+                            startTime.stop()
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -120,7 +122,7 @@ class ProfileRunner(val context: StressContext,
                             // if the key returned in the Mutation exists in the sampler, store the fields
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
-                            context.metrics.selects.mark()
+                            startTime.stop()
 
                         }
                     })
