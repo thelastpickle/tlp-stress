@@ -1,10 +1,13 @@
-package com.thelastpickle.tlpstress.profiles
+package com.thelastpickle.tlpstress.profiles.basictimeseries
 
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.thelastpickle.tlpstress.profiles.IStressProfile
+import com.thelastpickle.tlpstress.profiles.IStressRunner
+import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.PrimaryKeySampler
 import com.thelastpickle.tlpstress.randomString
 import com.thelastpickle.tlpstress.samplers.Fields
@@ -91,8 +94,6 @@ class BasicTimeSeries : IStressProfile {
             val fields = mapOf("data" to data)
             return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
         }
-
-
 
     }
 

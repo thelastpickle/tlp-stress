@@ -1,14 +1,15 @@
-package com.thelastpickle.tlpstress.profiles
+package com.thelastpickle.tlpstress.profiles.keyvalue
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.profiles.IStressProfile
+import com.thelastpickle.tlpstress.profiles.IStressRunner
+import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.randomString
 import com.thelastpickle.tlpstress.samplers.Fields
 import com.thelastpickle.tlpstress.samplers.ISampler
 import com.thelastpickle.tlpstress.samplers.PrimaryKeySampler
 import com.thelastpickle.tlpstress.samplers.ValidationResult
-import java.util.*
-
 
 
 class KeyValue : IStressProfile {

@@ -1,8 +1,11 @@
-package com.thelastpickle.tlpstress.profiles
+package com.thelastpickle.tlpstress.profiles.maps
 
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.profiles.IStressProfile
+import com.thelastpickle.tlpstress.profiles.IStressRunner
+import com.thelastpickle.tlpstress.profiles.Operation
 import com.thelastpickle.tlpstress.samplers.ISampler
 import com.thelastpickle.tlpstress.samplers.NoOpSampler
 
