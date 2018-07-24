@@ -4,6 +4,7 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.*
+import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import java.util.concurrent.Semaphore
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
@@ -29,7 +30,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--id"], description = "Identifier for this run, will be used in partition keys.  Make unique for when starting concurrent runners.")
     var id = "001"
 
-    @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.")
+    @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.", converter = HumanReadableConverter::class)
     var partitionValues = 1000000L
 
     @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
@@ -47,7 +48,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
     var threads = 1
 
-    @Parameter(names = ["--iterations", "-i"], description = "Number of operations to run.")
+    @Parameter(names = ["--iterations", "-i"], description = "Number of operations to run.", converter = HumanReadableConverter::class)
     var iterations : Long = 1000
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
@@ -67,6 +68,8 @@ class Run : IStressCommand {
 
         // get all the initial schema
         println("Creating schema")
+
+        println("Executing $iterations operations")
 
         val session = cluster.connect()
 
