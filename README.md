@@ -8,3 +8,17 @@ In addition to creating workloads, tlp-stress can also (maybe?) verify the data 
 
 
 This tool is in its infancy and not ready for general usage.
+
+
+# Examples
+
+Time series workload with a billion operations:
+
+    bin/tlp-stress run BasicTimeSeries -i 1B
+
+Key value workload with a million operations across 5k partitions, 50:50 read:write ratio:
+
+    bin/tlp-stress run KeyValue -i 1M -p 5k -r .5
+
+
+
