@@ -21,4 +21,7 @@ Key value workload with a million operations across 5k partitions, 50:50 read:wr
     bin/tlp-stress run KeyValue -i 1M -p 5k -r .5
 
 
+Time series workload, using TWCS:
+
+    bin/tlp-stress run KeyValue -i 10M --compaction "{'class':'TimeWindowCompactionStrategy', 'compaction_window_size': 1, 'compaction_window_unit': 'DAYS'}"
 
