@@ -73,12 +73,8 @@ class Run : IStressCommand {
 
         val session = cluster.connect()
 
-        val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS $keyspace
-                        | WITH replication =
-                        | {'class': 'SimpleStrategy',
-                        | 'replication_factor':3} """.trimMargin()
+        val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS $keyspace WITH replication = $replication"""
 
-//        logger.debug { createKeyspace }
         session.execute(createKeyspace)
 
         session.execute("USE $keyspace")
