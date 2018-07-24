@@ -23,4 +23,4 @@ elif [ -r "$TLP_STRESS_LOGBACK" ]; then
     LOGBACK_CONFIG="$TLP_STRESS_LOGBACK"
 fi
 
-java -Dlogback.configurationFile="$LOGBACK_CONFIG" -jar "${BASE_STRESS_DIR}/build/libs/tlp-stress-1.0-SNAPSHOT.jar" "$@"
+java -Dlogback.configurationFile="$LOGBACK_CONFIG" -Xmx1G -XX:+UseG1GC -jar "${BASE_STRESS_DIR}/build/libs/tlp-stress-1.0-SNAPSHOT.jar" "$@"
