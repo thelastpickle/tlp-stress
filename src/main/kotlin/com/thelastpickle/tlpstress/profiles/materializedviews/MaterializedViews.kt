@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles.materializedviews
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.generators.USCities
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -50,10 +51,11 @@ class MaterializedViews : IStressProfile {
 
         class MVRunner : IStressRunner {
             var select_count = 0L
+            val cities = USCities()
 
             override fun getNextMutation(partitionKey: String): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
-                return Operation.Mutation(insert.bind(partitionKey, num, "test"), partitionKey, mapOf())
+                return Operation.Mutation(insert.bind(partitionKey, num, cities.getText()), partitionKey, mapOf())
             }
 
             override fun getNextSelect(partitionKey: String): Operation {
