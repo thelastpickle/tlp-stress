@@ -32,21 +32,18 @@ class MaterializedViews : IStressProfile {
 
     }
 
-    override fun schema(): List<String> {
-        var tables = listOf("""CREATE TABLE IF NOT EXISTS person
-                            | (name text, age int, city text, state text, primary key(name))""".trimMargin(),
+    override fun schema(): List<String> = listOf("""CREATE TABLE IF NOT EXISTS person
+                        | (name text, age int, city text, state text, primary key(name))""".trimMargin(),
 
-                            """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age AS
-                                |SELECT age, name, city, state FROM person
-                                |WHERE age IS NOT NULL AND name IS NOT NULL
-                                |PRIMARY KEY (age, name)""".trimMargin(),
+                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age AS
+                            |SELECT age, name, city, state FROM person
+                            |WHERE age IS NOT NULL AND name IS NOT NULL
+                            |PRIMARY KEY (age, name)""".trimMargin(),
 
-                            """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_city AS
-                                |SELECT city, name, age FROM person
-                                |WHERE city IS NOT NULL AND name IS NOT NULL
-                                |PRIMARY KEY (city, name) """.trimMargin())
-        return tables
-    }
+                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_city AS
+                            |SELECT city, name, age FROM person
+                            |WHERE city IS NOT NULL AND name IS NOT NULL
+                            |PRIMARY KEY (city, name) """.trimMargin())
 
     override fun getRunner(context: StressContext): IStressRunner {
 
