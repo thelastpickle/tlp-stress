@@ -10,7 +10,8 @@ data class City (val name:String, val stateShort:String, val stateFull:String, v
 }
 
 
-class USCities : DataGenerator {
+class USCities(val args: ArrayList<String> = arrayListOf<String>()) : DataGenerator {
+
 
     private val cities : List<City>
     private val size : Int

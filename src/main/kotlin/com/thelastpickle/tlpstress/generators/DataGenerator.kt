@@ -7,4 +7,5 @@ interface DataGenerator {
     fun getFloat() : Float = throw UnsupportedTypeException()
     fun getText() : String = throw UnsupportedTypeException()
 
+
 }
