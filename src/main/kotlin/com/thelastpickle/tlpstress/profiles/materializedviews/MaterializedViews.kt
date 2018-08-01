@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles.materializedviews
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.USCities
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
@@ -47,7 +48,7 @@ class MaterializedViews : IStressProfile {
         return tables
     }
 
-    override fun getRunner(): IStressRunner {
+    override fun getRunner(context: StressContext): IStressRunner {
 
         class MVRunner : IStressRunner {
             var select_count = 0L

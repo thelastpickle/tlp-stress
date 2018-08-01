@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
+import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.samplers.ISampler
@@ -53,7 +54,7 @@ interface IStressProfile {
      * but then needs to create multiple stress runners
      * this allows the code to be a little cleaner
      */
-    fun getRunner(): IStressRunner
+    fun getRunner(context: StressContext): IStressRunner
 
     /**
      * returns a map of generators cooresponding to the different fields

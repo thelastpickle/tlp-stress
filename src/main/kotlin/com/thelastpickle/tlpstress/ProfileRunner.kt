@@ -59,7 +59,7 @@ class ProfileRunner(val context: StressContext,
         var operations = 0
         val sem = context.semaphore
 
-        val runner = profile.getRunner()
+        val runner = profile.getRunner(context)
 
         for (key in partitionKeyGenerator.generateKey(iterations, context.mainArguments.partitionValues)) {
 
@@ -159,7 +159,7 @@ class ProfileRunner(val context: StressContext,
         if(context.mainArguments.populate) {
             println("prepopulating")
             val sem = Semaphore(context.permits)
-            val runner = profile.getRunner()
+            val runner = profile.getRunner(context)
 
             var inserted = 0
             // for now, simply generate a single value for each partition key

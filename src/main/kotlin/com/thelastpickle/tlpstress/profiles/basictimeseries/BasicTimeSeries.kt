@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.Book
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
@@ -84,7 +85,7 @@ class BasicTimeSeries : IStressProfile {
     }
 
 
-    class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
+    class TimeSeriesRunner(val context: StressContext, val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
         override fun getNextSelect(partitionKey: String): Operation {
 
             val bound = select.bind(partitionKey, limit)
@@ -104,9 +105,9 @@ class BasicTimeSeries : IStressProfile {
     /**
      * need to fix custom arguments
      */
-    override fun getRunner(): IStressRunner {
+    override fun getRunner(context: StressContext): IStressRunner {
 
-        return TimeSeriesRunner(prepared, getPartitionHead, 500)
+        return TimeSeriesRunner(context, prepared, getPartitionHead, 500)
 
     }
 

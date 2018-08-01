@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles.maps
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -38,7 +39,7 @@ class Maps : IStressProfile {
     }
 
 
-    override fun getRunner(): IStressRunner {
+    override fun getRunner(context: StressContext): IStressRunner {
         class MapRunner : IStressRunner {
             override fun getNextMutation(partitionKey: String): Operation {
                 return Operation.SelectStatement(insert.bind("key", "value", partitionKey))

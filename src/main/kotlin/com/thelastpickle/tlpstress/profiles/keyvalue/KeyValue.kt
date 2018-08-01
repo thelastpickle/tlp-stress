@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.profiles.keyvalue
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -40,7 +41,7 @@ class KeyValue : IStressProfile {
         return listOf(table)
     }
 
-    class KeyValueRunner(val insert: PreparedStatement, val select: PreparedStatement) : IStressRunner {
+    class KeyValueRunner(val context: StressContext, val insert: PreparedStatement, val select: PreparedStatement) : IStressRunner {
         override fun getNextSelect(partitionKey: String): Operation {
             val bound = select.bind(partitionKey )
             return Operation.SelectStatement(bound)
@@ -56,8 +57,8 @@ class KeyValue : IStressProfile {
 
     }
 
-    override fun getRunner(): IStressRunner {
-        return KeyValueRunner(insert, select)
+    override fun getRunner(context: StressContext): IStressRunner {
+        return KeyValueRunner(context, insert, select)
     }
 
     override fun getSampler(session: Session, sampleRate: Double): ISampler {
