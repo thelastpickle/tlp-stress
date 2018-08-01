@@ -1,18 +1,26 @@
 package com.thelastpickle.tlpstress.generators
 
-
 data class Field(val table: String, val field: String)
 
 class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMapOf(),
-               val defaults: Map<Field, DataGenerator> = mapOf()) {
+               val defaults: MutableMap<Field, DataGenerator> = mutableMapOf(),
+               val overrides: MutableMap<Field, DataGenerator> = mutableMapOf()) {
+
+
+
 
     companion object {
-        fun create(defaults: Map<Field, DataGenerator>) : Registry {
+        fun create(defaults: MutableMap<Field, DataGenerator>) : Registry {
             val data = Registry.getGenerators()
             return Registry(data, defaults)
         }
 
-        fun getGenerators() : Map<String, Class<out DataGenerator>> = mapOf("cities" to USCities::class.java,
+        fun create() : Registry {
+            val data = Registry.getGenerators()
+            return Registry(data)
+        }
+
+        private fun getGenerators() : Map<String, Class<out DataGenerator>> = mutableMapOf("cities" to USCities::class.java,
                                                                             "gaussian" to Gaussian::class.java,
                                                                             "book" to Book::class.java)
 
@@ -46,4 +54,24 @@ class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMa
             return tmp.split(",").map { it.trim() }
         }
     }
+
+    fun setDefault(table: String, field: String, generator: DataGenerator) : Registry {
+        val f = Field(table, field)
+        defaults[f] = generator
+        return this
+    }
+
+    fun setOverride(table: String, field: String, generator: DataGenerator) : Registry {
+        val f = Field(table, field)
+        overrides[f] = generator
+        return this
+    }
+
+    fun getGenerator(table: String, field: String) : DataGenerator {
+        val tmp = Field(table, field)
+        if(tmp in overrides)
+            return overrides[tmp]!!
+        return defaults[tmp]!!
+    }
+
 }
