@@ -2,6 +2,10 @@ package com.thelastpickle.tlpstress.generators
 
 data class Field(val table: String, val field: String)
 
+class FieldFactory(private val table: String) {
+    fun getField(field: String) : Field = Field(table, field)
+}
+
 /**
  * Registry for data generators
  * When the original schema is created, the registry will be set up with default generators for each field
@@ -34,7 +38,8 @@ class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMa
                 = mutableMapOf("cities" to USCities::class.java,
                                 "gaussian" to Gaussian::class.java,
                                 "book" to Book::class.java,
-                                "random" to Random::class.java)
+                                "random" to Random::class.java,
+                                "firstname" to FirstName::class.java)
 
         /**
          *

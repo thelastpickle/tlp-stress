@@ -4,6 +4,9 @@ import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.generators.DataGenerator
+import com.thelastpickle.tlpstress.generators.Field
+import com.thelastpickle.tlpstress.generators.FieldFactory
 import com.thelastpickle.tlpstress.generators.USCities
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
@@ -72,6 +75,11 @@ class MaterializedViews : IStressProfile {
         }
         return MVRunner()
     }
+
+//    override fun getFieldGenerators(): Map<Field, DataGenerator> {
+//        val person = FieldFactory("person")
+//        return mapOf(person.getField("name") to Random
+//    }
 
     override fun getSampler(session: Session, sampleRate: Double): ISampler {
         return NoOpSampler()
