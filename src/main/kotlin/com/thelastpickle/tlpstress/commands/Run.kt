@@ -1,10 +1,12 @@
 package com.thelastpickle.tlpstress.commands
 
+import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
+import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
@@ -57,6 +59,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--replication"], description = "Replication options")
     var replication = "{'class': 'SimpleStrategy', 'replication_factor':3 }"
 
+    @DynamicParameter(names = ["--field."], description = "Override a field's data generator")
+    var fields = mapOf<String, String>()
+
     
     override fun execute() {
 
@@ -81,6 +86,19 @@ class Run : IStressCommand {
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
+        // used for the DataGenerator
+
+        /*
+        Here we add the compaction and compression options.  in the future we'll be able to do stuff like
+        compression.mytable.chunk_length_in_kb=4
+        compaction.mytable.class=TimeWindowCompactionStrategy
+
+        ideally we should have shortcuts
+
+        compaction.mytable.class=twcs
+         */
+
+
         for (statement in plugin.instance.schema()) {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)
@@ -88,6 +106,12 @@ class Run : IStressCommand {
                     .build()
             println(s)
             session.execute(s)
+        }
+
+        val fieldRegistry = Registry.create()
+
+        for((field,generator) in plugin.instance.getFieldGenerators()) {
+            fieldRegistry.setDefault(field, generator)
         }
 
         plugin.instance.prepare(session)

@@ -4,6 +4,9 @@ import java.util.concurrent.ThreadLocalRandom
 
 class Random(var args: ArrayList<String>) : DataGenerator {
 
+    constructor(min: Int, max: Int) : this(arrayListOf(min.toString(), max.toString()))
+    constructor(min: Long, max: Long) : this(arrayListOf(min.toString(), max.toString()))
+
     val min = args[0].toLong()
     val max = args[1].toLong()
 

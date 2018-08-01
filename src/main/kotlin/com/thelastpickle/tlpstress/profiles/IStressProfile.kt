@@ -2,6 +2,8 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
+import com.thelastpickle.tlpstress.generators.DataGenerator
+import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.samplers.ISampler
 
 interface IStressRunner {
@@ -53,6 +55,18 @@ interface IStressProfile {
      */
     fun getRunner(): IStressRunner
 
+    /**
+     * returns a map of generators cooresponding to the different fields
+     * it's required to specify all fields that use a generator
+     * some fields don't, like TimeUUID or the first partition key
+     * This is optional, but encouraged
+     *
+     * A profile can technically do whatever it wants, no one is obligated to use the generator
+     * Using this does give the flexibility of specifying a different generator however
+     * In the case of text fields, this is VERY strongly encouraged to allow for more flexibility with the size
+     * of the text payload
+     */
+    fun getFieldGenerators() : Map<Field, DataGenerator> = mapOf()
 
     /**
      * returns an instance of ISampler.

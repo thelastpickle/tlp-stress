@@ -5,6 +5,10 @@ import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.thelastpickle.tlpstress.generators.Book
+import com.thelastpickle.tlpstress.generators.DataGenerator
+import com.thelastpickle.tlpstress.generators.Field
+import com.thelastpickle.tlpstress.generators.Random
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -13,7 +17,7 @@ import com.thelastpickle.tlpstress.randomString
 import com.thelastpickle.tlpstress.samplers.Fields
 import com.thelastpickle.tlpstress.samplers.ISampler
 import com.thelastpickle.tlpstress.samplers.ValidationResult
-import java.util.*
+import java.util.UUID
 
 
 /**
@@ -104,6 +108,10 @@ class BasicTimeSeries : IStressProfile {
 
         return TimeSeriesRunner(prepared, getPartitionHead, 500)
 
+    }
+
+    override fun getFieldGenerators(): Map<Field, DataGenerator> {
+        return mapOf(Field("sensor_data", "data") to Random(20, 100))
     }
 
 
