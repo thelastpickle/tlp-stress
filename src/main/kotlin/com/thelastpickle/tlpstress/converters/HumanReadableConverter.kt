@@ -1,7 +1,6 @@
 package com.thelastpickle.tlpstress.converters
 
 import com.beust.jcommander.IStringConverter
-import com.beust.jcommander.IStringConverterFactory
 
 class HumanReadableConverter : IStringConverter<Long> {
     override fun convert(value: String?): Long {

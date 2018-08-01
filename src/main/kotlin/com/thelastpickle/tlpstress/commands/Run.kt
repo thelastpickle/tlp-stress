@@ -60,7 +60,7 @@ class Run : IStressCommand {
     var replication = "{'class': 'SimpleStrategy', 'replication_factor':3 }"
 
     @DynamicParameter(names = ["--field."], description = "Override a field's data generator")
-    var fields = mapOf<String, String>()
+    var fields = mutableMapOf<String, String>()
 
     
     override fun execute() {
@@ -112,6 +112,14 @@ class Run : IStressCommand {
 
         for((field,generator) in plugin.instance.getFieldGenerators()) {
             fieldRegistry.setDefault(field, generator)
+        }
+
+        for((field, generator) in fields) {
+            println("$field, $generator")
+            val instance = Registry.getInstance(generator)
+            val parts = field.split(".")
+            // TODO check to make sure the fields exist
+            fieldRegistry.setOverride(parts[0]!!, parts[1]!!, instance)
         }
 
         plugin.instance.prepare(session)
