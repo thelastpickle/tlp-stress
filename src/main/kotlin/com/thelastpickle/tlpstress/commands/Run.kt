@@ -134,7 +134,7 @@ class Run : IStressCommand {
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
             println("Connected")
-            val context = StressContext(session, this, it, metrics, sem, permits)
+            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry)
             ProfileRunner.create(context, plugin.instance)
         }
 
