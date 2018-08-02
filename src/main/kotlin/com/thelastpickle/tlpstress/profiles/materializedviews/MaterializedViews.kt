@@ -4,10 +4,7 @@ import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.generators.DataGenerator
-import com.thelastpickle.tlpstress.generators.Field
-import com.thelastpickle.tlpstress.generators.FieldFactory
-import com.thelastpickle.tlpstress.generators.USCities
+import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -36,10 +33,10 @@ class MaterializedViews : IStressProfile {
     }
 
     override fun schema(): List<String> = listOf("""CREATE TABLE IF NOT EXISTS person
-                        | (name text, age int, city text, state text, primary key(name))""".trimMargin(),
+                        | (name text, age int, city text  primary key(name))""".trimMargin(),
 
                         """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age AS
-                            |SELECT age, name, city, state FROM person
+                            |SELECT age, name, city FROM person
                             |WHERE age IS NOT NULL AND name IS NOT NULL
                             |PRIMARY KEY (age, name)""".trimMargin(),
 
@@ -52,7 +49,13 @@ class MaterializedViews : IStressProfile {
 
         class MVRunner : IStressRunner {
             var select_count = 0L
-            val cities = USCities()
+
+            val cities = context.registry.getGenerator("person", "city")
+
+//            val firstName = FirstName()
+//            val lastName = LastName()
+//
+//            fun getName() : String = firstName.getText() + " " + lastName.getText()
 
             override fun getNextMutation(partitionKey: String): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
@@ -76,10 +79,13 @@ class MaterializedViews : IStressProfile {
         return MVRunner()
     }
 
-//    override fun getFieldGenerators(): Map<Field, DataGenerator> {
-//        val person = FieldFactory("person")
-//        return mapOf(person.getField("name") to Random
-//    }
+    override fun getFieldGenerators(): Map<Field, DataGenerator> {
+        val person = FieldFactory("person")
+        return mapOf(person.getField("firstname") to FirstName(),
+                     person.getField("lastname") to LastName(),
+                     person.getField("city") to USCities()
+                    )
+    }
 
     override fun getSampler(session: Session, sampleRate: Double): ISampler {
         return NoOpSampler()
