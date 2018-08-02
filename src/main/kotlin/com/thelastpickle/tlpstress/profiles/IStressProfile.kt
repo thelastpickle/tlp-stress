@@ -6,6 +6,7 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.samplers.ISampler
+import com.thelastpickle.tlpstress.samplers.NoOpSampler
 
 interface IStressRunner {
     fun getNextMutation(partitionKey: String) : Operation
@@ -72,7 +73,7 @@ interface IStressProfile {
     /**
      * returns an instance of ISampler.
      */
-    fun getSampler(session: Session, sampleRate: Double) : ISampler
+    fun getSampler(session: Session, sampleRate: Double) : ISampler { return NoOpSampler() }
 
 }
 

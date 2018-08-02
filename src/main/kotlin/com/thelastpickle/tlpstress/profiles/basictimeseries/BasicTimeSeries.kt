@@ -30,25 +30,6 @@ class BasicTimeSeries : IStressProfile {
 
     data class PrimaryKey(val first: String, val timestamp: UUID)
 
-
-    // TODO maybe move to the runner?
-    override fun getSampler(session: Session, sampleRate: Double): ISampler {
-
-        val validate = fun (primaryKey: Any, fields: Fields) : ValidationResult {
-            if(primaryKey is PrimaryKey) {
-                val bound = getRow.bind(primaryKey.first, primaryKey.timestamp)
-                val result = session.execute(bound).one()
-                if(result.getString("data") == fields.get("data"))
-                    return ValidationResult.Correct()
-            }
-            return ValidationResult.Incorrect()
-        }
-
-        return PrimaryKeySampler(sampleRate, validate)
-    }
-
-
-
     override fun schema(): List<String> {
         val query = """CREATE TABLE IF NOT EXISTS sensor_data (
                             sensor_id text,

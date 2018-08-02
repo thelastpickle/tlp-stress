@@ -61,14 +61,4 @@ class KeyValue : IStressProfile {
         return KeyValueRunner(context, insert, select)
     }
 
-    override fun getSampler(session: Session, sampleRate: Double): ISampler {
-        var validate = fun(primaryKey: Any, fields: Fields) : ValidationResult {
-            val bound = select.bind(primaryKey)
-            val result = session.execute(bound).one()
-            if(result.getString("value") == fields.get("value"))
-                return ValidationResult.Correct()
-            return ValidationResult.Incorrect()
-        }
-        return PrimaryKeySampler(sampleRate, validate)
-    }
 }

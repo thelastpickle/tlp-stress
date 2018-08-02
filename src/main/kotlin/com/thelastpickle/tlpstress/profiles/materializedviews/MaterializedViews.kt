@@ -52,11 +52,6 @@ class MaterializedViews : IStressProfile {
 
             val cities = context.registry.getGenerator("person", "city")
 
-//            val firstName = FirstName()
-//            val lastName = LastName()
-//
-//            fun getName() : String = firstName.getText() + " " + lastName.getText()
-
             override fun getNextMutation(partitionKey: String): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
                 return Operation.Mutation(insert.bind(partitionKey, num, cities.getText()), partitionKey, mapOf())
@@ -87,9 +82,6 @@ class MaterializedViews : IStressProfile {
                     )
     }
 
-    override fun getSampler(session: Session, sampleRate: Double): ISampler {
-        return NoOpSampler()
-    }
 
     lateinit var insert : PreparedStatement
     lateinit var select_base : PreparedStatement

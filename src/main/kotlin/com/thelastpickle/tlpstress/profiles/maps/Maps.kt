@@ -54,10 +54,4 @@ class Maps : IStressProfile {
         }
         return MapRunner()
     }
-
-
-
-    override fun getSampler(session: Session, sampleRate: Double): ISampler {
-        return NoOpSampler()
-    }
 }
