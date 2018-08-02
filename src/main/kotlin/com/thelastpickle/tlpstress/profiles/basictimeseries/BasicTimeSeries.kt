@@ -43,19 +43,6 @@ class BasicTimeSeries : IStressProfile {
     lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
 
-
-    // jcommander arguments
-    class Arguments {
-        @Parameter(names = ["--limit"], description = "Number of rows to return per partition.")
-        var limit = 50
-
-    }
-
-    override fun getArguments() : Any {
-        return Arguments()
-    }
-
-
     override fun prepare(session: Session) {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")

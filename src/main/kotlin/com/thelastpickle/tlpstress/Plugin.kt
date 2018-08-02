@@ -12,8 +12,7 @@ import org.reflections.Reflections
 
 data class Plugin (val name: String,
                    val cls: Class<out IStressProfile>,
-                   val instance: IStressProfile,
-                   val arguments: Any) {
+                   val instance: IStressProfile) {
 
     companion object {
 
@@ -25,8 +24,8 @@ data class Plugin (val name: String,
 
             for(m in modules) {
                 val instance = m.getConstructor().newInstance()
-                val args = instance.getArguments()
-                val tmp = Plugin(m.simpleName, m, instance, args)
+//                val args = instance.getArguments()
+                val tmp = Plugin(m.simpleName, m, instance)
                 result[m.simpleName] = tmp
             }
 

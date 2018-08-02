@@ -13,15 +13,6 @@ import com.thelastpickle.tlpstress.samplers.NoOpSampler
 import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {
-    override fun getArguments(): Any {
-        // jcommander arguments
-        class Arguments {
-            @Parameter(names = ["--limit"], description = "Number of rows to return per partition.")
-            var limit = 50
-
-        }
-        return Arguments()
-    }
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO person (name, age, city) values (?, ?, ?)")

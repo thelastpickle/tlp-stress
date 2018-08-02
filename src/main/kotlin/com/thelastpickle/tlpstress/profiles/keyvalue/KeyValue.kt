@@ -24,14 +24,6 @@ class KeyValue : IStressProfile {
 
     data class PrimaryKey(val first: String)
 
-    class Arguments {
-
-    }
-
-    override fun getArguments(): Any {
-        return Arguments()
-    }
-
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO keyvalue (key, value) VALUES (?, ?)")
         select = session.prepare("SELECT * from keyvalue WHERE key = ?")
@@ -44,8 +36,6 @@ class KeyValue : IStressProfile {
                         )""".trimIndent()
         return listOf(table)
     }
-
-
 
     override fun getRunner(context: StressContext): IStressRunner {
 

@@ -18,16 +18,6 @@ class Maps : IStressProfile {
 
     data class PrimaryKey(val field: String)
 
-    override fun getArguments(): Any {
-        // jcommander arguments
-        class Arguments {
-            @Parameter(names = ["--limit"], description = "Number of rows to return per partition.")
-            var limit = 50
-
-        }
-        return Arguments()
-    }
-
     override fun prepare(session: Session) {
         insert = session.prepare("UPDATE map_stress SET data[?] = ? WHERE id = ?")
         select = session.prepare("SELECT * from map_stress WHERE id = ?")

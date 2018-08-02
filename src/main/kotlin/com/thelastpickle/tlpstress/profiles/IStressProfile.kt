@@ -19,14 +19,6 @@ interface IStressRunner {
  * to imp
  */
 interface IStressProfile {
-
-    /**
-     * jcommander arguments that will be auto added to the commander subcommand.
-     * This lets us drop in arbitrary classes, annotate them with Parameters,
-     * and they just magically show up in the CLI tool.
-     */
-    fun getArguments() : Any
-
     /**
      * Handles any prepared statements that are needed
      * the class should track all prepared statements internally
