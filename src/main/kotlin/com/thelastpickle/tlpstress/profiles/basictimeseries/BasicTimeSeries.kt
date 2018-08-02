@@ -66,29 +66,32 @@ class BasicTimeSeries : IStressProfile {
     }
 
 
-    class TimeSeriesRunner(val context: StressContext, val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
-        override fun getNextSelect(partitionKey: String): Operation {
 
-            val bound = select.bind(partitionKey, limit)
-            return Operation.SelectStatement(bound)
-        }
-
-        override fun getNextMutation(partitionKey: String) : Operation {
-            val data = randomString(100)
-            val timestamp = UUIDs.timeBased()
-            val bound = insert.bind(partitionKey,timestamp, data)
-            val fields = mapOf("data" to data)
-            return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
-        }
-
-    }
 
     /**
      * need to fix custom arguments
      */
     override fun getRunner(context: StressContext): IStressRunner {
 
-        return TimeSeriesRunner(context, prepared, getPartitionHead, 500)
+        class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
+
+            override fun getNextSelect(partitionKey: String): Operation {
+
+                val bound = select.bind(partitionKey, limit)
+                return Operation.SelectStatement(bound)
+            }
+
+            override fun getNextMutation(partitionKey: String) : Operation {
+                val data = randomString(100)
+                val timestamp = UUIDs.timeBased()
+                val bound = insert.bind(partitionKey,timestamp, data)
+                val fields = mapOf("data" to data)
+                return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
+            }
+
+        }
+
+        return TimeSeriesRunner(prepared, getPartitionHead, 500)
 
     }
 

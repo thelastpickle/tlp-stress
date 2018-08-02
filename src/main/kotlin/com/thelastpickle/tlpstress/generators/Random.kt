@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress.generators
 
+import org.apache.commons.text.RandomStringGenerator
 import java.util.concurrent.ThreadLocalRandom
 
 class Random(var args: ArrayList<String>) : DataGenerator {
@@ -15,5 +16,12 @@ class Random(var args: ArrayList<String>) : DataGenerator {
             throw Exception("Int larger than Int.MAX_VALUE requested, use a long instead")
 
         return ThreadLocalRandom.current().nextInt(min.toInt(), max.toInt())
+    }
+
+    override fun getText(): String {
+        val length = ThreadLocalRandom.current().nextInt(min.toInt(), max.toInt())
+
+        val generator = RandomStringGenerator.Builder().withinRange(65, 90).build()
+        return generator.generate(length)
     }
 }
