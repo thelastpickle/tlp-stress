@@ -6,10 +6,7 @@ import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.generators.Book
-import com.thelastpickle.tlpstress.generators.DataGenerator
-import com.thelastpickle.tlpstress.generators.Field
-import com.thelastpickle.tlpstress.generators.Random
+import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -65,13 +62,12 @@ class BasicTimeSeries : IStressProfile {
         getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
     }
 
-
-
-
     /**
      * need to fix custom arguments
      */
     override fun getRunner(context: StressContext): IStressRunner {
+
+        val dataField = context.registry.getGenerator("sensor_data", "data")
 
         class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
 
@@ -82,7 +78,7 @@ class BasicTimeSeries : IStressProfile {
             }
 
             override fun getNextMutation(partitionKey: String) : Operation {
-                val data = randomString(100)
+                val data = dataField.getText()
                 val timestamp = UUIDs.timeBased()
                 val bound = insert.bind(partitionKey,timestamp, data)
                 val fields = mapOf("data" to data)
@@ -96,7 +92,7 @@ class BasicTimeSeries : IStressProfile {
     }
 
     override fun getFieldGenerators(): Map<Field, DataGenerator> {
-        return mapOf(Field("sensor_data", "data") to Random(20, 100))
+        return mapOf(Field("sensor_data", "data") to Random(100, 200))
     }
 
 
