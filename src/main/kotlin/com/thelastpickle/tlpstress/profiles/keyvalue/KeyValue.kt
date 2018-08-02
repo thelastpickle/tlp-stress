@@ -45,28 +45,34 @@ class KeyValue : IStressProfile {
         return listOf(table)
     }
 
-    class KeyValueRunner(val context: StressContext, val insert: PreparedStatement, val select: PreparedStatement) : IStressRunner {
-        override fun getNextSelect(partitionKey: String): Operation {
-            val bound = select.bind(partitionKey )
-            return Operation.SelectStatement(bound)
-        }
 
-        override fun getNextMutation(partitionKey: String): Operation {
-            val data = randomString(100)
-            val bound = insert.bind(partitionKey,  data)
-            val fields = mapOf("value" to data)
-
-            return Operation.Mutation(bound, PrimaryKey(partitionKey), fields)
-        }
-
-    }
 
     override fun getRunner(context: StressContext): IStressRunner {
-        return KeyValueRunner(context, insert, select)
+
+        val value = context.registry.getGenerator("keyvalue", "value")
+
+        class KeyValueRunner(val insert: PreparedStatement, val select: PreparedStatement) : IStressRunner {
+
+            override fun getNextSelect(partitionKey: String): Operation {
+                val bound = select.bind(partitionKey )
+                return Operation.SelectStatement(bound)
+            }
+
+            override fun getNextMutation(partitionKey: String): Operation {
+                val data = value.getText()
+                val bound = insert.bind(partitionKey,  data)
+                val fields = mapOf("value" to data)
+
+                return Operation.Mutation(bound, PrimaryKey(partitionKey), fields)
+            }
+
+        }
+
+        return KeyValueRunner(insert, select)
     }
 
     override fun getFieldGenerators(): Map<Field, DataGenerator> {
         val kv = FieldFactory("keyvalue")
-        return mapOf(kv.getField("value") to Random(10, 50))
+        return mapOf(kv.getField("value") to Random(100, 200))
     }
 }
