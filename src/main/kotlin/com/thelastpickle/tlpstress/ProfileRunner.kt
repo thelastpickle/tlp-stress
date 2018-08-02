@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
-import com.thelastpickle.tlpstress.samplers.ISampler
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
@@ -19,14 +18,14 @@ import java.util.concurrent.ThreadLocalRandom
  */
 class ProfileRunner(val context: StressContext,
                     val profile: IStressProfile,
-                    val partitionKeyGenerator: PartitionKeyGenerator,
-                    val sampler: ISampler) {
+                    val partitionKeyGenerator: PartitionKeyGenerator) {
 
     companion object {
         fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
             val prefix = context.mainArguments.id + "." + context.thread + "."
             val partitionKeyGenerator = PartitionKeyGenerator.random(prefix)
-            return ProfileRunner(context, profile, partitionKeyGenerator, profile.getSampler(context.session, context.mainArguments.sampleRate))
+
+            return ProfileRunner(context, profile, partitionKeyGenerator)
         }
     }
 
@@ -100,7 +99,7 @@ class ProfileRunner(val context: StressContext,
                             // if the key returned in the Mutation exists in the sampler, store the fields
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
-                            sampler.maybePut(op.partitionKey, op.fields)
+//                            sampler.maybePut(op.partitionKey, op.fields)
                             startTime.stop()
 
                         }
@@ -144,9 +143,10 @@ class ProfileRunner(val context: StressContext,
      * TODO return validation statistics
      */
     fun validate() {
-        print("Verifying dataset ${sampler.size()} samples.")
-        val stats = sampler.validate()
-        print("Stats: $stats")
+        // sampler needs to be rethought
+//        print("Verifying dataset ${sampler.size()} samples.")
+//        val stats = sampler.validate()
+//        print("Stats: $stats")
 
     }
 

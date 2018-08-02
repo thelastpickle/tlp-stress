@@ -35,8 +35,8 @@ class Run : IStressCommand {
     @Parameter(names = ["--partitions", "-p"], description = "Max value of integer component of first partition key.", converter = HumanReadableConverter::class)
     var partitionValues = 1000000L
 
-    @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
-    var sampleRate = 0.001 // .1%..  this might be better as a number, like a million.  reasonable to keep in memory
+//    @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
+//    var sampleRate : Double? = null // .1%..  this might be better as a number, like a million.  reasonable to keep in memory
 
     @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
     var readRate = 0.01
@@ -119,7 +119,7 @@ class Run : IStressCommand {
             val instance = Registry.getInstance(generator)
             val parts = field.split(".")
             // TODO check to make sure the fields exist
-            fieldRegistry.setOverride(parts[0]!!, parts[1]!!, instance)
+            fieldRegistry.setOverride(parts[0], parts[1], instance)
         }
 
         plugin.instance.prepare(session)

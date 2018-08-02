@@ -75,6 +75,8 @@ interface IStressProfile {
      */
     fun getSampler(session: Session, sampleRate: Double) : ISampler { return NoOpSampler() }
 
+
+
 }
 
 
