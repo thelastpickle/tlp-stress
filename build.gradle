@@ -72,6 +72,6 @@ compileTestKotlin {
 
 task compileManual(type:Exec) {
     workingDir "."
-    commandLine "pandoc", "-s", "MANUAL.md", "-o", "docs/index.html"
+    commandLine "pandoc", "-s", "--toc", "MANUAL.md", "-o", "docs/index.html"
 
 }

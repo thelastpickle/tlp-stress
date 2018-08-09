@@ -8,6 +8,33 @@
   <style type="text/css">code{white-space: pre;}</style>
 </head>
 <body>
-<p>This is a test of the doc</p>
+<div id="TOC">
+<ul>
+<li><a href="#building">Building</a><ul>
+<li><a href="#building-the-stress-tool">Building the Stress Tool</a></li>
+<li><a href="#building-the-documentation">Building the documentation</a></li>
+</ul></li>
+<li><a href="#running">Running</a><ul>
+<li><a href="#quickstart-example">Quickstart Example</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="building">Building</h1>
+<h2 id="building-the-stress-tool">Building the Stress Tool</h2>
+<p>How to build</p>
+<pre><code>gradle assemble</code></pre>
+<h2 id="building-the-documentation">Building the documentation</h2>
+<p>There's a custom gradle task to build the manual, pandoc must be installed:</p>
+<pre><code>gradle compileManual</code></pre>
+<h1 id="running">Running</h1>
+<p>Once you've built the application, you can run a stress workload.</p>
+<p>Run</p>
+<pre><code>bin/tlp-stress -h </code></pre>
+<p>to see all the help options.</p>
+<h2 id="quickstart-example">Quickstart Example</h2>
+<p>Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.</p>
+<p>Either add the <code>bin</code> directory to your PATH or from within tlp-stress run:</p>
+<pre><code>bin/tlp-stress run KeyValue -i 1M -p 100k</code></pre>
+<p>This command will run</p>
 </body>
 </html>
