@@ -74,6 +74,11 @@ class ProfileRunner(val context: StressContext,
             } else {
                 runner.getNextMutation(key)
             }
+            
+            // if we're using the rate limiter (unlikely) grab a permit
+            context.rateLimiter?.run {
+                acquire(1)
+            }
 
             context.semaphore.acquire()
 
@@ -165,6 +170,9 @@ class ProfileRunner(val context: StressContext,
             // for now, simply generate a single value for each partition key
             for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues)) {
                 sem.acquire()
+
+
+
                 val op = runner.getNextMutation(key)
                 if(op is Operation.Mutation) {
                     val future = context.session.executeAsync(op.bound)

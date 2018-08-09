@@ -4,6 +4,7 @@ import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
+import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.generators.Registry
@@ -41,7 +42,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
     var readRate = 0.01
 
-    @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.")
+    @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
     var concurrency = 250
 
     @Parameter(names = ["--populate"], description = "Pre-population the DB")
@@ -61,6 +62,9 @@ class Run : IStressCommand {
 
     @DynamicParameter(names = ["--field."], description = "Override a field's data generator")
     var fields = mutableMapOf<String, String>()
+
+    @Parameter(names = ["--rate"], description = "Rate limiter, accepts human numbers. 0 = disabled", converter = HumanReadableConverter::class)
+    var rate = 0L
 
     
     override fun execute() {
@@ -98,6 +102,9 @@ class Run : IStressCommand {
         compaction.mytable.class=twcs
          */
 
+        val rateLimiter = if(rate > 0) {
+            RateLimiter.create(rate.toDouble())
+        } else null
 
         for (statement in plugin.instance.schema()) {
             val s = SchemaBuilder.create(statement)
@@ -127,14 +134,13 @@ class Run : IStressCommand {
 
         val metrics = Metrics()
 
-        val permits = 250
+        val permits = concurrency
         var sem = Semaphore(permits)
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            println("Connected")
-            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry)
+            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 
