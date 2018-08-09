@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+    pandoc:
+        image: jagregory/pandoc
+        volumes:
+          - ./:/source
+        command: -s --toc manual/MANUAL.md -o docs/index.html
+
