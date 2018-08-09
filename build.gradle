@@ -70,8 +70,3 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-task compileManual(type:Exec) {
-    workingDir "."
-    commandLine "pandoc", "-s", "--toc", "manual/MANUAL.md", "-o", "docs/index.html"
-
-}
