@@ -53,7 +53,7 @@ class KeyValue : IStressProfile {
                 val bound = insert.bind(partitionKey,  data)
                 val fields = mapOf("value" to data)
 
-                return Operation.Mutation(bound, PrimaryKey(partitionKey), fields)
+                return Operation.Mutation(bound)
             }
 
         }

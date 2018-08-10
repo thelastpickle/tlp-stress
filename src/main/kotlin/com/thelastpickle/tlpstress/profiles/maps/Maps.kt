@@ -37,8 +37,7 @@ class Maps : IStressProfile {
 
             override fun getNextSelect(partitionKey: String): Operation {
                 val b = select.bind(partitionKey)
-                val fields = mapOf<String, String>()
-                return Operation.Mutation(b, PrimaryKey(partitionKey), fields)
+                return Operation.Mutation(b)
             }
 
         }

@@ -22,7 +22,6 @@ import java.util.UUID
  * Create a simple time series use case with some number of partitions
  * TODO make it use TWCS
  */
-@Parameters(commandDescription = "Basic Time Series workload defaulting to TWCS.")
 class BasicTimeSeries : IStressProfile {
 
     data class PrimaryKey(val first: String, val timestamp: UUID)
@@ -69,7 +68,7 @@ class BasicTimeSeries : IStressProfile {
                 val timestamp = UUIDs.timeBased()
                 val bound = insert.bind(partitionKey,timestamp, data)
                 val fields = mapOf("data" to data)
-                return Operation.Mutation(bound, PrimaryKey(partitionKey, timestamp), fields)
+                return Operation.Mutation(bound)
             }
 
         }

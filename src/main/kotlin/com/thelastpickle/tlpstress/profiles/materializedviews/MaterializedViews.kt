@@ -45,7 +45,7 @@ class MaterializedViews : IStressProfile {
 
             override fun getNextMutation(partitionKey: String): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
-                return Operation.Mutation(insert.bind(partitionKey, num, cities.getText()), partitionKey, mapOf())
+                return Operation.Mutation(insert.bind(partitionKey, num, cities.getText()))
             }
 
             override fun getNextSelect(partitionKey: String): Operation {

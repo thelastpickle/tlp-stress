@@ -10,7 +10,7 @@ class FieldFactory(private val table: String) {
  * Registry for data generators
  * When the original schema is created, the registry will be set up with default generators for each field
  * A generator option can be overridden on the command line as a dynamic flag with field.*
- * The idea here is we should be able to customize the data we insert without custom coding
+ * The idea here is we should be able to customize the data we increment without custom coding
  * for instance, I could use random(1, 100) to be an int field of 1-100 or a text field of 1-100 characters.
  * book(10, 100) is a random selection of 10-100 words from a bunch of open source licensed books
  * Ideally we have enough here to simulate a lot (call it 90%) of common workloads
