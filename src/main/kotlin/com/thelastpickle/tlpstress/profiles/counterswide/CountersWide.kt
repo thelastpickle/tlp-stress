@@ -26,7 +26,7 @@ class CountersWide : IStressProfile {
             | key text,
             | cluster bigint,
             | value counter,
-            | primary key(key, cluster)
+            | primary key(key, cluster))
         """.trimMargin())
 
     }
