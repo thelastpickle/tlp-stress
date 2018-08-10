@@ -17,7 +17,7 @@ data class Plugin (val name: String,
     companion object {
 
         fun getPlugins() : Map<String, Plugin> {
-            val r = Reflections()
+            val r = Reflections("com.thelastpickle.tlpstress")
             val modules = r.getSubTypesOf(IStressProfile::class.java)
 
             var result = mutableMapOf<String, Plugin>()
