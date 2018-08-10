@@ -18,23 +18,40 @@ One of the goals of tlp-stress is to provide enough pre-designed workloads *out 
 
 The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed.  Statistics are automatically captured by CodaHale's metrics library.
 
+# Quickstart Example
 
-# Building
+Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.
+
+Either add the `bin` directory to your PATH or from within tlp-stress run:
 
 
-## Building the Stress Tool
+    bin/tlp-stress run KeyValue -i 1M -p 100k
+    
+
+
+# Building the Stress Tool
 
 How to build 
 
     gradle assemble
     
-## Building the documentation
+# Building the documentation
 
 There's a custom gradle task to build the manual, pandoc must be installed:
     
     gradle compileManual
 
-# Running
+# Usage
+
+## Listing All Workloads
+
+## Getting infomration about a workload
+
+* Description
+* Schema
+
+
+## Running a Stress Workload
 
 Once you've built the application, you can run a stress workload.  
 
@@ -44,17 +61,7 @@ Run
     
 to see all the help options.
 
-## Quickstart Example
-
-Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.
-
-Either add the `bin` directory to your PATH or from within tlp-stress run:
 
 
-    bin/tlp-stress run KeyValue -i 1M -p 100k
-    
-This command will run
-
-
-
+# Creating a Workload
 

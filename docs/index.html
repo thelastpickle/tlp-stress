@@ -16,13 +16,15 @@
 <div id="TOC">
 <ul>
 <li><a href="#introduction">Introduction</a></li>
-<li><a href="#building">Building</a><ul>
+<li><a href="#quickstart-example">Quickstart Example</a></li>
 <li><a href="#building-the-stress-tool">Building the Stress Tool</a></li>
 <li><a href="#building-the-documentation">Building the documentation</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#listing-all-workloads">Listing All Workloads</a></li>
+<li><a href="#getting-infomration-about-a-workload">Getting infomration about a workload</a></li>
+<li><a href="#running-a-stress-workload">Running a Stress Workload</a></li>
 </ul></li>
-<li><a href="#running">Running</a><ul>
-<li><a href="#quickstart-example">Quickstart Example</a></li>
-</ul></li>
+<li><a href="#creating-a-workload">Creating a Workload</a></li>
 </ul>
 </div>
 <h1 id="introduction">Introduction</h1>
@@ -35,22 +37,28 @@
 <li>Collections (maps)</li>
 </ul>
 <p>The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed. Statistics are automatically captured by CodaHale's metrics library.</p>
-<h1 id="building">Building</h1>
-<h2 id="building-the-stress-tool">Building the Stress Tool</h2>
+<h1 id="quickstart-example">Quickstart Example</h1>
+<p>Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.</p>
+<p>Either add the <code>bin</code> directory to your PATH or from within tlp-stress run:</p>
+<pre><code>bin/tlp-stress run KeyValue -i 1M -p 100k</code></pre>
+<h1 id="building-the-stress-tool">Building the Stress Tool</h1>
 <p>How to build</p>
 <pre><code>gradle assemble</code></pre>
-<h2 id="building-the-documentation">Building the documentation</h2>
+<h1 id="building-the-documentation">Building the documentation</h1>
 <p>There's a custom gradle task to build the manual, pandoc must be installed:</p>
 <pre><code>gradle compileManual</code></pre>
-<h1 id="running">Running</h1>
+<h1 id="usage">Usage</h1>
+<h2 id="listing-all-workloads">Listing All Workloads</h2>
+<h2 id="getting-infomration-about-a-workload">Getting infomration about a workload</h2>
+<ul>
+<li>Description</li>
+<li>Schema</li>
+</ul>
+<h2 id="running-a-stress-workload">Running a Stress Workload</h2>
 <p>Once you've built the application, you can run a stress workload.</p>
 <p>Run</p>
 <pre><code>bin/tlp-stress -h </code></pre>
 <p>to see all the help options.</p>
-<h2 id="quickstart-example">Quickstart Example</h2>
-<p>Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.</p>
-<p>Either add the <code>bin</code> directory to your PATH or from within tlp-stress run:</p>
-<pre><code>bin/tlp-stress run KeyValue -i 1M -p 100k</code></pre>
-<p>This command will run</p>
+<h1 id="creating-a-workload">Creating a Workload</h1>
 </body>
 </html>
