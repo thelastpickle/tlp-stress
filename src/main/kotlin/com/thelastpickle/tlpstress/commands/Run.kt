@@ -66,6 +66,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--rate"], description = "Rate limiter, accepts human numbers. 0 = disabled", converter = HumanReadableConverter::class)
     var rate = 0L
 
+    @Parameter(names = ["--drop"], description = "Drop the keyspace before starting.")
+    var dropKeyspace = false
+
     
     override fun execute() {
 
@@ -82,8 +85,14 @@ class Run : IStressCommand {
 
         val session = cluster.connect()
 
+        if(dropKeyspace) {
+            println("Dropping $keyspace")
+            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
+        }
+
         val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS $keyspace WITH replication = $replication"""
 
+        println("Creating $keyspace: $createKeyspace")
         session.execute(createKeyspace)
 
         session.execute("USE $keyspace")
