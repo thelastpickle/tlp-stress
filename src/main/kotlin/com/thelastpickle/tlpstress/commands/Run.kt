@@ -51,7 +51,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
     var threads = 1
 
-    @Parameter(names = ["--iterations", "-i"], description = "Number of operations to run.", converter = HumanReadableConverter::class)
+    @Parameter(names = ["--iterations", "-i", "-n"], description = "Number of operations to run.", converter = HumanReadableConverter::class)
     var iterations : Long = 1000
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
@@ -84,6 +84,8 @@ class Run : IStressCommand {
         println("Executing $iterations operations")
 
         val session = cluster.connect()
+
+        println("Connected")
 
         if(dropKeyspace) {
             println("Dropping $keyspace")
@@ -138,9 +140,10 @@ class Run : IStressCommand {
             fieldRegistry.setOverride(parts[0], parts[1], instance)
         }
 
+        println("Preparing queries")
         plugin.instance.prepare(session)
 
-
+        println("Initializing metrics")
         val metrics = Metrics()
 
         val permits = concurrency

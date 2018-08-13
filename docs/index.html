@@ -29,12 +29,13 @@
 </div>
 <h1 id="introduction">Introduction</h1>
 <p>tlp-stress is a workload-centric stress tool, written in Kotlin. Workloads are easy to write and because they are based in code, you have the ultimate flexibility.</p>
-<p>One of the goals of tlp-stress is to provide enough pre-designed workloads <em>out of the box</em> so it's unnecessary to code up a workload for most use cases. For instance, it's very common to have a key value workload, and want to test that. tlp-stress allows you to customize a pre-configured key-value workload, using simple parameters to modify the workload to fit your needs. Several workloads are included, such as</p>
+<p>One of the goals of tlp-stress is to provide enough pre-designed workloads <em>out of the box</em> so it's unnecessary to code up a workload for most use cases. For instance, it's very common to have a key value workload, and want to test that. tlp-stress allows you to customize a pre-configured key-value workload, using simple parameters to modify the workload to fit your needs. Several workloads are included, such as:</p>
 <ul>
 <li>Time Series</li>
 <li>Key / Value</li>
 <li>Materialized Views</li>
 <li>Collections (maps)</li>
+<li>Counters</li>
 </ul>
 <p>The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed. Statistics are automatically captured by CodaHale's metrics library.</p>
 <h1 id="quickstart-example">Quickstart Example</h1>
@@ -46,7 +47,7 @@
 <pre><code>gradle assemble</code></pre>
 <h1 id="building-the-documentation">Building the documentation</h1>
 <p>There's a custom gradle task to build the manual, pandoc must be installed:</p>
-<pre><code>gradle compileManual</code></pre>
+<pre><code>docker-compose run pandoc</code></pre>
 <h1 id="usage">Usage</h1>
 <h2 id="listing-all-workloads">Listing All Workloads</h2>
 <h2 id="getting-infomration-about-a-workload">Getting infomration about a workload</h2>

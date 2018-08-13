@@ -9,12 +9,13 @@ toc-title: Table of Contents
 
 tlp-stress is a workload-centric stress tool, written in Kotlin.  Workloads are easy to write and because they are based in code, you have the ultimate flexibility.
 
-One of the goals of tlp-stress is to provide enough pre-designed workloads *out of the box* so it's unnecessary to code up a workload for most use cases.  For instance, it's very common to have a key value workload, and want to test that.  tlp-stress allows you to customize a pre-configured key-value workload, using simple parameters to modify the workload to fit your needs.  Several workloads are included, such as
+One of the goals of tlp-stress is to provide enough pre-designed workloads *out of the box* so it's unnecessary to code up a workload for most use cases.  For instance, it's very common to have a key value workload, and want to test that.  tlp-stress allows you to customize a pre-configured key-value workload, using simple parameters to modify the workload to fit your needs.  Several workloads are included, such as:
 
 * Time Series
 * Key / Value 
 * Materialized Views
 * Collections (maps)
+* Counters
 
 The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed.  Statistics are automatically captured by CodaHale's metrics library.
 
@@ -39,7 +40,7 @@ How to build
 
 There's a custom gradle task to build the manual, pandoc must be installed:
     
-    gradle compileManual
+    docker-compose run pandoc
 
 # Usage
 
