@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress
 
 import com.codahale.metrics.*
 import com.codahale.metrics.Timer
+import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -16,9 +17,12 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     var lines = 0L
 
     var width = mapOf( 0 to 12,
-                       1 to 8 ).withDefault { 0 }
+                       1 to 8, 2 to 10 ).withDefault { 0 }
+
 
     var writeHeaders = listOf("Count", "p99", "5min")
+
+    val formatter = DecimalFormat("##.##")
 
 
     override fun report(gauges: SortedMap<String, Gauge<Any>>?,
@@ -33,8 +37,11 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         with(timers!!.get("mutations")!!) {
             printColumn(count, width.getValue(0))
-            printColumn(snapshot.get99thPercentile(), width.getValue(1))
-            printColumn("${fiveMinuteRate}/s", width.getValue(2))
+
+            val duration = convertDuration(snapshot.get99thPercentile())
+
+            printColumn(duration, width.getValue(1))
+            printColumn("${formatter.format(fiveMinuteRate)}/s", width.getValue(2))
         }
 
         println()
@@ -42,7 +49,9 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     }
 
     fun printColumn(value: Double, width: Int) {
-        printColumn(value.toString(), width)
+        // round to 2 decimal places
+        val tmp = DecimalFormat("##.##").format(value)
+        printColumn(tmp, width)
     }
 
     fun printColumn(value: Long, width: Int) {
@@ -55,7 +64,8 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
     fun printColumn(value: String, width: Int) {
         val tmp = value.padStart(width)
-        print(value)
+        print(tmp)
+//        print("|")
     }
 
     fun printHeader() {
@@ -63,8 +73,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         var i = 0
         for(h in writeHeaders) {
             val tmp = h.padStart(width.getValue(i))
-            print(h)
-            print(" ")
+            print(tmp)
             i++
         }
 
