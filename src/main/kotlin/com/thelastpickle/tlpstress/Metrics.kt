@@ -23,7 +23,7 @@ class Metrics {
 
     val errors = metrics.meter("errors")
     val mutations = metrics.timer("mutations")
-    val selects = metrics.timer("select")
+    val selects = metrics.timer("selects")
 
 //    val requestTimer = metrics.timer("requestTimer")
 }

@@ -40,19 +40,23 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         val state = AtomicInteger()
 
+        // this is a little weird, but we should show the same headers for writes & selects
+        val queries = listOf(timers!!["mutations"]!!, timers!!["selects"]!!)
 
+        for((i, queryType) in queries.withIndex()) {
+            with(queryType) {
+                printColumn(count, state.getAndIncrement())
 
-        with(timers!!["mutations"]!!) {
+                val duration = convertDuration(snapshot.get99thPercentile())
 
-            printColumn(count, state.getAndIncrement())
+                printColumn(duration, state.getAndIncrement())
+                printColumn(formatter.format(fiveMinuteRate), state.getAndIncrement())
 
-            val duration = convertDuration(snapshot.get99thPercentile())
-
-            printColumn(duration, state.getAndIncrement())
-            printColumn(formatter.format(fiveMinuteRate), state.getAndIncrement())
-
+            }
+            if(i == 0) {
+                print(" | ")
+            }
         }
-
         println()
         lines++
     }
@@ -83,6 +87,9 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         var i = 0
 
+        val fullWidth = opHeaders.map { it.length }.sum() * 2
+
+
         for(x in 0..1) {
 
             for (h in opHeaders) {
@@ -92,9 +99,18 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
                 print(tmp)
                 i++
             }
+            if(x == 0) {
+                print(" | ")
+            }
+
         }
 
         println()
+
+        // errors
+
+        println( "-".repeat(fullWidth) )
+
     }
 
     /**
