@@ -2,9 +2,12 @@ package com.thelastpickle.tlpstress
 
 import com.codahale.metrics.*
 import com.codahale.metrics.Timer
+import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.log
 
 
 class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(registry,
@@ -16,14 +19,14 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
     var lines = 0L
 
-    var width = mapOf( 0 to 12,
-                       1 to 8, 2 to 10 ).withDefault { 0 }
+    var width = mutableMapOf<Int, Int>( ).withDefault { 0 }
 
 
-    var writeHeaders = listOf("Count", "p99", "5min")
+    var opHeaders = listOf("Count", "Latency (p99)", "5min (req/s)")
 
     val formatter = DecimalFormat("##.##")
 
+    val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
     override fun report(gauges: SortedMap<String, Gauge<Any>>?,
                         counters: SortedMap<String, Counter>?,
@@ -35,51 +38,77 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         if(lines % 10L == 0L)
             printHeader()
 
-        with(timers!!.get("mutations")!!) {
-            printColumn(count, width.getValue(0))
+        val state = AtomicInteger()
+
+
+
+        with(timers!!["mutations"]!!) {
+
+            printColumn(count, state.getAndIncrement())
 
             val duration = convertDuration(snapshot.get99thPercentile())
 
-            printColumn(duration, width.getValue(1))
-            printColumn("${formatter.format(fiveMinuteRate)}/s", width.getValue(2))
+            printColumn(duration, state.getAndIncrement())
+            printColumn(formatter.format(fiveMinuteRate), state.getAndIncrement())
+
         }
 
         println()
         lines++
     }
 
-    fun printColumn(value: Double, width: Int) {
+    fun printColumn(value: Double, index: Int) {
         // round to 2 decimal places
         val tmp = DecimalFormat("##.##").format(value)
-        printColumn(tmp, width)
+
+        printColumn(tmp, index)
     }
 
-    fun printColumn(value: Long, width: Int) {
-        printColumn(value.toString(), width)
+    fun printColumn(value: Long, index: Int) {
+        printColumn(value.toString(), index)
     }
 
-    fun printColumn(value: Int, width: Int) {
-        printColumn(value.toString(), width)
+    fun printColumn(value: Int, index: Int) {
+        printColumn(value.toString(), index)
     }
 
-    fun printColumn(value: String, width: Int) {
+    fun printColumn(value: String, index: Int) {
+        val width = getWidth(index, value)
         val tmp = value.padStart(width)
         print(tmp)
-//        print("|")
     }
 
     fun printHeader() {
         println("Writes")
+
         var i = 0
-        for(h in writeHeaders) {
-            val tmp = h.padStart(width.getValue(i))
-            print(tmp)
-            i++
+
+        for(x in 0..1) {
+
+            for (h in opHeaders) {
+                val colWidth = getWidth(i, h)
+
+                val tmp = h.padStart(colWidth)
+                print(tmp)
+                i++
+            }
         }
 
-
-
         println()
+    }
+
+    /**
+     * Gets the width for a column, resizing the column if necessary
+     */
+    fun getWidth(i: Int, value : String = "") : Int {
+        val tmp = width.getValue(i)
+        if(value.length > tmp) {
+
+            logger.debug("Resizing column[$i] to ${value.length}")
+            // give a little extra padding in case the number grows quickly
+            width.set(i, value.length + 2)
+        }
+        return width.getValue(i)
     }
 
 
