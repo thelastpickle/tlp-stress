@@ -22,13 +22,14 @@
 <li><a href="#usage">Usage</a><ul>
 <li><a href="#listing-all-workloads">Listing All Workloads</a></li>
 <li><a href="#getting-infomration-about-a-workload">Getting infomration about a workload</a></li>
-<li><a href="#running-a-stress-workload">Running a Stress Workload</a></li>
+<li><a href="#running-a-stress-workload">Running a Stress Workload</a><ul>
+<li><a href="#customzing-fields">Customzing Fields</a></li>
 </ul></li>
-<li><a href="#creating-a-workload">Creating a Workload</a></li>
+</ul></li>
 </ul>
 </div>
 <h1 id="introduction">Introduction</h1>
-<p>tlp-stress is a workload-centric stress tool, written in Kotlin. Workloads are easy to write and because they are based in code, you have the ultimate flexibility.</p>
+<p>tlp-stress is a workload-centric stress tool, written in Kotlin. Workloads are easy to write and because they are written in code, you have the ultimate flexibility. Workloads can be tweaked via command line parameters to make them fit your environment more closely.</p>
 <p>One of the goals of tlp-stress is to provide enough pre-designed workloads <em>out of the box</em> so it's unnecessary to code up a workload for most use cases. For instance, it's very common to have a key value workload, and want to test that. tlp-stress allows you to customize a pre-configured key-value workload, using simple parameters to modify the workload to fit your needs. Several workloads are included, such as:</p>
 <ul>
 <li>Time Series</li>
@@ -37,7 +38,7 @@
 <li>Collections (maps)</li>
 <li>Counters</li>
 </ul>
-<p>The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed. Statistics are automatically captured by CodaHale's metrics library.</p>
+<p>The tool is flexible enough to design workloads which leverage multiple (thousands) of tables, hitting them as needed. Statistics are automatically captured by the Dropwizard metrics library.</p>
 <h1 id="quickstart-example">Quickstart Example</h1>
 <p>Assuming you have either a CCM cluster or are running a single node locally, you can run this quickstart.</p>
 <p>Either add the <code>bin</code> directory to your PATH or from within tlp-stress run:</p>
@@ -60,6 +61,11 @@
 <p>Run</p>
 <pre><code>bin/tlp-stress -h </code></pre>
 <p>to see all the help options.</p>
-<h1 id="creating-a-workload">Creating a Workload</h1>
+<h3 id="customzing-fields">Customzing Fields</h3>
+<p>To some extent, workloads can be customized by leveraging the <code>--fields</code> flag. For instance, if we look at the KeyValue workload, we have a table called <code>keyvalue</code> which has a <code>value</code> field.</p>
+<p>To customize the data we use for this field, we provide a generator at the command line. By default, the <code>value</code> field will use 100-200 characters of random text. What if we're storing blobs of text instead? Ideally we'd like to tweak this workload to be closer to our production use case. Let's use random sections from various books:</p>
+<pre><code>bin/tlp-stress run KeyValue --field.keyvalue.value=&#39;book(20,40)`</code></pre>
+<p>Instead of using random strings of garbage, the KeyValue workload will now use 20-40 words extracted from books.</p>
+<p>There are other generators available, such as names, gaussian numbers, and cities. Not every generator applies to every type. It's up to the workload to specify which fields can be used this way.</p>
 </body>
 </html>
