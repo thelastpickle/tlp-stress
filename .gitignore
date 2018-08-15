@@ -4,12 +4,12 @@
 .DS_Store
 .vagrant.v1*
 .tags*
-/.gradle/
+#/.gradle/
 /out/
 /build/
-gradle/
-gradlew.bat
-settings.gradle
+#gradle/
+#gradlew.bat
+#settings.gradle
 *.log
 *.jar
 conf/logback.xml
