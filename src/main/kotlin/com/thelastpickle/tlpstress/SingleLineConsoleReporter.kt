@@ -7,7 +7,6 @@ import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 import com.github.ajalt.mordant.TermColors
 
 class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(registry,
@@ -43,7 +42,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         val state = AtomicInteger()
 
         // this is a little weird, but we should show the same headers for writes & selects
-        val queries = listOf(timers!!["mutations"]!!, timers!!["selects"]!!)
+        val queries = listOf(timers!!["mutations"]!!, timers["selects"]!!)
 
         for((i, queryType) in queries.withIndex()) {
             with(queryType) {
@@ -63,6 +62,9 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         lines++
     }
 
+    /*
+    Helpers for printing the column with correct spacing
+     */
     fun printColumn(value: Double, index: Int) {
         // round to 2 decimal places
         val tmp = DecimalFormat("##.##").format(value)
@@ -86,8 +88,20 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
     fun printHeader() {
 
-        println("Writes")
+        val widthOfEachOperation = opHeaders.map { it.length }.sum()
 
+        val paddingEachSide = (widthOfEachOperation - "Writes".length) / 2
+
+        print(" ".repeat(paddingEachSide))
+        print( termColors.blue("Writes"))
+        print(" ".repeat(paddingEachSide))
+        print(" ".repeat(paddingEachSide))
+        print(termColors.blue("Reads"))
+        print(" ".repeat(paddingEachSide))
+
+        print("Errors")
+
+        println()
         var i = 0
 
         for(x in 0..1) {
@@ -96,9 +110,6 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
                 val colWidth = getWidth(i, h)
                 val required = colWidth - h.length
-
-//                val tmp = h.padStart(colWidth)
-//                val tmp = "\\e[4m-$h-\\e[0"
 
                 val tmp = " ".repeat(required) + termColors.underline(h)
 
