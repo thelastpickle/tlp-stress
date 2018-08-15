@@ -6,9 +6,19 @@ cassandra-stress is a configuration-based tool for doing benchmarks and testing 
 
 In addition to creating workloads, tlp-stress can also (maybe?) verify the data in the DB is what should be visible.  The amount of data to verify can be configured via a sampling rate.  By default 1% of mutations are sampled and retained in memory for later verification.
 
+Full docs are here (sort of, work in progress): http://thelastpickle.com/tlp-stress/
 
-This tool is in its infancy and not ready for general usage.
+# Building
 
+Clone this repo, then build with gradle:
+
+    git clone https://github.com/thelastpickle/tlp-stress.git
+    cd tlp-stress
+    gradle assemble
+    
+Use the shell script wrapper to start and get help:
+
+    bin/tlp-stress -h
 
 # Examples
 
