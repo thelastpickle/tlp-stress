@@ -4,7 +4,7 @@
 .DS_Store
 .vagrant.v1*
 .tags*
-#/.gradle/
+/.gradle/
 /out/
 /build/
 #gradle/

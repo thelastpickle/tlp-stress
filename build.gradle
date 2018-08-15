@@ -9,9 +9,9 @@ buildscript {
     }
 }
 
-//plugins {
-//    id 'com.google.cloud.tools.jib' version '0.9.8'
-//}
+plugins {
+    id 'com.google.cloud.tools.jib' version '0.9.8'
+}
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
