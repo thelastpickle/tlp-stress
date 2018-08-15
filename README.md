@@ -12,7 +12,7 @@ Clone this repo, then build with gradle:
 
     git clone https://github.com/thelastpickle/tlp-stress.git
     cd tlp-stress
-    gradle assemble
+    ./gradlew assemble
     
 Use the shell script wrapper to start and get help:
 
