@@ -66,6 +66,9 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
             print(" | ")
         }
 
+        val errors = meters!!["errors"]!!
+        printColumn(errors.count, state.getAndIncrement())
+        printColumn(formatter.format(errors.fiveMinuteRate), state.getAndIncrement())
 
 
         println()
@@ -149,22 +152,6 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
             i++
         }
 
-//
-//        // errors are awkward
-//
-//        val errorStart = opHeaders.size * 2 + 1
-//
-//        val colCountWidth = getWidth(i, "Count")
-//        val countText = termColors.underline("Count")
-//
-//        print(countText)
-//        val fiveMinErrors = "5min (errors/s)"
-//
-//        val colFiveWidth = getWidth(i, fiveMinErrors)
-//
-//        val colFiveText = termColors.underline(fiveMinErrors)
-//
-//        print(colFiveText)
 
         println()
 
