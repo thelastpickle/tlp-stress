@@ -16,16 +16,25 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     TimeUnit.MILLISECONDS
     ) {
 
+    val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
     var lines = 0L
 
+    var opHeaders = listOf("Count", "Latency (p99)", "5min (req/s)")
     var width = mutableMapOf<Int, Int>( ).withDefault { 0 }
 
+    // initialize all the headers
+    // it's ok if this isn't perfect, it just has to work for the first round of headers
+    init {
 
-    var opHeaders = listOf("Count", "Latency (p99)", "5min (req/s)")
+        for ((i, h) in opHeaders.withIndex()) {
+            getWidth(i, h) // first pass - writes
+            getWidth(i + opHeaders.size, h) // second pass - reads
+        }
+    }
+
 
     val formatter = DecimalFormat("##.##")
 
-    val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
 
     val termColors = TermColors()
 
@@ -88,7 +97,11 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
     fun printHeader() {
 
-        val widthOfEachOperation = opHeaders.map { it.length }.sum()
+        var widthOfEachOperation = 0
+
+        for(i in 0..opHeaders.size) {
+           widthOfEachOperation += getWidth(i)
+        }
 
         val paddingEachSide = (widthOfEachOperation - "Writes".length) / 2
 
@@ -99,7 +112,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         print(termColors.blue("Reads"))
         print(" ".repeat(paddingEachSide))
 
-        print("Errors")
+        print(termColors.red("Errors"))
 
         println()
         var i = 0
