@@ -11,5 +11,4 @@
 #gradlew.bat
 #settings.gradle
 *.log
-*.jar
 conf/logback.xml
