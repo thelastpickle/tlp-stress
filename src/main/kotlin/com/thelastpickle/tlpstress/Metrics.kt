@@ -9,7 +9,7 @@ class Metrics {
     val reporter = SingleLineConsoleReporter(metrics)
 
     fun startReporting() {
-        reporter.start(1, TimeUnit.SECONDS)
+        reporter.start(3, TimeUnit.SECONDS)
     }
 
     val errors = metrics.meter("errors")

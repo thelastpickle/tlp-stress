@@ -53,7 +53,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         // this is a little weird, but we should show the same headers for writes & selects
         val queries = listOf(timers!!["mutations"]!!, timers["selects"]!!)
 
-        for((i, queryType) in queries.withIndex()) {
+        for(queryType in queries) {
             with(queryType) {
                 printColumn(count, state.getAndIncrement())
 
@@ -63,10 +63,11 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
                 printColumn(formatter.format(fiveMinuteRate), state.getAndIncrement())
 
             }
-            if(i == 0) {
-                print(" | ")
-            }
+            print(" | ")
         }
+
+
+
         println()
         lines++
     }
@@ -131,16 +132,41 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
                 print(tmp)
                 i++
             }
-            if(x == 0) {
-                print(" | ")
-            }
+            print(" | ")
 
         }
 
+        val errorHeaders = arrayListOf("Count", "5min (errors/s)")
+        // TODO: refactor this + the above loop to be a single function
+        for (h in errorHeaders) {
+
+            val colWidth = getWidth(i, h)
+            val required = colWidth - h.length
+
+            val tmp = " ".repeat(required) + termColors.underline(h)
+
+            print(tmp)
+            i++
+        }
+
+//
+//        // errors are awkward
+//
+//        val errorStart = opHeaders.size * 2 + 1
+//
+//        val colCountWidth = getWidth(i, "Count")
+//        val countText = termColors.underline("Count")
+//
+//        print(countText)
+//        val fiveMinErrors = "5min (errors/s)"
+//
+//        val colFiveWidth = getWidth(i, fiveMinErrors)
+//
+//        val colFiveText = termColors.underline(fiveMinErrors)
+//
+//        print(colFiveText)
+
         println()
-
-        // errors
-
 
     }
 
