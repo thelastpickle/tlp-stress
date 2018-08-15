@@ -1,6 +1,5 @@
 package com.thelastpickle.tlpstress
 
-import com.codahale.metrics.ConsoleReporter
 import com.codahale.metrics.MetricRegistry
 import java.util.concurrent.TimeUnit
 

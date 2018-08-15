@@ -8,7 +8,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.log
-
+import com.github.ajalt.mordant.TermColors
 
 class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(registry,
     "single-line-console-reporter",
@@ -27,6 +27,8 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     val formatter = DecimalFormat("##.##")
 
     val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+
+    val termColors = TermColors()
 
     override fun report(gauges: SortedMap<String, Gauge<Any>>?,
                         counters: SortedMap<String, Counter>?,
@@ -83,19 +85,25 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     }
 
     fun printHeader() {
+
         println("Writes")
 
         var i = 0
 
-        val fullWidth = opHeaders.map { it.length }.sum() * 2
-
-
         for(x in 0..1) {
 
             for (h in opHeaders) {
-                val colWidth = getWidth(i, h)
 
-                val tmp = h.padStart(colWidth)
+                val colWidth = getWidth(i, h)
+                val required = colWidth - h.length
+
+//                val tmp = h.padStart(colWidth)
+//                val tmp = "\\e[4m-$h-\\e[0"
+
+                val tmp = " ".repeat(required) + termColors.underline(h)
+
+
+
                 print(tmp)
                 i++
             }
@@ -109,7 +117,6 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         // errors
 
-        println( "-".repeat(fullWidth) )
 
     }
 
