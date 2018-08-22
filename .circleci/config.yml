@@ -23,6 +23,13 @@ jobs:
     
     steps:
       - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+              sudo apt-get update -qq
+              sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+              sudo pip install pyYaml ccm
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -31,15 +38,53 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: gradle dependencies
+      - run:
+          name: Download ccm
+          command: |
+            ccm create test_2_2 --no-switch -v 2.2.13
+            ccm create test_3_0 --no-switch -v 3.0.17
+            ccm create test_3_11 --no-switch -v 3.11.3
 
       - save_cache:
           paths:
             - ~/.gradle
+            - ~/.ccm/repository
+
           key: v1-dependencies-{{ checksum "build.gradle" }}
         
       # run tests!
       - run: gradle test
+
+      - run:
+          name: Start CCM and run tests
+          command: |
+            mkdir -p /home/circleci/.local
+            ccm create test -v 3.11.3 -n 3
+
+            echo "-Xmx500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
+            echo "-Xmx500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
+            echo "-Xmx500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+
+            echo "-Xms500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
+            echo "-Xms500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
+            echo "-Xms500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+
+            echo "-Xmn200m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
+            echo "-Xmn200m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
+            echo "-Xmn200m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+
+            ccm start --verbose
+
+            ./gradlew assemble
+
+            ls build/libs
+
+            bin/tlp-stress run BasicTimeSeries
+            bin/tlp-stress run CountersWide
+            bin/tlp-stress run KeyValue
+            bin/tlp-stress run LWT
+            bin/tlp-stress run Maps
+
 
 
 
