@@ -97,6 +97,7 @@ class ProfileRunner(val context: StressContext,
                             context.metrics.errors.mark()
                             startTime.stop()
 
+
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -106,6 +107,7 @@ class ProfileRunner(val context: StressContext,
                             // need to be mindful of memory, frequency is a stopgap
 //                            sampler.maybePut(op.partitionKey, op.fields)
                             startTime.stop()
+                            runner.onSuccess(op, result)
 
                         }
                     })

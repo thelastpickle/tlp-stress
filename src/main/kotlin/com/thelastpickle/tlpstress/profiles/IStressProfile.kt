@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
+import com.datastax.driver.core.ResultSet
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
@@ -11,6 +12,12 @@ import com.thelastpickle.tlpstress.samplers.NoOpSampler
 interface IStressRunner {
     fun getNextMutation(partitionKey: String) : Operation
     fun getNextSelect(partitionKey: String) : Operation
+    /**
+     * Callback after a query executes successfully.
+     * Will be used for state tracking on things like LWTs as well as provides an avenue for future work
+     * doing post-workload correctness checks
+     */
+    fun onSuccess(op: Operation.Mutation, result: ResultSet?) { }
 }
 
 /**
@@ -75,9 +82,9 @@ interface IStressProfile {
 sealed class Operation {
     // we're going to track metrics on the mutations differently
     // inserts will also carry data that might be saved for later validation
-    // TODO needs to be updated to hold full primary key
     // clustering keys won't be realistic to compute in the framework
-    data class Mutation(val bound: BoundStatement) : Operation()
+
+    data class Mutation(val bound: BoundStatement, val callbackPayload: Any? = null ) : Operation()
 
     data class SelectStatement(var bound: BoundStatement): Operation()
     // JMX commands
