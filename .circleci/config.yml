@@ -57,12 +57,12 @@ jobs:
         
       # run tests!
       - run: gradle test
-      
+
       - run:
           name: Start CCM and run tests
           command: |
             mkdir -p /home/circleci/.local
-            ccm create test -v 3.11.3
+            ccm create test -v 3.11.3 -n 3
 
             sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="192m"/' /home/circleci/.ccm/test/node1/conf/cassandra-env.sh
             sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="192m"/' /home/circleci/.ccm/test/node2/conf/cassandra-env.sh
