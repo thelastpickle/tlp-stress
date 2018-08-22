@@ -63,9 +63,9 @@ jobs:
             mkdir -p /home/circleci/.local
             ccm create test -v 3.11.3 -n 3
 
-            echo "-Xmx1G" > /home/circleci/.ccm/test/node1/conf/cassandra-env.sh
-            echo "-Xmx1G" > /home/circleci/.ccm/test/node2/conf/cassandra-env.sh
-            echo "-Xmx1G" > /home/circleci/.ccm/test/node3/conf/cassandra-env.sh
+            echo "-Xmx1G" >> /home/circleci/.ccm/test/node1/conf/jvm.options
+            echo "-Xmx1G" >> /home/circleci/.ccm/test/node2/conf/jvm.options
+            echo "-Xmx1G" >> /home/circleci/.ccm/test/node3/conf/jvm.options
 
             ccm start --verbose
             bin/tlp-stress run KeyValue
