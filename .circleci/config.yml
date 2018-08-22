@@ -40,14 +40,6 @@ jobs:
 
       - run: gradle dependencies
 
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-        
-      # run tests!
-      - run: gradle test
-
       - run:
           name: Download ccm
           command: |
@@ -61,7 +53,11 @@ jobs:
             - ~/.gradle
             - ~/.ccm/repository
 
-
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+        
+      # run tests!
+      - run: gradle test
+      
       - run:
           name: Start CCM and run tests
           command: |
