@@ -23,6 +23,13 @@ jobs:
     
     steps:
       - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+              sudo apt-get update -qq
+              sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+              sudo pip install pyYaml ccm
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -40,6 +47,14 @@ jobs:
         
       # run tests!
       - run: gradle test
+
+      - run:
+          name: Start CCM and run tests
+          command: |
+            ccm create -n 3 -v 3.11.3
+            ccm start
+            bin/tlp-stress run KeyValue
+
 
 
 
