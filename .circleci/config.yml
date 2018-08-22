@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Start CCM and run tests
           command: |
-            ccm create -n 3 -v 3.11.3
+            ccm create -n 3 -v 3.11.3 3_11
             ccm start
             bin/tlp-stress run KeyValue
 
