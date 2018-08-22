@@ -49,9 +49,33 @@ jobs:
       - run: gradle test
 
       - run:
+          name: Download ccm
+          command: |
+            ccm create test_2_1 --no-switch -v 2.1.20
+            ccm create test_2_2 --no-switch -v 2.2.13
+            ccm create test_3_0 --no-switch -v 3.0.17
+            ccm create test_3_11 --no-switch -v 3.11.3
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.ccm/repository
+
+
+      - run:
           name: Start CCM and run tests
           command: |
-            ccm create -n 3 -v 3.11.3 3_11
+            mkdir -p /home/circleci/.local
+            ccm create test -v 3.11.3
+
+            sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="192m"/' /home/circleci/.ccm/test/node1/conf/cassandra-env.sh
+            sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="192m"/' /home/circleci/.ccm/test/node2/conf/cassandra-env.sh
+            sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="192m"/' /home/circleci/.ccm/test/node3/conf/cassandra-env.sh
+
+            sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="100M"/' /home/circleci/.ccm/test/node1/conf/cassandra-env.sh
+            sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="100M"/' /home/circleci/.ccm/test/node2/conf/cassandra-env.sh
+            sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="100M"/' /home/circleci/.ccm/test/node3/conf/cassandra-env.sh
+
             ccm start --verbose
             bin/tlp-stress run KeyValue
 
