@@ -77,7 +77,8 @@ jobs:
 
             ./gradlew assemble
 
-            tree build
+            ls build/libs
+
             bin/tlp-stress run KeyValue
 
 
