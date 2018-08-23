@@ -71,9 +71,9 @@ jobs:
             echo "-Xms1G" >> /home/circleci/.ccm/test/node2/conf/jvm.options
             echo "-Xms1G" >> /home/circleci/.ccm/test/node3/conf/jvm.options
 
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+            echo "-Xmn500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
+            echo "-Xmn500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
+            echo "-Xmn500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
 
             ccm start --verbose
             bin/tlp-stress run KeyValue
