@@ -38,8 +38,6 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: gradle dependencies
-
       - run:
           name: Download ccm
           command: |
@@ -78,8 +76,8 @@ jobs:
             ccm start --verbose
 
             ./gradlew assemble
-            
-            ls
+
+            tree build
             bin/tlp-stress run KeyValue
 
 
