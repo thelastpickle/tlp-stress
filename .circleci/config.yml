@@ -76,6 +76,8 @@ jobs:
             echo "-Xmn200m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
 
             ccm start --verbose
+
+            ./gradlew assemble
             bin/tlp-stress run KeyValue
 
 
