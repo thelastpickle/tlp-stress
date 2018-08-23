@@ -78,6 +78,8 @@ jobs:
             ccm start --verbose
 
             ./gradlew assemble
+            
+            ls
             bin/tlp-stress run KeyValue
 
 
