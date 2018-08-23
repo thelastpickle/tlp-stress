@@ -79,7 +79,11 @@ jobs:
 
             ls build/libs
 
+            bin/tlp-stress run BasicTimeSeries
+            bin/tlp-stress run CountersWide
             bin/tlp-stress run KeyValue
+            bin/tlp-stress run LWT
+            bin/tlp-stress run Maps
 
 
 
