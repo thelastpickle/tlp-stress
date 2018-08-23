@@ -7,3 +7,7 @@ services:
           - ./:/source
         command: -s --toc manual/MANUAL.md -o docs/index.html
 
+    deb:
+        build: ./src/packaging/deb
+        volumes:
+          - ./:/data
