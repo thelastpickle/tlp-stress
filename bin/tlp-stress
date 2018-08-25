@@ -16,7 +16,7 @@ LOGBACK_CONFIG=""
 
 if [ "x$TLP_STRESS_LOGBACK" == "x" ]; then
     for logfile in "$HOME/.tlpstress/logback.xml" \
-        "/etc/tlpstress/logback.xml" \
+        "/etc/tlp-stress/logback.xml" \
         "$PWD/logback.xml" \
         "$BASE_STRESS_DIR/conf/logback.xml" ; do
         if [ -r "$logfile" ]; then
