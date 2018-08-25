@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+
 # You may define TLP_STRESS_LOGBACK or let stress figure it out.
 
 dir=$(dirname $0)

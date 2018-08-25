@@ -11,3 +11,6 @@ services:
         build: ./src/packaging/deb
         volumes:
           - ./:/data
+        command: sh /data/src/packaging/deb/build_deb.sh
+
+
