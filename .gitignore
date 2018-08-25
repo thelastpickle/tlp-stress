@@ -13,3 +13,4 @@
 *.log
 conf/logback.xml
 settings.gradle
+*.deb
