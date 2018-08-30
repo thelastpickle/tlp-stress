@@ -24,7 +24,7 @@ class MaterializedViews : IStressProfile {
     }
 
     override fun schema(): List<String> = listOf("""CREATE TABLE IF NOT EXISTS person
-                        | (name text, age int, city text  primary key(name))""".trimMargin(),
+                        | (name text, age int, city text, primary key(name))""".trimMargin(),
 
                         """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age AS
                             |SELECT age, name, city FROM person
