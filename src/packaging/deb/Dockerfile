@@ -2,6 +2,8 @@
 FROM ubuntu
 
 RUN apt-get update \
+    && apt-get install -y gnupg \
+    && apt-get update \
     && apt-get install -y \
         curl \
     && curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh \
