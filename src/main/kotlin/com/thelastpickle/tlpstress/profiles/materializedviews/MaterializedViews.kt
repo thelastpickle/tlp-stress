@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles.materializedviews
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.profiles.IStressProfile
@@ -43,12 +44,12 @@ class MaterializedViews : IStressProfile {
 
             val cities = context.registry.getGenerator("person", "city")
 
-            override fun getNextMutation(partitionKey: String): Operation {
+            override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
-                return Operation.Mutation(insert.bind(partitionKey, num, cities.getText()))
+                return Operation.Mutation(insert.bind(partitionKey.getText(), num, cities.getText()))
             }
 
-            override fun getNextSelect(partitionKey: String): Operation {
+            override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
                 val result = when(select_count % 2L) {
                     0L ->

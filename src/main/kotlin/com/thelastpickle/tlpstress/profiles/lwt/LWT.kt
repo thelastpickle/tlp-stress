@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles.lwt
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
@@ -31,8 +32,8 @@ class LWT : IStressProfile {
         class LWTRunner : IStressRunner {
             val state = mutableMapOf<String, Int>()
 
-            override fun getNextMutation(partitionKey: String): Operation {
-                val currentValue = state[partitionKey]
+            override fun getNextMutation(partitionKey: PartitionKey): Operation {
+                val currentValue = state[partitionKey.getText()]
                 val newValue: Int
 
                 val mutation = if(currentValue != null) {
@@ -42,12 +43,12 @@ class LWT : IStressProfile {
                     newValue = 0
                     insert.bind(partitionKey, newValue)
                 }
-                val payload = CallbackPayload(partitionKey, newValue)
+                val payload = CallbackPayload(partitionKey.getText(), newValue)
                 return Operation.Mutation(mutation, payload)
             }
 
-            override fun getNextSelect(partitionKey: String): Operation {
-                return Operation.SelectStatement(select.bind(partitionKey))
+            override fun getNextSelect(partitionKey: PartitionKey): Operation {
+                return Operation.SelectStatement(select.bind(partitionKey.getText()))
 
             }
 

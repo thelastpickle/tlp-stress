@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
+import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
@@ -10,8 +11,8 @@ import com.thelastpickle.tlpstress.samplers.ISampler
 import com.thelastpickle.tlpstress.samplers.NoOpSampler
 
 interface IStressRunner {
-    fun getNextMutation(partitionKey: String) : Operation
-    fun getNextSelect(partitionKey: String) : Operation
+    fun getNextMutation(partitionKey: PartitionKey) : Operation
+    fun getNextSelect(partitionKey: PartitionKey) : Operation
     /**
      * Callback after a query executes successfully.
      * Will be used for state tracking on things like LWTs as well as provides an avenue for future work
@@ -74,8 +75,9 @@ interface IStressProfile {
      */
     fun getSampler(session: Session, sampleRate: Double) : ISampler { return NoOpSampler() }
 
+    fun getDefaultReadRate() : Double { return .01 }
 
-
+    fun getCustomArguments() : Map<String, String> { return mapOf() }
 }
 
 

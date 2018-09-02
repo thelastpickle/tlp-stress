@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.profiles.IStressProfile
@@ -57,16 +58,16 @@ class BasicTimeSeries : IStressProfile {
 
         class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
 
-            override fun getNextSelect(partitionKey: String): Operation {
+            override fun getNextSelect(partitionKey: PartitionKey): Operation {
 
-                val bound = select.bind(partitionKey, limit)
+                val bound = select.bind(partitionKey.getText(), limit)
                 return Operation.SelectStatement(bound)
             }
 
-            override fun getNextMutation(partitionKey: String) : Operation {
+            override fun getNextMutation(partitionKey: PartitionKey) : Operation {
                 val data = dataField.getText()
                 val timestamp = UUIDs.timeBased()
-                val bound = insert.bind(partitionKey,timestamp, data)
+                val bound = insert.bind(partitionKey.getText(),timestamp, data)
                 val fields = mapOf("data" to data)
                 return Operation.Mutation(bound)
             }

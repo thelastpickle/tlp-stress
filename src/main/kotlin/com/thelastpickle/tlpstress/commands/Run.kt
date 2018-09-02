@@ -39,8 +39,8 @@ class Run : IStressCommand {
 //    @Parameter(names = ["--sample", "-s"], description = "Sample Rate (0-1)")
 //    var sampleRate : Double? = null // .1%..  this might be better as a number, like a million.  reasonable to keep in memory
 
-    @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is 0.01, or 1%")
-    var readRate = 0.01
+    @Parameter(names = ["--readrate", "--reads", "-r"], description = "Read Rate, 0-1.  Workloads may have their own defaults.  Default is dependent on workload.")
+    var readRate : Double? = null
 
     @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
     var concurrency = 250

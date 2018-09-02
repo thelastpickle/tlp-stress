@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.profiles.counterswide
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
@@ -42,22 +43,22 @@ class CountersWide : IStressProfile {
 
             var iterations = 0L
 
-            override fun getNextMutation(partitionKey: String): Operation {
+            override fun getNextMutation(partitionKey: PartitionKey): Operation {
 
                 val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
-                val tmp = increment.bind(partitionKey, clusteringKey)
+                val tmp = increment.bind(partitionKey.getText(), clusteringKey)
                 return Operation.Mutation(tmp)
             }
 
-            override fun getNextSelect(partitionKey: String): Operation {
+            override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 iterations++
 
                 if (iterations % 2 == 0L) {
                     val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
-                    return Operation.SelectStatement(selectOne.bind(partitionKey, clusteringKey))
+                    return Operation.SelectStatement(selectOne.bind(partitionKey.getText(), clusteringKey))
                 }
 
-                return Operation.SelectStatement(selectAll.bind(partitionKey))
+                return Operation.SelectStatement(selectAll.bind(partitionKey.getText()))
             }
 
         }

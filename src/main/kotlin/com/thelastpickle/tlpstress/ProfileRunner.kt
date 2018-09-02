@@ -29,11 +29,25 @@ class ProfileRunner(val context: StressContext,
         }
     }
 
+    val readRate: Double
+
+    init {
+        val tmp = context.mainArguments.readRate
+
+        if(tmp != null) {
+            readRate = tmp
+        }
+        else {
+            readRate = profile.getDefaultReadRate()
+        }
+    }
+
     fun print(message: String) {
         println("[Thread ${context.thread}]: $message")
 
     }
-    
+
+
     /**
 
      */
@@ -69,7 +83,7 @@ class ProfileRunner(val context: StressContext,
             // I should be able to just tell the runner to inject gossip failures in any test
             // without having to write that code in the profile
 
-            val op : Operation = if(context.mainArguments.readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
+            val op : Operation = if(readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
                 runner.getNextSelect(key)
             } else {
                 runner.getNextMutation(key)

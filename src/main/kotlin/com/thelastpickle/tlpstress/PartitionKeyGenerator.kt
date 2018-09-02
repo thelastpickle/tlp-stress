@@ -31,7 +31,8 @@ class PartitionKeyGenerator(
         var i : Long = 0
         while(true) {
             val tmp = genFunc(maxId)
-            val result = prefix + tmp.toString()
+//            val result = prefix + tmp.toString()
+            val result = PartitionKey(prefix, tmp)
             yield(result)
             i++
 

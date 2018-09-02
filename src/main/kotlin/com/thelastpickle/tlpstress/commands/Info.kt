@@ -20,5 +20,7 @@ class Info : IStressCommand {
             println(cql)
         }
 
+        println("Default read rate: ${plugin.instance.getDefaultReadRate()}")
+
     }
 }
