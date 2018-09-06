@@ -38,6 +38,10 @@ class KeyValue : IStressProfile {
         return listOf(table)
     }
 
+    override fun getDefaultReadRate(): Double {
+        return 0.5
+    }
+
     override fun getRunner(context: StressContext): IStressRunner {
 
         val value = context.registry.getGenerator("keyvalue", "value")
