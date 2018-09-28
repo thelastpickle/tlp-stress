@@ -31,7 +31,7 @@ Either add the `bin` directory to your PATH or from within tlp-stress
 run:
 
 ....
-bin/tlp-stress run KeyValue -i 1M -p 100k
+$ tlp-stress run KeyValue -i 1M -p 100k
 ....
 
 == Building the Stress Tool
@@ -85,7 +85,7 @@ Once you’ve built the application, you can run a stress workload.
 Run
 
 ```
-bin/tlp-stress -h
+$ tlp-stress -h
 ```
 
 to see all the help options.
@@ -103,7 +103,7 @@ Ideally we’d like to tweak this workload to be closer to our production
 use case. Let’s use random sections from various books:
 
 ```
-bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)`
+$ tlp-stress run KeyValue --field.keyvalue.value='book(20,40)`
 ```
 
 Instead of using random strings of garbage, the KeyValue workload will

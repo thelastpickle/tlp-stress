@@ -490,7 +490,7 @@ run:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>bin/tlp-stress run KeyValue -i 1M -p 100k</pre>
+<pre>$ tlp-stress run KeyValue -i 1M -p 100k</pre>
 </div>
 </div>
 </div>
@@ -501,9 +501,9 @@ run:</p>
 <div class="paragraph">
 <p>How to build</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>gradle assemble</pre>
+<pre class="highlight"><code>$ ./gradlew assemble</code></pre>
 </div>
 </div>
 </div>
@@ -517,7 +517,7 @@ installed:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>docker-compose up pandoc</code></pre>
+<pre class="highlight"><code>$ docker-compose up pandoc</code></pre>
 </div>
 </div>
 </div>
@@ -547,7 +547,7 @@ Done.</code></pre>
 <h3 id="_getting_infomration_about_a_workload">Getting infomration about a workload</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>tlp-stress info KeyValue</code></pre>
+<pre class="highlight"><code>$ tlp-stress info KeyValue</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -571,7 +571,7 @@ Done.</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>bin/tlp-stress -h</code></pre>
+<pre class="highlight"><code>$ tlp-stress -h</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -594,7 +594,7 @@ use case. Let’s use random sections from various books:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)`</code></pre>
+<pre class="highlight"><code>$ tlp-stress run KeyValue --field.keyvalue.value='book(20,40)`</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -612,7 +612,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-09-28 22:38:18 UTC
+Last updated 2018-09-28 22:41:54 UTC
 </div>
 </div>
 </body>
