@@ -13,4 +13,12 @@ services:
           - ./:/data
         command: sh /data/src/packaging/deb/build_deb.sh
 
+    docs:
+        image: asciidoctor/docker-asciidoctor
+
+        volumes:
+        - ./manual:/documents
+        - ./docs:/html
+
+        command: asciidoctor -o /html/index.html MANUAL.adoc
 
