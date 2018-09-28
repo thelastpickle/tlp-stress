@@ -515,9 +515,9 @@ run:</p>
 <p>There’s a custom gradle task to build the manual, pandoc must be
 installed:</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>docker-compose run pandoc</pre>
+<pre class="highlight"><code>docker-compose up pandoc</code></pre>
 </div>
 </div>
 </div>
@@ -527,17 +527,36 @@ installed:</p>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_listing_all_workloads">Listing All Workloads</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$ tlp-stress list
+Available Workloads:
 
+Maps
+CountersWide
+LWT
+BasicTimeSeries
+MaterializedViews
+KeyValue
+
+Done.</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_getting_infomration_about_a_workload">Getting infomration about a workload</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>tlp-stress info KeyValue</code></pre>
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p>Description</p>
+<p>Schema</p>
 </li>
 <li>
-<p>Schema</p>
+<p>Default read rate</p>
 </li>
 </ul>
 </div>
@@ -593,7 +612,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-09-28 22:35:00 UTC
+Last updated 2018-09-28 22:38:18 UTC
 </div>
 </div>
 </body>

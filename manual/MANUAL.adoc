@@ -38,27 +38,45 @@ bin/tlp-stress run KeyValue -i 1M -p 100k
 
 How to build
 
-....
-gradle assemble
-....
+```
+$ ./gradlew assemble
+```
 
 == Building the documentation
 
 There’s a custom gradle task to build the manual, pandoc must be
 installed:
 
-....
-docker-compose run pandoc
-....
+```
+$ docker-compose up pandoc
+```
 
 == Usage
 
 === Listing All Workloads
 
+```
+$ tlp-stress list
+Available Workloads:
+
+Maps
+CountersWide
+LWT
+BasicTimeSeries
+MaterializedViews
+KeyValue
+
+Done.
+```
+
 === Getting infomration about a workload
 
-* Description
+```
+$ tlp-stress info KeyValue
+```
+
 * Schema
+* Default read rate
 
 === Running a Stress Workload
 
