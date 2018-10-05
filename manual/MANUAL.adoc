@@ -1,4 +1,7 @@
 = tlp-stress
+Jon Haddad <jon@thelastpickle.com>
+:toc: left
+:icon: font
 
 tlp-stress is a workload-centric stress tool, written in Kotlin.
 Workloads are easy to write and because they are written in code, you
