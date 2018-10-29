@@ -18,4 +18,4 @@ Running
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   5090          35.39             0 |    4910          33.67             0 |       0                0
+   5013           19.4             0 |    4987          19.14             0 |       0                0

@@ -26,3 +26,8 @@ print_shell "info-key-value" "bin/tlp-stress info KeyValue"
 
 # list all workloads
 print_shell "list-all" "bin/tlp-stress list"
+
+print_shell "field-example-book" "bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)"
+
+
+

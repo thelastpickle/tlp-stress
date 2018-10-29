@@ -27,6 +27,8 @@ automatically captured by the Dropwizard metrics library.
 
 == Quickstart Example
 
+The goal of this project is to be testing common workloads (time series, key value) against a Cassandra cluster in 15 minutes or less.
+
 === Building the Stress Tool
 
 First you'll need to clone and build the repo.  You can grab the source here and build via the included gradle script:
@@ -80,26 +82,28 @@ include::examples/list-all.txt[]
 
 === Getting infomration about a workload
 
-```
-$ tlp-stress info KeyValue
-```
-
-* Schema
-* Default read rate
-
-=== Running a Stress Workload
-
-Once you’ve built the application, you can run a stress workload.
-
-Run
+It's possible to get (some) information about a workload by using the info command.  This area is a bit lacking at the moment.  It currently only provides the schema and default read rate.
 
 ```
-$ tlp-stress -h
+include::examples/info-key-value.txt[]
 ```
 
-to see all the help options.
 
-=== Customzing Fields
+=== Running a Customized Stress Workload
+
+
+==== Partition Keys
+
+
+
+
+==== Compaction
+
+
+==== Compression
+
+
+==== Customzing Fields
 
 To some extent, workloads can be customized by leveraging the `--fields`
 flag. For instance, if we look at the KeyValue workload, we have a table
@@ -122,11 +126,22 @@ There are other generators available, such as names, gaussian numbers,
 and cities. Not every generator applies to every type. It’s up to the
 workload to specify which fields can be used this way.
 
+== Developer Docs
 
-== Building the documentation
+=== Building the documentation
+
+First generate the command examples with the following shell script:
+
+```bash
+manual/generate_examples.sh
+```
 
 There’s a docker service to build the HTML manual:
 
 ```
 $ docker-compose up docs
 ```
+
+=== Writing a Custom Workload
+
+`tlp-stress` is a work in progress.  Writing a stress workload isn't documented yet as it is still changing.
