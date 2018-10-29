@@ -447,14 +447,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_run_your_first_stress_workload">Run Your First Stress Workload</a></li>
 </ul>
 </li>
-<li><a href="#_building_the_documentation">Building the documentation</a></li>
 <li><a href="#_usage">Usage</a>
 <ul class="sectlevel2">
 <li><a href="#_general_help">General Help</a></li>
 <li><a href="#_listing_all_workloads">Listing All Workloads</a></li>
 <li><a href="#_getting_infomration_about_a_workload">Getting infomration about a workload</a></li>
-<li><a href="#_running_a_stress_workload">Running a Stress Workload</a></li>
-<li><a href="#_customzing_fields">Customzing Fields</a></li>
+<li><a href="#_running_a_customized_stress_workload">Running a Customized Stress Workload</a></li>
+</ul>
+</li>
+<li><a href="#_developer_docs">Developer Docs</a>
+<ul class="sectlevel2">
+<li><a href="#_building_the_documentation">Building the documentation</a></li>
+<li><a href="#_writing_a_custom_workload">Writing a Custom Workload</a></li>
 </ul>
 </li>
 </ul>
@@ -506,6 +510,9 @@ automatically captured by the Dropwizard metrics library.</p>
 <div class="sect1">
 <h2 id="_quickstart_example">Quickstart Example</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The goal of this project is to be testing common workloads (time series, key value) against a Cassandra cluster in 15 minutes or less.</p>
+</div>
 <div class="sect2">
 <h3 id="_building_the_stress_tool">Building the Stress Tool</h3>
 <div class="paragraph">
@@ -527,12 +534,15 @@ locally, you can run this quickstart.</p>
 </div>
 <div class="paragraph">
 <p>Either add the <code>bin</code> directory to your PATH or from within tlp-stress
-run:</p>
+run the following command to execute 10,000 queries:</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>$ bin/tlp-stress run KeyValue -n 10000</pre>
+<pre class="highlight"><code>$ bin/tlp-stress run KeyValue -n 10000</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see the output of the keyspaces and tables that are created as well as some statistical information regarding the workload:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -555,21 +565,11 @@ Running
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   4947           66.9             0 |    5053          66.04             0 |       0                0</code></pre>
+   5013           19.4             0 |    4987          19.14             0 |       0                0</code></pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_building_the_documentation">Building the documentation</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>There’s a docker service to build the HTML manual:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>$ docker-compose up docs</code></pre>
+<p>If you&#8217;ve made it this far, congrats!  You&#8217;ve run your first workload.</p>
 </div>
 </div>
 </div>
@@ -577,6 +577,9 @@ Stress complete, 1.
 <div class="sect1">
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>You&#8217;ll probably want to do a bit more than simply run a few thousand queries against a KeyValue table with default settings.  The nice part about tlp-stress is that it not only comes with a variety of workloads that you can run to test your cluster, but that it allows you to change many of the parameters.  In the quickstart example we used the <code>-n</code> flag</p>
+</div>
 <div class="sect2">
 <h3 id="_general_help">General Help</h3>
 <div class="paragraph">
@@ -584,7 +587,7 @@ Stress complete, 1.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ tlp-stress
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ bin/tlp-stress
 Usage: tlp-stress [options] [command] [command options]
   Options:
     --help, -h
@@ -657,15 +660,15 @@ Usage: tlp-stress [options] [command] [command options]
 <h3 id="_listing_all_workloads">Listing All Workloads</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ tlp-stress list
+<pre class="highlight"><code>$ bin/tlp-stress list
 Available Workloads:
 
+BasicTimeSeries
 Maps
 CountersWide
-LWT
-BasicTimeSeries
 MaterializedViews
 KeyValue
+LWT
 
 Done.</code></pre>
 </div>
@@ -673,41 +676,36 @@ Done.</code></pre>
 </div>
 <div class="sect2">
 <h3 id="_getting_infomration_about_a_workload">Getting infomration about a workload</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code>$ tlp-stress info KeyValue</code></pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Schema</p>
-</li>
-<li>
-<p>Default read rate</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_running_a_stress_workload">Running a Stress Workload</h3>
 <div class="paragraph">
-<p>Once you’ve built the application, you can run a stress workload.</p>
-</div>
-<div class="paragraph">
-<p>Run</p>
+<p>It&#8217;s possible to get (some) information about a workload by using the info command.  This area is a bit lacking at the moment.  It currently only provides the schema and default read rate.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ tlp-stress -h</code></pre>
+<pre class="highlight"><code>$ bin/tlp-stress info KeyValue
+CREATE TABLE IF NOT EXISTS keyvalue (
+                        key text PRIMARY KEY,
+                        value text
+                        )
+Default read rate: 0.5</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>to see all the help options.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_customzing_fields">Customzing Fields</h3>
+<h3 id="_running_a_customized_stress_workload">Running a Customized Stress Workload</h3>
+<div class="sect3">
+<h4 id="_partition_keys">Partition Keys</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_compaction">Compaction</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_compression">Compression</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_customzing_fields">Customzing Fields</h4>
 <div class="paragraph">
 <p>To some extent, workloads can be customized by leveraging the <code>--fields</code>
 flag. For instance, if we look at the KeyValue workload, we have a table
@@ -738,9 +736,40 @@ workload to specify which fields can be used this way.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_developer_docs">Developer Docs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_building_the_documentation">Building the documentation</h3>
+<div class="paragraph">
+<p>First generate the command examples with the following shell script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">manual/generate_examples.sh</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There’s a docker service to build the HTML manual:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$ docker-compose up docs</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_writing_a_custom_workload">Writing a Custom Workload</h3>
+<div class="paragraph">
+<p><code>tlp-stress</code> is a work in progress.  Writing a stress workload isn&#8217;t documented yet as it is still changing.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-10-29 20:24:35 UTC
+Last updated 2018-10-29 23:25:36 UTC
 </div>
 </div>
 </body>
