@@ -47,14 +47,22 @@ $ ./gradlew assemble
 
 == Building the documentation
 
-There’s a custom gradle task to build the manual, pandoc must be
-installed:
+There’s a docker service to build the HTML manual:
 
 ```
-$ docker-compose up pandoc
+$ docker-compose up docs
 ```
 
 == Usage
+
+=== General Help
+
+`tlp-stress` will display the help if the `tlp-stress` command is run without any arguments or if the `--help` flag is passed:
+
+```bash
+$ tlp-stress
+include::tlp-stress-help.txt[]
+```
 
 === Listing All Workloads
 

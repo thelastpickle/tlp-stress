@@ -446,6 +446,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_building_the_documentation">Building the documentation</a></li>
 <li><a href="#_usage">Usage</a>
 <ul class="sectlevel2">
+<li><a href="#_general_help">General Help</a></li>
 <li><a href="#_listing_all_workloads">Listing All Workloads</a></li>
 <li><a href="#_getting_infomration_about_a_workload">Getting infomration about a workload</a></li>
 <li><a href="#_running_a_stress_workload">Running a Stress Workload</a></li>
@@ -533,12 +534,11 @@ run:</p>
 <h2 id="_building_the_documentation">Building the documentation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>There’s a custom gradle task to build the manual, pandoc must be
-installed:</p>
+<p>There’s a docker service to build the HTML manual:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ docker-compose up pandoc</code></pre>
+<pre class="highlight"><code>$ docker-compose up docs</code></pre>
 </div>
 </div>
 </div>
@@ -546,6 +546,82 @@ installed:</p>
 <div class="sect1">
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_general_help">General Help</h3>
+<div class="paragraph">
+<p><code>tlp-stress</code> will display the help if the <code>tlp-stress</code> command is run without any arguments or if the <code>--help</code> flag is passed:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ tlp-stress
+Usage: tlp-stress [options] [command] [command options]
+  Options:
+    --help, -h
+      Shows this help.
+      Default: false
+  Commands:
+    run      Run a tlp-stress profile
+      Usage: run [options]
+        Options:
+          --compaction
+            Compaction option to use.  Double quotes will auto convert to
+            single for convenience.
+            Default: &lt;empty string&gt;
+          --compression
+            Compression options
+            Default: &lt;empty string&gt;
+          --concurrency, -c
+            Concurrent queries allowed.  Increase for larger clusters.
+            Default: 250
+          --drop
+            Drop the keyspace before starting.
+            Default: false
+          --field.
+            Override a field's data generator
+            Syntax: --field.key=value
+            Default: {}
+          -h, --help
+            Show this help
+          --host
+
+            Default: 127.0.0.1
+          --id
+            Identifier for this run, will be used in partition keys.  Make
+            unique for when starting concurrent runners.
+            Default: 001
+          --iterations, -i, -n
+            Number of operations to run.
+            Default: 1000
+          --keyspace
+            Keyspace to use
+            Default: tlp_stress
+          --partitions, -p
+            Max value of integer component of first partition key.
+            Default: 1000000
+          --populate
+            Pre-population the DB
+            Default: false
+          --rate
+            Rate limiter, accepts human numbers. 0 = disabled
+            Default: 0
+          --readrate, --reads, -r
+            Read Rate, 0-1.  Workloads may have their own defaults.  Default
+            is dependent on workload.
+          --replication
+            Replication options
+            Default: {'class': 'SimpleStrategy', 'replication_factor':3 }
+          --threads, -t
+            Threads to run
+            Default: 1
+
+    info      Get details of a specific workload.
+      Usage: info
+
+    list      List all workloads.
+      Usage: list</code></pre>
+</div>
+</div>
+</div>
 <div class="sect2">
 <h3 id="_listing_all_workloads">Listing All Workloads</h3>
 <div class="listingblock">
@@ -633,7 +709,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-10-05 19:59:58 UTC
+Last updated 2018-10-29 20:08:49 UTC
 </div>
 </div>
 </body>

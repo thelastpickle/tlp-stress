@@ -1,0 +1,67 @@
+Usage: tlp-stress [options] [command] [command options]
+  Options:
+    --help, -h
+      Shows this help.
+      Default: false
+  Commands:
+    run      Run a tlp-stress profile
+      Usage: run [options]
+        Options:
+          --compaction
+            Compaction option to use.  Double quotes will auto convert to 
+            single for convenience.
+            Default: <empty string>
+          --compression
+            Compression options
+            Default: <empty string>
+          --concurrency, -c
+            Concurrent queries allowed.  Increase for larger clusters.
+            Default: 250
+          --drop
+            Drop the keyspace before starting.
+            Default: false
+          --field.
+            Override a field's data generator
+            Syntax: --field.key=value
+            Default: {}
+          -h, --help
+            Show this help
+          --host
+
+            Default: 127.0.0.1
+          --id
+            Identifier for this run, will be used in partition keys.  Make 
+            unique for when starting concurrent runners.
+            Default: 001
+          --iterations, -i, -n
+            Number of operations to run.
+            Default: 1000
+          --keyspace
+            Keyspace to use
+            Default: tlp_stress
+          --partitions, -p
+            Max value of integer component of first partition key.
+            Default: 1000000
+          --populate
+            Pre-population the DB
+            Default: false
+          --rate
+            Rate limiter, accepts human numbers. 0 = disabled
+            Default: 0
+          --readrate, --reads, -r
+            Read Rate, 0-1.  Workloads may have their own defaults.  Default 
+            is dependent on workload.
+          --replication
+            Replication options
+            Default: {'class': 'SimpleStrategy', 'replication_factor':3 }
+          --threads, -t
+            Threads to run
+            Default: 1
+
+    info      Get details of a specific workload.
+      Usage: info
+
+    list      List all workloads.
+      Usage: list
+
+
