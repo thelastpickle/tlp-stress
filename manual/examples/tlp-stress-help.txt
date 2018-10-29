@@ -1,3 +1,4 @@
+$ bin/tlp-stress
 Usage: tlp-stress [options] [command] [command options]
   Options:
     --help, -h

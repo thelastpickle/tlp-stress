@@ -441,8 +441,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_quickstart_example">Quickstart Example</a></li>
+<li><a href="#_quickstart_example">Quickstart Example</a>
+<ul class="sectlevel2">
 <li><a href="#_building_the_stress_tool">Building the Stress Tool</a></li>
+<li><a href="#_run_your_first_stress_workload">Run Your First Stress Workload</a></li>
+</ul>
+</li>
 <li><a href="#_building_the_documentation">Building the documentation</a></li>
 <li><a href="#_usage">Usage</a>
 <ul class="sectlevel2">
@@ -502,6 +506,21 @@ automatically captured by the Dropwizard metrics library.</p>
 <div class="sect1">
 <h2 id="_quickstart_example">Quickstart Example</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_building_the_stress_tool">Building the Stress Tool</h3>
+<div class="paragraph">
+<p>First you&#8217;ll need to clone and build the repo.  You can grab the source here and build via the included gradle script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">git clone https://github.com/thelastpickle/tlp-stress.git
+cd tlp-stress
+./gradlew assemble</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_your_first_stress_workload">Run Your First Stress Workload</h3>
 <div class="paragraph">
 <p>Assuming you have either a CCM cluster or are running a single node
 locally, you can run this quickstart.</p>
@@ -512,20 +531,32 @@ run:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>$ tlp-stress run KeyValue -i 1M -p 100k</pre>
+<pre>$ bin/tlp-stress run KeyValue -n 10000</pre>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_building_the_stress_tool">Building the Stress Tool</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>How to build</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ ./gradlew assemble</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">Creating schema
+Executing 10000 operations
+Connected
+Creating tlp_stress: CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
+CREATE TABLE IF NOT EXISTS keyvalue (
+                        key text PRIMARY KEY,
+                        value text
+                        )
+Preparing queries
+Initializing metrics
+Connecting
+Preparing
+1 threads prepared.
+Running
+[Thread 0]: Operations: 10000
+[Thread 0]: All operations complete.  Validating.
+Stress complete, 1.
+                  Writes                                    Reads                  Errors
+  Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
+   4947           66.9             0 |    5053          66.04             0 |       0                0</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -709,7 +740,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-10-29 20:08:49 UTC
+Last updated 2018-10-29 20:24:35 UTC
 </div>
 </div>
 </body>

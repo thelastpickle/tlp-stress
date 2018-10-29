@@ -1,0 +1,6 @@
+$ bin/tlp-stress info KeyValue
+CREATE TABLE IF NOT EXISTS keyvalue (
+                        key text PRIMARY KEY,
+                        value text
+                        )
+Default read rate: 0.5

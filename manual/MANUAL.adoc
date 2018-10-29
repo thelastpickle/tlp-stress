@@ -27,57 +27,55 @@ automatically captured by the Dropwizard metrics library.
 
 == Quickstart Example
 
+=== Building the Stress Tool
+
+First you'll need to clone and build the repo.  You can grab the source here and build via the included gradle script:
+
+
+```bash
+git clone https://github.com/thelastpickle/tlp-stress.git
+cd tlp-stress
+./gradlew assemble
+```
+
+=== Run Your First Stress Workload
+
 Assuming you have either a CCM cluster or are running a single node
 locally, you can run this quickstart.
 
 Either add the `bin` directory to your PATH or from within tlp-stress
-run:
-
-....
-$ tlp-stress run KeyValue -i 1M -p 100k
-....
-
-== Building the Stress Tool
-
-How to build
+run the following command to execute 10,000 queries:
 
 ```
-$ ./gradlew assemble
+include::examples/tlp-stress-keyvalue.txt[lines=1]
 ```
 
-== Building the documentation
+You'll see the output of the keyspaces and tables that are created as well as some statistical information regarding the workload:
 
-There’s a docker service to build the HTML manual:
+```bash
+include::examples/tlp-stress-keyvalue.txt[lines=2..-1]
+```
 
-```
-$ docker-compose up docs
-```
+If you've made it this far, congrats!  You've run your first workload.
+
+
 
 == Usage
+
+You'll probably want to do a bit more than simply run a few thousand queries against a KeyValue table with default settings.  The nice part about tlp-stress is that it not only comes with a variety of workloads that you can run to test your cluster, but that it allows you to change many of the parameters.  In the quickstart example we used the `-n` flag
 
 === General Help
 
 `tlp-stress` will display the help if the `tlp-stress` command is run without any arguments or if the `--help` flag is passed:
 
 ```bash
-$ tlp-stress
-include::tlp-stress-help.txt[]
+include::examples/tlp-stress-help.txt[]
 ```
 
 === Listing All Workloads
 
 ```
-$ tlp-stress list
-Available Workloads:
-
-Maps
-CountersWide
-LWT
-BasicTimeSeries
-MaterializedViews
-KeyValue
-
-Done.
+include::examples/list-all.txt[]
 ```
 
 === Getting infomration about a workload
@@ -123,3 +121,12 @@ now use 20-40 words extracted from books.
 There are other generators available, such as names, gaussian numbers,
 and cities. Not every generator applies to every type. It’s up to the
 workload to specify which fields can be used this way.
+
+
+== Building the documentation
+
+There’s a docker service to build the HTML manual:
+
+```
+$ docker-compose up docs
+```
