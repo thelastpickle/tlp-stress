@@ -54,9 +54,10 @@ include::examples/tlp-stress-keyvalue.txt[lines=1]
 
 You'll see the output of the keyspaces and tables that are created as well as some statistical information regarding the workload:
 
-```bash
+[source,bash,options="nowrap"]
+----
 include::examples/tlp-stress-keyvalue.txt[lines=2..-1]
-```
+----
 
 If you've made it this far, congrats!  You've run your first workload.
 
@@ -91,10 +92,22 @@ include::examples/info-key-value.txt[]
 
 === Running a Customized Stress Workload
 
+Whenever possible we try to use human friendly numbers.  Typing out `-n 1000000000` is error prone and hard to read, `-n 1B` is much easier.
+
+.Table Human Friendly Values
+|===
+|Suffix|Implication|Example|Equivilent
+
+|k|Thousand|1k|1,000
+|m|Million|1m|1,000,000
+|b|Billion|1b|1,000,000,000
+
+|===
+
 
 ==== Partition Keys
 
-
+A very useful feature is controlling how many
 
 
 ==== Compaction
