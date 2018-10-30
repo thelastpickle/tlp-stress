@@ -18,6 +18,12 @@ class Run : IStressCommand {
     @Parameter(names = ["--host"])
     var host = "127.0.0.1"
 
+    @Parameter(names = ["--username", "-U"])
+    var username = "cassandra"
+
+    @Parameter(names = ["--password", "-P"])
+    var password = "cassandra"
+
     @Parameter(required = true)
     var profile = ""
 
@@ -73,7 +79,7 @@ class Run : IStressCommand {
     override fun execute() {
 
         // we're going to build one session per thread for now
-        val cluster = Cluster.builder().addContactPoint(host).build()
+        val cluster = Cluster.builder().addContactPoint(host).withCredentials(username, password).build()
 
         // set up the keyspace
 //        val commandArgs = parser.getParsedPlugin()!!.arguments
