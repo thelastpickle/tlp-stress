@@ -570,7 +570,7 @@ Running
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   5056          39.47             0 |    4944          39.85             0 |       0                0</code></pre>
+   4955          38.52             0 |    5045          36.74             0 |       0                0</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -637,6 +637,9 @@ Usage: tlp-stress [options] [command] [command options]
           --partitions, -p
             Max value of integer component of first partition key.
             Default: 1000000
+          --password, -P
+
+            Default: cassandra
           --populate
             Pre-population the DB
             Default: false
@@ -652,6 +655,9 @@ Usage: tlp-stress [options] [command] [command options]
           --threads, -t
             Threads to run
             Default: 1
+          --username, -U
+
+            Default: cassandra
 
     info      Get details of a specific workload.
       Usage: info
