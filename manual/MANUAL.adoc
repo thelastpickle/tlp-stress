@@ -107,13 +107,21 @@ Whenever possible we try to use human friendly numbers.  Typing out `-n 10000000
 
 ==== Partition Keys
 
-A very useful feature is controlling how many
+A very useful feature is controlling how many partitions are read and written to for a given stress test.  Doing a billion operations across a billion partitions is going to have a much different performance profile than writing to one hundred partitions, especially when mixed with different compaction settings.  Using `-p` we can control how many partition keys a stress test will leverage.  The keys are randomly chosen at the moment.
 
+
+==== Read Rate
+
+It's possible to specify the read rate of a test as a double.  For example, if you want to use 1% writes, you'd specify `-r .01`.
 
 ==== Compaction
 
+It's possible to change the compaction strategy used.  At the moment this changes the compaction strategy of every table in the test.  This will be addressed in the future to be more flexible.
+
 
 ==== Compression
+
+It's possible to change the compression options used.  At the moment this changes the compression options of every table in the test.  This will be addressed in the future to be more flexible.
 
 
 ==== Customzing Fields
