@@ -65,7 +65,7 @@ If you've made it this far, congrats!  You've run your first workload.
 
 == Usage
 
-You'll probably want to do a bit more than simply run a few thousand queries against a KeyValue table with default settings.  The nice part about tlp-stress is that it not only comes with a variety of workloads that you can run to test your cluster, but that it allows you to change many of the parameters.  In the quickstart example we used the `-n` flag
+You'll probably want to do a bit more than simply run a few thousand queries against a KeyValue table with default settings.  The nice part about tlp-stress is that it not only comes with a variety of workloads that you can run to test your cluster, but that it allows you to change many of the parameters.  In the quickstart example we used the `-n` flag to change the total number of operations `tlp-stress` will execute against the database.  There are many more options available, this section will cover some of them.
 
 === General Help
 
