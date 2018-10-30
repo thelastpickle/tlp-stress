@@ -549,7 +549,12 @@ run the following command to execute 10,000 queries:</p>
 <pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Creating schema
 Executing 10000 operations
 Connected
-Creating tlp_stress: CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
+Creating tlp_stress:
+CREATE KEYSPACE
+ IF NOT EXISTS tlp_stress
+ WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
+
+Creating Tables
 CREATE TABLE IF NOT EXISTS keyvalue (
                         key text PRIMARY KEY,
                         value text
@@ -565,7 +570,7 @@ Running
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   5013           19.4             0 |    4987          19.14             0 |       0                0</code></pre>
+   5056          39.47             0 |    4944          39.85             0 |       0                0</code></pre>
 </div>
 </div>
 <div class="paragraph">

@@ -92,9 +92,11 @@ class Run : IStressCommand {
             session.execute("DROP KEYSPACE IF EXISTS $keyspace")
         }
 
-        val createKeyspace = """CREATE KEYSPACE IF NOT EXISTS $keyspace WITH replication = $replication"""
+        val createKeyspace = """CREATE KEYSPACE
+            | IF NOT EXISTS $keyspace
+            | WITH replication = $replication""".trimMargin()
 
-        println("Creating $keyspace: $createKeyspace")
+        println("Creating $keyspace: \n$createKeyspace\n")
         session.execute(createKeyspace)
 
         session.execute("USE $keyspace")
@@ -117,6 +119,7 @@ class Run : IStressCommand {
             RateLimiter.create(rate.toDouble())
         } else null
 
+        println("Creating Tables")
         for (statement in plugin.instance.schema()) {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)

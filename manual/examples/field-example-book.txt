@@ -2,7 +2,12 @@ $ bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)
 Creating schema
 Executing 1000 operations
 Connected
-Creating tlp_stress: CREATE KEYSPACE IF NOT EXISTS tlp_stress WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
+Creating tlp_stress: 
+CREATE KEYSPACE
+ IF NOT EXISTS tlp_stress
+ WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
+
+Creating Tables
 CREATE TABLE IF NOT EXISTS keyvalue (
                         key text PRIMARY KEY,
                         value text
