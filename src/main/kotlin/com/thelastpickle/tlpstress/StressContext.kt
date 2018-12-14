@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress
 
+import com.datastax.driver.core.ConsistencyLevel
 import com.datastax.driver.core.Session
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.commands.Run
@@ -13,6 +14,7 @@ data class StressContext(val session: Session,
                          val semaphore: Semaphore,
                          val permits: Int,
                          val registry: Registry,
-                         val rateLimiter: RateLimiter?)
+                         val rateLimiter: RateLimiter?,
+                         val consistencyLevel: ConsistencyLevel)
 
 

@@ -4,8 +4,11 @@ import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.Cluster
+import com.datastax.driver.core.ConsistencyLevel
+import com.datastax.driver.core.QueryOptions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
+import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
@@ -75,11 +78,18 @@ class Run : IStressCommand {
     @Parameter(names = ["--drop"], description = "Drop the keyspace before starting.")
     var dropKeyspace = false
 
+    @Parameter(names = ["--cl"], description = "Consistency level for reads/writes (Defaults to LOCAL_ONE).", converter = ConsistencyLevelConverter::class)
+    var consistencyLevel = ConsistencyLevel.LOCAL_ONE
+
     
     override fun execute() {
 
         // we're going to build one session per thread for now
-        val cluster = Cluster.builder().addContactPoint(host).withCredentials(username, password).build()
+        val cluster = Cluster.builder()
+                .addContactPoint(host)
+                .withCredentials(username, password)
+                .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
+                .build()
 
         // set up the keyspace
 //        val commandArgs = parser.getParsedPlugin()!!.arguments
@@ -87,7 +97,7 @@ class Run : IStressCommand {
         // get all the initial schema
         println("Creating schema")
 
-        println("Executing $iterations operations")
+        println("Executing $iterations operations with consistency level $consistencyLevel")
 
         val session = cluster.connect()
 
@@ -161,7 +171,7 @@ class Run : IStressCommand {
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry, rateLimiter)
+            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry, rateLimiter, consistencyLevel)
             ProfileRunner.create(context, plugin.instance)
         }
 
@@ -171,6 +181,7 @@ class Run : IStressCommand {
         }.count()
 
         println("$executed threads prepared.")
+
 
         metrics.startReporting()
 
