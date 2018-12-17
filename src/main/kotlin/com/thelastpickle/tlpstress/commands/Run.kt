@@ -3,11 +3,10 @@ package com.thelastpickle.tlpstress.commands
 import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
-import com.datastax.driver.core.Cluster
-import com.datastax.driver.core.ConsistencyLevel
-import com.datastax.driver.core.QueryOptions
+import com.datastax.driver.core.*
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
+import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.generators.Registry
@@ -52,7 +51,7 @@ class Run : IStressCommand {
     var readRate : Double? = null
 
     @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
-    var concurrency = 250L
+    var concurrency = 100
 
     @Parameter(names = ["--populate"], description = "Pre-population the DB")
     var populate = false
@@ -89,6 +88,11 @@ class Run : IStressCommand {
                 .addContactPoint(host)
                 .withCredentials(username, password)
                 .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
+                .withPoolingOptions(PoolingOptions()
+                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
+                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
                 .build()
 
         // set up the keyspace
