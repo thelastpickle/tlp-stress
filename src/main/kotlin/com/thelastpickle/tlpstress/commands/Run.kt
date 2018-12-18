@@ -52,7 +52,7 @@ class Run : IStressCommand {
     var readRate : Double? = null
 
     @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
-    var concurrency = 250
+    var concurrency = 250L
 
     @Parameter(names = ["--populate"], description = "Pre-population the DB")
     var populate = false
@@ -166,12 +166,12 @@ class Run : IStressCommand {
         val metrics = Metrics()
 
         val permits = concurrency
-        var sem = Semaphore(permits)
+        var sem = Semaphore(permits.toInt())
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, sem, permits, fieldRegistry, rateLimiter, consistencyLevel)
+            val context = StressContext(session, this, it, metrics, sem, permits.toInt(), fieldRegistry, rateLimiter, consistencyLevel)
             ProfileRunner.create(context, plugin.instance)
         }
 
