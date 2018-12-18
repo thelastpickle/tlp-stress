@@ -51,7 +51,7 @@ class Run : IStressCommand {
     var readRate : Double? = null
 
     @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
-    var concurrency = 100
+    var concurrency = 100L
 
     @Parameter(names = ["--populate"], description = "Pre-population the DB")
     var populate = false
