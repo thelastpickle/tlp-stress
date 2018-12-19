@@ -11,10 +11,8 @@ data class StressContext(val session: Session,
                          val mainArguments: Run,
                          val thread: Int,
                          val metrics: Metrics,
-                         val semaphore: Semaphore,
                          val permits: Int,
                          val registry: Registry,
-                         val rateLimiter: RateLimiter?,
-                         val consistencyLevel: ConsistencyLevel)
+                         val rateLimiter: RateLimiter?)
 
 
