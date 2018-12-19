@@ -4,11 +4,13 @@ import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.datastax.driver.core.*
+import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
+import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
 import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
 
@@ -60,7 +62,11 @@ class Run : IStressCommand {
     var threads = 1
 
     @Parameter(names = ["--iterations", "-i", "-n"], description = "Number of operations to run.", converter = HumanReadableConverter::class)
-    var iterations : Long = 1000
+    var iterations : Long = 0
+    val DEFAULT_ITERATIONS : Long = 1000000
+
+    @Parameter(names = ["--duration", "-d"], description = "Duration of the stress test.  Expressed in format 1d 3h 15m", converter = HumanReadableTimeConverter::class)
+    var duration : Int = 0
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
@@ -82,6 +88,10 @@ class Run : IStressCommand {
 
     
     override fun execute() {
+
+        Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
+        iterations = if (duration == 0 && iterations == 0L) DEFAULT_ITERATIONS else iterations // apply the default if the number of iterations wasn't set
+
 
         // we're going to build one session per thread for now
         val cluster = Cluster.builder()
@@ -170,12 +180,11 @@ class Run : IStressCommand {
         val metrics = Metrics()
 
         val permits = concurrency
-        var sem = Semaphore(permits.toInt())
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, sem, permits.toInt(), fieldRegistry, rateLimiter, consistencyLevel)
+            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 

@@ -453,6 +453,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_listing_all_workloads">Listing All Workloads</a></li>
 <li><a href="#_getting_infomration_about_a_workload">Getting infomration about a workload</a></li>
 <li><a href="#_running_a_customized_stress_workload">Running a Customized Stress Workload</a></li>
+<li><a href="#_running_a_stress_test_for_a_given_duration_instead_of_a_number_of_operations">Running a stress test for a given duration instead of a number of operations</a></li>
 </ul>
 </li>
 <li><a href="#_developer_docs">Developer Docs</a>
@@ -743,6 +744,26 @@ Default read rate: 0.5</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect2">
+<h3 id="_running_a_stress_test_for_a_given_duration_instead_of_a_number_of_operations">Running a stress test for a given duration instead of a number of operations</h3>
+<div class="paragraph">
+<p>You might need to run a stress test for a given duration instead of providing a number of operations, especially in case of multithreaded stress runs. This is done by providing the duration in a human readable format with the <code>-d</code> argument. The minimum duration is 1 minute.
+For example, running a test for 1 hours and 30 minutes will be done as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>tlp-stress run KeyValue -d "1h 30m"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To run a test for 1 days, 3 hours and 15 minutes (why not?), run tlp-stress as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>tlp-stress run KeyValue -d "1d 3h 15m"</code></pre>
+</div>
+</div>
 <div class="sect3">
 <h4 id="_partition_keys">Partition Keys</h4>
 <div class="paragraph">
@@ -832,7 +853,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-10-30 00:19:45 UTC
+Last updated 2018-12-22 19:30:56 UTC
 </div>
 </div>
 </body>
