@@ -1,6 +1,6 @@
 $ bin/tlp-stress run KeyValue -n 10000
 Creating schema
-Executing 10000 operations
+Executing 10000 operations with consistency level LOCAL_ONE
 Connected
 Creating tlp_stress: 
 CREATE KEYSPACE
@@ -23,4 +23,4 @@ Running
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   4955          38.52             0 |    5045          36.74             0 |       0                0
+   5020          14.74             0 |    4980          16.07             0 |       0                0

@@ -60,8 +60,9 @@ class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMa
 
         internal fun getName(s: String) : String {
             val nameRegex = """(^[a-z]+)\(.*\)""".toRegex()
-            val result = nameRegex.find(s)
-            return result!!.groupValues[1]
+            val result = nameRegex.find(s) ?: throw FieldNotFoundException(s)
+            return result.groupValues[1]
+
         }
 
         internal fun getArguments(s: String) : List<String> {
@@ -109,5 +110,9 @@ class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMa
             return overrides[tmp]!!
         return defaults[tmp]!!
     }
+
+}
+
+class FieldNotFoundException(message: String) : Throwable() {
 
 }

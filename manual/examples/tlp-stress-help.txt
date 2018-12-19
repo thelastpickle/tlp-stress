@@ -8,6 +8,10 @@ Usage: tlp-stress [options] [command] [command options]
     run      Run a tlp-stress profile
       Usage: run [options]
         Options:
+          --cl
+            Consistency level for reads/writes (Defaults to LOCAL_ONE).
+            Default: LOCAL_ONE
+            Possible Values: [ANY, ONE, TWO, THREE, QUORUM, ALL, LOCAL_QUORUM, EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE]
           --compaction
             Compaction option to use.  Double quotes will auto convert to 
             single for convenience.
@@ -17,7 +21,7 @@ Usage: tlp-stress [options] [command] [command options]
             Default: <empty string>
           --concurrency, -c
             Concurrent queries allowed.  Increase for larger clusters.
-            Default: 250
+            Default: 100
           --drop
             Drop the keyspace before starting.
             Default: false
