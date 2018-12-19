@@ -9,6 +9,7 @@ import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
+import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
 import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
 
@@ -61,6 +62,9 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--iterations", "-i", "-n"], description = "Number of operations to run.", converter = HumanReadableConverter::class)
     var iterations : Long = 1000
+
+    @Parameter(names = ["--duration", "-d"], description = "Duration of the stress test.", converter = HumanReadableTimeConverter::class)
+    var duration : Int = 0
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
@@ -175,7 +179,7 @@ class Run : IStressCommand {
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, sem, permits.toInt(), fieldRegistry, rateLimiter, consistencyLevel)
+            val context = StressContext(session, this, it, metrics, sem, permits.toInt(), fieldRegistry, rateLimiter, consistencyLevel, duration)
             ProfileRunner.create(context, plugin.instance)
         }
 

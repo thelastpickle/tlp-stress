@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
+import org.joda.time.DateTime
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
@@ -54,8 +55,12 @@ class ProfileRunner(val context: StressContext,
     fun run() {
 
         // need to add a warmup / populate phase
-
-        executeOperations(context.mainArguments.iterations)
+        if (context.mainArguments.duration == 0) {
+            print("Running the profile for ${context.mainArguments.iterations} iterations...")
+        } else {
+            print("Running the profile for ${context.mainArguments.duration}min...")
+        }
+        executeOperations(context.mainArguments.iterations, context.mainArguments.duration)
 
         print("All operations complete.  Validating.")
         // put a countdownlatch here, wait to validate
@@ -65,17 +70,19 @@ class ProfileRunner(val context: StressContext,
     /**
      * Used for both pre-populating data and for performing the actual runner
      */
-    private fun executeOperations(iterations: Long) {
+    private fun executeOperations(iterations: Long, duration: Int) {
         // we're going to (for now) only keep 1000 in flight queries per session
 
-
+        val desiredEndTime = DateTime.now().plusMinutes(duration)
         var operations = 0
         val sem = context.semaphore
 
         val runner = profile.getRunner(context)
 
-        for (key in partitionKeyGenerator.generateKey(iterations, context.mainArguments.partitionValues)) {
-
+        for (key in partitionKeyGenerator.generateKey(if (duration > 0) 100000000 else iterations, context.mainArguments.partitionValues)) {
+            if (duration > 0 && desiredEndTime.isBeforeNow()) {
+                break
+            }
             // get next thing from the profile
             // thing could be a statement, or it could be a failure command
             // certain profiles will want to deterministically inject failures
