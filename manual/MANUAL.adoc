@@ -104,6 +104,18 @@ Whenever possible we try to use human friendly numbers.  Typing out `-n 10000000
 
 |===
 
+=== Running a stress test for a given duration instead of a number of operations
+
+You might need to run a stress test for a given duration instead of providing a number of operations, especially in case of multithreaded stress runs. This is done by providing the duration in a human readable format with the `-d` argument. The minimum duration is 1 minute.
+For example, running a test for 1 hours and 30 minutes will be done as follows:
+```
+tlp-stress run KeyValue -d 1h 30m
+```
+
+To run a test for 1 days, 3 hours and 15 minutes (why not?), run tlp-stress as follows:
+```
+tlp-stress run KeyValue -d 1d 3h 15m
+```
 
 ==== Partition Keys
 
