@@ -174,12 +174,11 @@ class Run : IStressCommand {
         val metrics = Metrics()
 
         val permits = concurrency
-        var sem = Semaphore(permits.toInt())
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, sem, permits.toInt(), fieldRegistry, rateLimiter, consistencyLevel, duration)
+            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 
