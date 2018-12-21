@@ -27,8 +27,8 @@ class BasicTimeSeries : IStressProfile {
 
     data class PrimaryKey(val first: String, val timestamp: UUID)
 
-    override fun schema(): List<String> {
-        val query = """CREATE TABLE IF NOT EXISTS sensor_data (
+    override fun schema(tableSuffix: String): List<String> {
+        val query = """CREATE TABLE IF NOT EXISTS sensor_data$tableSuffix (
                             sensor_id text,
                             timestamp timeuuid,
                             data text,
@@ -43,10 +43,10 @@ class BasicTimeSeries : IStressProfile {
     lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
 
-    override fun prepare(session: Session) {
-        prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
-        getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
-        getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        prepared = session.prepare("INSERT INTO sensor_data$tableSuffix (sensor_id, timestamp, data) VALUES (?, ?, ?)")
+        getRow = session.prepare("SELECT * from sensor_data$tableSuffix WHERE sensor_id = ? AND timestamp = ? ")
+        getPartitionHead = session.prepare("SELECT * from sensor_data$tableSuffix WHERE sensor_id = ? LIMIT ?")
     }
 
     /**

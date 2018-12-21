@@ -179,7 +179,7 @@ class ProfileRunner(val context: StressContext,
     }
 
     fun prepare() {
-        profile.prepare(context.session)
+        profile.prepare(context.session, context.mainArguments.tableSuffix)
         val prefix = context.mainArguments.id + "." + context.thread + "."
         val sequenceGenerator = PartitionKeyGenerator.sequence(prefix)
 

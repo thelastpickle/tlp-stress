@@ -25,13 +25,13 @@ class KeyValue : IStressProfile {
 
     data class PrimaryKey(val first: String)
 
-    override fun prepare(session: Session) {
-        insert = session.prepare("INSERT INTO keyvalue (key, value) VALUES (?, ?)")
-        select = session.prepare("SELECT * from keyvalue WHERE key = ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        insert = session.prepare("INSERT INTO keyvalue$tableSuffix (key, value) VALUES (?, ?)")
+        select = session.prepare("SELECT * from keyvalue$tableSuffix WHERE key = ?")
     }
 
-    override fun schema(): List<String> {
-        val table = """CREATE TABLE IF NOT EXISTS keyvalue (
+    override fun schema(tableSuffix: String): List<String> {
+        val table = """CREATE TABLE IF NOT EXISTS keyvalue$tableSuffix (
                         key text PRIMARY KEY,
                         value text
                         )""".trimIndent()

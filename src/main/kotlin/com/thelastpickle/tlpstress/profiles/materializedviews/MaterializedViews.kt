@@ -15,25 +15,25 @@ import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {
 
-    override fun prepare(session: Session) {
-        insert = session.prepare("INSERT INTO person (name, age, city) values (?, ?, ?)")
-        select_base = session.prepare("SELECT * FROM person WHERE name = ?")
-        select_by_age = session.prepare("SELECT * FROM person_by_age WHERE age = ?")
-        select_by_city = session.prepare("SELECT * FROM person_by_city WHERE city = ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        insert = session.prepare("INSERT INTO person$tableSuffix (name, age, city) values (?, ?, ?)")
+        select_base = session.prepare("SELECT * FROM person$tableSuffix WHERE name = ?")
+        select_by_age = session.prepare("SELECT * FROM person_by_age$tableSuffix WHERE age = ?")
+        select_by_city = session.prepare("SELECT * FROM person_by_city$tableSuffix WHERE city = ?")
 
 
     }
 
-    override fun schema(): List<String> = listOf("""CREATE TABLE IF NOT EXISTS person
+    override fun schema(tableSuffix: String): List<String> = listOf("""CREATE TABLE IF NOT EXISTS person$tableSuffix
                         | (name text, age int, city text, primary key(name))""".trimMargin(),
 
-                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age AS
-                            |SELECT age, name, city FROM person
+                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_age$tableSuffix AS
+                            |SELECT age, name, city FROM person$tableSuffix
                             |WHERE age IS NOT NULL AND name IS NOT NULL
                             |PRIMARY KEY (age, name)""".trimMargin(),
 
-                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_city AS
-                            |SELECT city, name, age FROM person
+                        """CREATE MATERIALIZED VIEW IF NOT EXISTS person_by_city$tableSuffix AS
+                            |SELECT city, name, age FROM person$tableSuffix
                             |WHERE city IS NOT NULL AND name IS NOT NULL
                             |PRIMARY KEY (city, name) """.trimMargin())
 

@@ -19,13 +19,13 @@ class Maps : IStressProfile {
 
     data class PrimaryKey(val field: String)
 
-    override fun prepare(session: Session) {
-        insert = session.prepare("UPDATE map_stress SET data[?] = ? WHERE id = ?")
-        select = session.prepare("SELECT * from map_stress WHERE id = ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        insert = session.prepare("UPDATE map_stress$tableSuffix SET data[?] = ? WHERE id = ?")
+        select = session.prepare("SELECT * from map_stress$tableSuffix WHERE id = ?")
     }
 
-    override fun schema(): List<String> {
-        val query = """ CREATE TABLE IF NOT EXISTS map_stress (id text, data map<text, text>, primary key (id)) """
+    override fun schema(tableSuffix: String): List<String> {
+        val query = """ CREATE TABLE IF NOT EXISTS map_stress$tableSuffix (id text, data map<text, text>, primary key (id)) """
         return listOf(query)
     }
 

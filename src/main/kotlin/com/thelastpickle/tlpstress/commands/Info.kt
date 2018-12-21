@@ -16,7 +16,7 @@ class Info : IStressCommand {
         val plugin = Plugin.getPlugins().get(profile)!!
 
 
-        for(cql in plugin.instance.schema()) {
+        for(cql in plugin.instance.schema("")) {
             println(cql)
         }
 

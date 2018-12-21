@@ -15,14 +15,14 @@ class LWT : IStressProfile {
     lateinit var update: PreparedStatement
     lateinit var select: PreparedStatement
 
-    override fun schema(): List<String> {
-        return arrayListOf("""CREATE TABLE IF NOT EXISTS lwt (id text primary key, value int) """)
+    override fun schema(tableSuffix: String): List<String> {
+        return arrayListOf("""CREATE TABLE IF NOT EXISTS lwt$tableSuffix (id text primary key, value int) """)
     }
 
-    override fun prepare(session: Session) {
-        insert = session.prepare("INSERT INTO lwt (id, value) VALUES (?, ?) IF NOT EXISTS")
-        update = session.prepare("UPDATE lwt SET value = ? WHERE id = ? IF value = ?")
-        select = session.prepare("SELECT * from lwt WHERE id = ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        insert = session.prepare("INSERT INTO lwt$tableSuffix (id, value) VALUES (?, ?) IF NOT EXISTS")
+        update = session.prepare("UPDATE lwt$tableSuffix SET value = ? WHERE id = ? IF value = ?")
+        select = session.prepare("SELECT * from lwt$tableSuffix WHERE id = ?")
     }
 
 

@@ -10,6 +10,7 @@ import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
+import com.thelastpickle.tlpstress.converters.ValidTableNameConverter
 import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
 
@@ -84,7 +85,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--cl"], description = "Consistency level for reads/writes (Defaults to LOCAL_ONE).", converter = ConsistencyLevelConverter::class)
     var consistencyLevel = ConsistencyLevel.LOCAL_ONE
 
-    
+    @Parameter(names = ["--table-suffix"], description = "Suffix to add to the stress table name. Allows to have concurrent runners working on separate tables to spread the load efficiently.", converter = ValidTableNameConverter::class)
+    var tableSuffix = ""
+
     override fun execute() {
 
         // we're going to build one session per thread for now
@@ -110,6 +113,7 @@ class Run : IStressCommand {
         val session = cluster.connect()
 
         println("Connected")
+        println("table suffix: $tableSuffix")
 
         if(dropKeyspace) {
             println("Dropping $keyspace")
@@ -144,7 +148,7 @@ class Run : IStressCommand {
         } else null
 
         println("Creating Tables")
-        for (statement in plugin.instance.schema()) {
+        for (statement in plugin.instance.schema(tableSuffix)) {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)
                     .withCompression(compression)
@@ -168,7 +172,7 @@ class Run : IStressCommand {
         }
 
         println("Preparing queries")
-        plugin.instance.prepare(session)
+        plugin.instance.prepare(session, tableSuffix)
 
         println("Initializing metrics")
         val metrics = Metrics()

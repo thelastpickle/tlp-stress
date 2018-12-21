@@ -159,6 +159,16 @@ There are other generators available, such as names, gaussian numbers,
 and cities. Not every generator applies to every type. It’s up to the
 workload to specify which fields can be used this way.
 
+==== Table name suffix
+
+In order to start concurrent runners on separate tables but using the same profile, you can add a suffix to the table name by using the optional "--table-suffix" command line argument. It will add the provided value to the stress table name.
+Running the following:
+```
+tlp-stress run KeyValue --table-suffix "_test1"
+```
+
+will generate a table called `tlp_stress.sensor_data_test1` instead of the default `tlp_stress.sensor_data`.
+
 == Developer Docs
 
 === Building the documentation

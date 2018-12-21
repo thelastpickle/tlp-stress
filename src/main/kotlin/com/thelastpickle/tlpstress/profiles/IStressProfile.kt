@@ -32,7 +32,7 @@ interface IStressProfile {
      * the class should track all prepared statements internally
      * and pass them on to the Runner
      */
-    fun prepare(session: Session)
+    fun prepare(session: Session, tableSuffix: String)
     /**
      * returns a bunch of DDL statements
      * this can be create table, index, materialized view, etc
@@ -45,7 +45,7 @@ interface IStressProfile {
      * there are plenty of use cases where you would want a specific
      * compaction strategy most of the time (like a time series, or a cache)
      */
-    fun schema(): List<String>
+    fun schema(tableSuffix: String): List<String>
 
     /**
      * returns an instance of the stress runner for this particular class

@@ -16,14 +16,14 @@ class CountersWide : IStressProfile {
     lateinit var selectOne: PreparedStatement
     lateinit var selectAll: PreparedStatement
 
-    override fun prepare(session: Session) {
-        increment = session.prepare("UPDATE counter_wide SET value = value + 1 WHERE key = ? and cluster = ?")
-        selectOne = session.prepare("SELECT * from counter_wide WHERE key = ? AND cluster = ?")
-        selectAll = session.prepare("SELECT * from counter_wide WHERE key = ?")
+    override fun prepare(session: Session, tableSuffix: String) {
+        increment = session.prepare("UPDATE counter_wide$tableSuffix SET value = value + 1 WHERE key = ? and cluster = ?")
+        selectOne = session.prepare("SELECT * from counter_wide$tableSuffix WHERE key = ? AND cluster = ?")
+        selectAll = session.prepare("SELECT * from counter_wide$tableSuffix WHERE key = ?")
     }
 
-    override fun schema(): List<String> {
-        return listOf("""CREATE TABLE IF NOT EXISTS counter_wide (
+    override fun schema(tableSuffix: String): List<String> {
+        return listOf("""CREATE TABLE IF NOT EXISTS counter_wide$tableSuffix (
             | key text,
             | cluster bigint,
             | value counter,
