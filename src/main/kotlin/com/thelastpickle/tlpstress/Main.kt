@@ -13,11 +13,6 @@ fun main(argv: Array<String>) {
     } catch (e: Exception) {
         println(e.message)
         e.printStackTrace()
-    } finally {
-        // we exit here to kill the console thread otherwise it waits forever.
-        // I'm sure a reasonable fix exists, but I don't have time to look into it.
-        System.exit(0)
     }
-
 }
 

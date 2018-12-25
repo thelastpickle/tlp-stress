@@ -20,6 +20,7 @@ apply plugin: 'application'
 apply plugin: 'com.google.protobuf'
 apply plugin: 'idea'
 
+
 group 'com.thelastpickle'
 version '1.0-SNAPSHOT'
 
@@ -76,9 +77,9 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation 'com.google.guava:guava:27.0.1-jre'
 
-    implementation "io.grpc:grpc-netty:${grpcVersion}"
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    compile "io.grpc:grpc-netty:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${grpcVersion}"
+    compile "io.grpc:grpc-stub:${grpcVersion}"
 
     
     // https://mvnrepository.com/artifact/com.github.ajalt/mordant
@@ -103,8 +104,8 @@ compileTestKotlin {
 sourceSets {
     main.java.srcDirs += "src/main/kotlin"
     test.java.srcDirs += "src/test/kotlin"
-//    main.java.srcDirs += "build/generated/source/proto/main/grpc"
-//    main.java.srcDirs += "build/generated/source/proto/main/java"
+    main.java.srcDirs += "build/generated/source/proto/main/grpc"
+    main.java.srcDirs += "build/generated/source/proto/main/java"
 }
 
 test {
