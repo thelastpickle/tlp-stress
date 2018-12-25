@@ -27,8 +27,6 @@ class Daemon : IStressCommand {
         println("Terminated")
     }
 
-
-
     internal class DaemonServer : StressServerGrpc.StressServerImplBase() {
         init {
             println("Starting up daemon")
