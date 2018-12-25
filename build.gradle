@@ -103,8 +103,8 @@ compileTestKotlin {
 sourceSets {
     main.java.srcDirs += "src/main/kotlin"
     test.java.srcDirs += "src/test/kotlin"
-    main.java.srcDirs += "build/generated/source/proto/main/grpc"
-    main.java.srcDirs += "build/generated/source/proto/main/java"
+//    main.java.srcDirs += "build/generated/source/proto/main/grpc"
+//    main.java.srcDirs += "build/generated/source/proto/main/java"
 }
 
 test {

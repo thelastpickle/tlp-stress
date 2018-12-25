@@ -1,0 +1,15 @@
+syntax = "proto3";
+option java_package = "com.thelastpickle.tlpstress";
+option java_outer_classname = "StressProtoServer";
+
+service StressServer {
+    rpc RunWorkload (RunRequest) returns (RunReply) {}
+}
+
+message RunRequest {
+    string arguments = 1;
+}
+
+message RunReply {
+    string test = 1;
+}
