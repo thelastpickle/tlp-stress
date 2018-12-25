@@ -25,6 +25,9 @@ Usage: tlp-stress [options] [command] [command options]
           --drop
             Drop the keyspace before starting.
             Default: false
+          --duration, -d
+            Duration of the stress test.  Expressed in format 1d 3h 15m
+            Default: 0
           --field.
             Override a field's data generator
             Syntax: --field.key=value
@@ -40,7 +43,7 @@ Usage: tlp-stress [options] [command] [command options]
             Default: 001
           --iterations, -i, -n
             Number of operations to run.
-            Default: 1000
+            Default: 0
           --keyspace
             Keyspace to use
             Default: tlp_stress

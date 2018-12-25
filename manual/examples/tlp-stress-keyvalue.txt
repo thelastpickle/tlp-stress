@@ -18,9 +18,10 @@ Connecting
 Preparing
 1 threads prepared.
 Running
+[Thread 0]: Running the profile for 10000 iterations...
 [Thread 0]: Operations: 10000
 [Thread 0]: All operations complete.  Validating.
 Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   5020          14.74             0 |    4980          16.07             0 |       0                0
+   5028           8.66             0 |    4972           7.92             0 |       0                0
