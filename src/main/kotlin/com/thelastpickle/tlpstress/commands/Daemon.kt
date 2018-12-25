@@ -11,18 +11,27 @@ import io.grpc.stub.StreamObserver
 class Daemon : IStressCommand {
 
     override fun execute() {
-        val port = 5000
+        val port = 5001
 
-        ServerBuilder.forPort(port)
-                .addService(DaemonServer())
+        println("Starting daemon mode.")
+        val daemonServer = DaemonServer()
+        println("Hi")
+        val server = ServerBuilder.forPort(port)
+                .addService(daemonServer)
                 .build()
                 .start()
 
+        server.awaitTermination()
+        println("Terminated")
     }
 
 
 
     internal class DaemonServer : StressServerGrpc.StressServerImplBase() {
+        init {
+            println("Starting up daemon")
+        }
+
         override fun runWorkload(request: StressProtoServer.RunRequest?, responseObserver: StreamObserver<StressProtoServer.RunReply>?) {
             if(request == null || responseObserver == null)
                 return
