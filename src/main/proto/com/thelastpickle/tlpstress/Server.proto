@@ -3,13 +3,13 @@ option java_package = "com.thelastpickle.tlpstress";
 option java_outer_classname = "StressProtoServer";
 
 service StressServer {
-    rpc RunWorkload (RunRequest) returns (RunReply) {}
+    rpc RunWorkload (RunRequest) returns (stream RunStatus) {}
 }
 
 message RunRequest {
     string arguments = 1;
 }
 
-message RunReply {
+message RunStatus {
     string test = 1;
 }

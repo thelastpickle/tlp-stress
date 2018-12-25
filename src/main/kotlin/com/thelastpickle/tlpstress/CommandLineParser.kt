@@ -30,7 +30,7 @@ class CommandLineParser(val jCommander: JCommander,
             val commands = mapOf(
                     "run" to Run(),
                     "info" to Info(),
-                    "list" to com.thelastpickle.tlpstress.commands.List(),
+                    "list" to com.thelastpickle.tlpstress.commands.List<Any>(),
                     "daemon" to Daemon(),
                     "submit" to Submit())
 
