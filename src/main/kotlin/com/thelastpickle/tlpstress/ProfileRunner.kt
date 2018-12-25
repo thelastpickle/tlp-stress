@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
 import org.joda.time.DateTime
+import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
@@ -80,6 +81,8 @@ class ProfileRunner(val context: StressContext,
 
         val runner = profile.getRunner(context)
 
+        val executor =  Executors.newSingleThreadExecutor()
+
         for (key in partitionKeyGenerator.generateKey(if (duration > 0) Long.MAX_VALUE else iterations, context.mainArguments.partitionValues)) {
             if (duration > 0 && desiredEndTime.isBeforeNow()) {
                 break
@@ -108,18 +111,15 @@ class ProfileRunner(val context: StressContext,
             // that way this can be reused for the pre-population
             when (op) {
                 is Operation.Mutation -> {
-//                    logger.debug { op }
-
                     val startTime = context.metrics.mutations.time()
                     val future = context.session.executeAsync(op.bound)
+
 
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
                             context.metrics.errors.mark()
                             startTime.stop()
-
-
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -132,7 +132,7 @@ class ProfileRunner(val context: StressContext,
                             runner.onSuccess(op, result)
 
                         }
-                    })
+                    }, executor)
                 }
 
                 is Operation.SelectStatement -> {
@@ -153,7 +153,7 @@ class ProfileRunner(val context: StressContext,
                             startTime.stop()
 
                         }
-                    })
+                    }, executor)
                 }
             }
             operations++
@@ -183,6 +183,8 @@ class ProfileRunner(val context: StressContext,
         val prefix = context.mainArguments.id + "." + context.thread + "."
         val sequenceGenerator = PartitionKeyGenerator.sequence(prefix)
 
+        val executor =  Executors.newSingleThreadExecutor()
+
         // populate the DB with random values
         if(context.mainArguments.populate) {
             println("prepopulating")
@@ -208,7 +210,7 @@ class ProfileRunner(val context: StressContext,
                         override fun onSuccess(result: ResultSet?) {
                             sem.release()
                         }
-                    })
+                    }, executor)
 
                 }
             }
