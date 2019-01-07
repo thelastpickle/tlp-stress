@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.commands
 import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
+import com.beust.jcommander.converters.IParameterSplitter
 import com.datastax.driver.core.*
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
@@ -13,6 +14,14 @@ import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
 import com.thelastpickle.tlpstress.generators.Registry
 import java.util.concurrent.Semaphore
+
+class NoSplitter : IParameterSplitter {
+    override fun split(value: String?): MutableList<String> {
+        return mutableListOf(value!!)
+    }
+
+}
+
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
 class Run : IStressCommand {
@@ -86,6 +95,8 @@ class Run : IStressCommand {
     @Parameter(names = ["--cl"], description = "Consistency level for reads/writes (Defaults to LOCAL_ONE).", converter = ConsistencyLevelConverter::class)
     var consistencyLevel = ConsistencyLevel.LOCAL_ONE
 
+    @Parameter(names = ["--cql"], description = "Additional CQL to run after the schema is created.  Use for DDL modifications such as creating indexes.", splitter = NoSplitter::class)
+    var additionalCQL = mutableListOf<String>()
     
     override fun execute() {
 
@@ -157,6 +168,12 @@ class Run : IStressCommand {
                     .build()
             println(s)
             session.execute(s)
+        }
+
+        // run additional CQL
+        for (statement in additionalCQL) {
+            println(statement)
+            session.execute(statement)
         }
 
         val fieldRegistry = Registry.create()
