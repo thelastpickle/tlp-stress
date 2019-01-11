@@ -38,10 +38,10 @@ class LWT : IStressProfile {
 
                 val mutation = if(currentValue != null) {
                     newValue = currentValue + 1
-                    update.bind(0, partitionKey, newValue)
+                    update.bind(0, partitionKey.getText(), newValue)
                 } else {
                     newValue = 0
-                    insert.bind(partitionKey, newValue)
+                    insert.bind(partitionKey.getText(), newValue)
                 }
                 val payload = CallbackPayload(partitionKey.getText(), newValue)
                 return Operation.Mutation(mutation, payload)
