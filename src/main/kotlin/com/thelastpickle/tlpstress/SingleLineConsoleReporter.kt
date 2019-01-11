@@ -19,7 +19,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
     var lines = 0L
 
-    var opHeaders = listOf("Count", "Latency (p99)", "5min (req/s)")
+    var opHeaders = listOf("Count", "Latency (p99)", "1min (req/s)")
     var width = mutableMapOf<Int, Int>( ).withDefault { 0 }
 
     // initialize all the headers
@@ -60,7 +60,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
                 val duration = convertDuration(snapshot.get99thPercentile())
 
                 printColumn(duration, state.getAndIncrement())
-                printColumn(formatter.format(fiveMinuteRate), state.getAndIncrement())
+                printColumn(formatter.format(oneMinuteRate), state.getAndIncrement())
 
             }
             print(" | ")
@@ -68,7 +68,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         val errors = meters!!["errors"]!!
         printColumn(errors.count, state.getAndIncrement())
-        printColumn(formatter.format(errors.fiveMinuteRate), state.getAndIncrement())
+        printColumn(formatter.format(errors.oneMinuteRate), state.getAndIncrement())
 
 
         println()
@@ -139,7 +139,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
         }
 
-        val errorHeaders = arrayListOf("Count", "5min (errors/s)")
+        val errorHeaders = arrayListOf("Count", "1min (errors/s)")
         // TODO: refactor this + the above loop to be a single function
         for (h in errorHeaders) {
 
