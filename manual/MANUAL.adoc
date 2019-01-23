@@ -81,7 +81,7 @@ include::examples/tlp-stress-help.txt[]
 include::examples/list-all.txt[]
 ```
 
-=== Getting infomration about a workload
+=== Getting information about a workload
 
 It's possible to get (some) information about a workload by using the info command.  This area is a bit lacking at the moment.  It currently only provides the schema and default read rate.
 
@@ -96,7 +96,7 @@ Whenever possible we try to use human friendly numbers.  Typing out `-n 10000000
 
 .Table Human Friendly Values
 |===
-|Suffix|Implication|Example|Equivilent
+|Suffix|Implication|Example|Equivalent
 
 |k|Thousand|1k|1,000
 |m|Million|1m|1,000,000
@@ -108,11 +108,13 @@ Whenever possible we try to use human friendly numbers.  Typing out `-n 10000000
 
 You might need to run a stress test for a given duration instead of providing a number of operations, especially in case of multithreaded stress runs. This is done by providing the duration in a human readable format with the `-d` argument. The minimum duration is 1 minute.
 For example, running a test for 1 hours and 30 minutes will be done as follows:
+
 ```
 tlp-stress run KeyValue -d "1h 30m"
 ```
 
 To run a test for 1 days, 3 hours and 15 minutes (why not?), run tlp-stress as follows:
+
 ```
 tlp-stress run KeyValue -d "1d 3h 15m"
 ```
@@ -136,7 +138,7 @@ It's possible to change the compaction strategy used.  At the moment this change
 It's possible to change the compression options used.  At the moment this changes the compression options of every table in the test.  This will be addressed in the future to be more flexible.
 
 
-==== Customzing Fields
+==== Customizing Fields
 
 To some extent, workloads can be customized by leveraging the `--fields`
 flag. For instance, if we look at the KeyValue workload, we have a table
