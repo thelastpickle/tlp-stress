@@ -24,14 +24,18 @@ class PartitionKeyGenerator(
             var current = 0L
             return PartitionKeyGenerator({max -> current++ }, prefix)
         }
+        fun normal(prefix: String = "test") : PartitionKeyGenerator {
+            return PartitionKeyGenerator({max ->
+                (ThreadLocalRandom.current().nextGaussian() * max.toDouble()).toLong()  }, prefix  )
+        }
     }
 
 
-    fun generateKey(total: Long, maxId: Long = 100000) = buildSequence {
+    fun generateKey(total: Long, maxId: Long = 100000) = sequence {
         var i : Long = 0
         while(true) {
             val tmp = genFunc(maxId)
-//            val result = prefix + tmp.toString()
+
             val result = PartitionKey(prefix, tmp)
             yield(result)
             i++
