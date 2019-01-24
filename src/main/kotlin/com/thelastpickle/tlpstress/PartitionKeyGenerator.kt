@@ -17,13 +17,24 @@ class PartitionKeyGenerator(
      *
      */
     companion object {
+        /**
+         *
+         */
         fun random(prefix: String = "test") : PartitionKeyGenerator {
             return PartitionKeyGenerator({max -> ThreadLocalRandom.current().nextLong(1, max) }, prefix)
         }
+
+        /**
+         *
+         */
         fun sequence(prefix: String = "test") : PartitionKeyGenerator {
             var current = 0L
             return PartitionKeyGenerator({max -> current++ }, prefix)
         }
+
+        /**
+         * Gaussian distribution
+         */
         fun normal(prefix: String = "test") : PartitionKeyGenerator {
             return PartitionKeyGenerator({max ->
                 (ThreadLocalRandom.current().nextGaussian() * max.toDouble()).toLong()  }, prefix  )
