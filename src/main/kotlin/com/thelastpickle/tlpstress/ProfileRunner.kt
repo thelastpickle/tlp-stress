@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
-
+class PartitionKeyGeneratorException(e: String) : Exception()
 
 /**
  * Single threaded profile runner.
@@ -24,7 +24,12 @@ class ProfileRunner(val context: StressContext,
     companion object {
         fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
             val prefix = context.mainArguments.id + "." + context.thread + "."
-            val partitionKeyGenerator = PartitionKeyGenerator.random(prefix)
+            val partitionKeyGenerator = when(context.mainArguments.partitionKeyGenerator) {
+                "normal" -> PartitionKeyGenerator.normal(prefix)
+                "random" -> PartitionKeyGenerator.random(prefix)
+                "sequence" -> PartitionKeyGenerator.sequence(prefix)
+                else -> throw PartitionKeyGeneratorException("not a valid generator")
+            }
 
             return ProfileRunner(context, profile, partitionKeyGenerator)
         }

@@ -29,7 +29,13 @@ class PartitionKeyGenerator(
          */
         fun sequence(prefix: String = "test") : PartitionKeyGenerator {
             var current = 0L
-            return PartitionKeyGenerator({max -> current++ }, prefix)
+            return PartitionKeyGenerator(
+                    {
+                        max ->
+                        if(current > max)
+                            current = 0
+                        current++
+                    }, prefix)
         }
 
         /**

@@ -97,12 +97,17 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--cql"], description = "Additional CQL to run after the schema is created.  Use for DDL modifications such as creating indexes.", splitter = NoSplitter::class)
     var additionalCQL = mutableListOf<String>()
+
+    @Parameter(names = ["--partitiongenerator", "--pg"], description = "Method of generating partition keys.  Supports random, normal (gaussian), and sequence.")
+    var partitionKeyGenerator: String = "random"
     
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
         iterations = if (duration == 0 && iterations == 0L) DEFAULT_ITERATIONS else iterations // apply the default if the number of iterations wasn't set
 
+
+        Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
         // we're going to build one session per thread for now
         val cluster = Cluster.builder()
