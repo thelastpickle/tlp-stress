@@ -1,7 +1,8 @@
 package com.thelastpickle.tlpstress
 
 import java.util.concurrent.ThreadLocalRandom
-import kotlin.coroutines.experimental.buildSequence
+
+import org.apache.commons.math3.random.RandomDataGenerator
 
 /**
  * Accepts a function that generates numbers.
@@ -42,8 +43,17 @@ class PartitionKeyGenerator(
          * Gaussian distribution
          */
         fun normal(prefix: String = "test") : PartitionKeyGenerator {
-            return PartitionKeyGenerator({max ->
-                (ThreadLocalRandom.current().nextGaussian() * max.toDouble()).toLong()  }, prefix  )
+            val generator = RandomDataGenerator()
+            return PartitionKeyGenerator({ max ->
+                var result = 0L
+                while(true) {
+                    val mid = (max / 2).toDouble()
+                    result = generator.nextGaussian(mid, mid / 4.0).toLong()
+                    if(result in 0..max)
+                        break
+                }
+                result
+            }, prefix)
         }
     }
 

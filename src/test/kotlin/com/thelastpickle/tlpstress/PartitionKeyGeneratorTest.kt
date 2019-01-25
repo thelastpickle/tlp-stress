@@ -28,4 +28,13 @@ internal class PartitionKeyGeneratorTest {
         assertThat(data).isEqualTo(listOf(0,1,2,0,1))
 
     }
+
+    @Test
+    fun testNormal() {
+        val p = PartitionKeyGenerator.normal("test")
+        for (x in p.generateKey(1000, 1000)) {
+
+        }
+
+    }
 }

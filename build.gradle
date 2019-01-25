@@ -74,6 +74,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.github.ajalt/mordant
     compile group: 'com.github.ajalt', name: 'mordant', version: '1.1.0'
 
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.1.0'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.9.1'
     testCompile "org.jetbrains.kotlin:kotlin-test"
