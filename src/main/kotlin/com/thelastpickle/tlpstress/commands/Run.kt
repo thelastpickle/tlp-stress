@@ -5,6 +5,8 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
 import com.datastax.driver.core.*
+import com.datastax.driver.core.policies.HostFilterPolicy
+import com.datastax.driver.core.policies.RoundRobinPolicy
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
@@ -100,6 +102,9 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--partitiongenerator", "--pg"], description = "Method of generating partition keys.  Supports random, normal (gaussian), and sequence.")
     var partitionKeyGenerator: String = "random"
+
+    @Parameter(names = ["--coordinatorOnly", "--co"])
+    var coordinatorOnlyMode = false
     
     override fun execute() {
 
@@ -110,7 +115,7 @@ class Run : IStressCommand {
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
         // we're going to build one session per thread for now
-        val cluster = Cluster.builder()
+        var builder = Cluster.builder()
                 .addContactPoint(host)
                 .withCredentials(username, password)
                 .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
@@ -119,7 +124,15 @@ class Run : IStressCommand {
                         .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
                         .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
                         .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
-                .build()
+
+        if(coordinatorOnlyMode) {
+            println("Using experimental coordinator only mode.")
+            val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
+            builder = builder.withLoadBalancingPolicy(policy)
+        }
+
+
+        val cluster = builder.build()
 
         // set up the keyspace
 //        val commandArgs = parser.getParsedPlugin()!!.arguments
