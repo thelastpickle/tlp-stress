@@ -50,7 +50,7 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-text', version: '1.3'
 
     // https://mvnrepository.com/artifact/com.datastax.cassandra/cassandra-driver-core
-    compile group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.5.1'
+    compile group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.6.0'
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
 
     // https://mvnrepository.com/artifact/org.reflections/reflections
