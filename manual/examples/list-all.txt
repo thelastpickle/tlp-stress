@@ -1,11 +1,11 @@
 $ bin/tlp-stress list
 Available Workloads:
 
-LWT 
-CountersWide 
-MaterializedViews 
-BasicTimeSeries 
 KeyValue 
+LWT 
+MaterializedViews 
+CountersWide 
 Maps 
+BasicTimeSeries 
 
 Done.

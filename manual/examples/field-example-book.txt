@@ -1,6 +1,6 @@
 $ bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)'
 Creating schema
-Executing 1000 operations with consistency level LOCAL_ONE
+Executing 1000000 operations with consistency level LOCAL_ONE
 Connected
 Creating tlp_stress: 
 CREATE KEYSPACE

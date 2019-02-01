@@ -23,5 +23,5 @@ Running
 [Thread 0]: All operations complete.  Validating.
 Stress complete, 1.
                   Writes                                    Reads                  Errors
-  Count  Latency (p99)  5min (req/s) |   Count  Latency (p99)  5min (req/s) |   Count  5min (errors/s)
-   5028           8.66             0 |    4972           7.92             0 |       0                0
+  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
+   5014          31.61             0 |    4986          30.79             0 |       0                0

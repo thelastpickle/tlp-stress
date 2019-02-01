@@ -22,6 +22,16 @@ Usage: tlp-stress [options] [command] [command options]
           --concurrency, -c
             Concurrent queries allowed.  Increase for larger clusters.
             Default: 100
+          --coordinatorOnly, --co
+            Coordinator only made.  This will cause tlp-stress to round robin 
+            between nodes without tokens.  Requires using -Djoin_ring=false in 
+            cassandra-env.sh.  When using this option you must only provide a 
+            coordinator to --host.
+            Default: false
+          --cql
+            Additional CQL to run after the schema is created.  Use for DDL 
+            modifications such as creating indexes.
+            Default: []
           --drop
             Drop the keyspace before starting.
             Default: false
@@ -47,6 +57,10 @@ Usage: tlp-stress [options] [command] [command options]
           --keyspace
             Keyspace to use
             Default: tlp_stress
+          --partitiongenerator, --pg
+            Method of generating partition keys.  Supports random, normal 
+            (gaussian), and sequence.
+            Default: random
           --partitions, -p
             Max value of integer component of first partition key.
             Default: 1000000
