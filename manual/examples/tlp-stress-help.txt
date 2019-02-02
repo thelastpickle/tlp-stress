@@ -22,7 +22,7 @@ Usage: tlp-stress [options] [command] [command options]
           --concurrency, -c
             Concurrent queries allowed.  Increase for larger clusters.
             Default: 100
-          --coordinatorOnly, --co
+          --coordinatoronly, --co
             Coordinator only made.  This will cause tlp-stress to round robin 
             between nodes without tokens.  Requires using -Djoin_ring=false in 
             cassandra-env.sh.  When using this option you must only provide a 
