@@ -241,7 +241,7 @@ class Run : IStressCommand {
 
         println("$executed threads prepared.")
 
-        metricsList.map { it.startReporting() }
+        metricsList.forEach { it.startReporting() }
 
         val runnersExecuted = runners.parallelStream().map {
             println("Running")
@@ -254,7 +254,7 @@ class Run : IStressCommand {
         Thread.sleep(1000)
 
         // dump out metrics
-        metricsList.map { it.reporter.report() }
+        metricsList.forEach { it.reporter.report() }
     }
 
 }
