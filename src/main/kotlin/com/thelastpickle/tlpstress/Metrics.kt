@@ -1,19 +1,17 @@
 package com.thelastpickle.tlpstress
 
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.ScheduledReporter
 import java.util.concurrent.TimeUnit
 
-class Metrics {
-    val metrics = MetricRegistry()
-
-    val reporter = SingleLineConsoleReporter(metrics)
+class Metrics(metricRegistry: MetricRegistry, val reporter: ScheduledReporter) {
 
     fun startReporting() {
         reporter.start(3, TimeUnit.SECONDS)
     }
 
-    val errors = metrics.meter("errors")
-    val mutations = metrics.timer("mutations")
-    val selects = metrics.timer("selects")
+    val errors = metricRegistry.meter("errors")
+    val mutations = metricRegistry.timer("mutations")
+    val selects = metricRegistry.timer("selects")
 
 }

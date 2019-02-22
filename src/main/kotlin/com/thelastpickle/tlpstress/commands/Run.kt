@@ -4,6 +4,7 @@ import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
+import com.codahale.metrics.MetricRegistry
 import com.datastax.driver.core.*
 import com.datastax.driver.core.policies.HostFilterPolicy
 import com.datastax.driver.core.policies.RoundRobinPolicy
@@ -105,6 +106,9 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--coordinatoronly", "--co"], description = "Coordinator only made.  This will cause tlp-stress to round robin between nodes without tokens.  Requires using -Djoin_ring=false in cassandra-env.sh.  When using this option you must only provide a coordinator to --host.")
     var coordinatorOnlyMode = false
+
+    @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
+    var writeToCsv = false
     
     override fun execute() {
 
@@ -212,7 +216,13 @@ class Run : IStressCommand {
         plugin.instance.prepare(session)
 
         println("Initializing metrics")
-        val metrics = Metrics()
+        val registry = MetricRegistry()
+        val reporter = if (writeToCsv) {
+            FileReporter(registry)
+        } else {
+            SingleLineConsoleReporter(registry)
+        }
+        val metrics = Metrics(registry, reporter)
 
         val permits = concurrency
 
@@ -229,7 +239,6 @@ class Run : IStressCommand {
         }.count()
 
         println("$executed threads prepared.")
-
 
         metrics.startReporting()
 
