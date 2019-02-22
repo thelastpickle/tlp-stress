@@ -4,10 +4,11 @@ import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
 import java.util.concurrent.TimeUnit
 
-class Metrics(metricRegistry: MetricRegistry, val reporter: ScheduledReporter) {
+class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>) {
 
     fun startReporting() {
-        reporter.start(3, TimeUnit.SECONDS)
+        for(reporter in reporters)
+            reporter.start(3, TimeUnit.SECONDS)
     }
 
     val errors = metricRegistry.meter("errors")

@@ -14,3 +14,4 @@
 conf/logback.xml
 settings.gradle
 *.deb
+/metrics*

@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.ScheduledReporter
 import com.datastax.driver.core.*
 import com.datastax.driver.core.policies.HostFilterPolicy
 import com.datastax.driver.core.policies.RoundRobinPolicy
@@ -217,12 +218,15 @@ class Run : IStressCommand {
 
         println("Initializing metrics")
         val registry = MetricRegistry()
-        val reporter = if (writeToCsv) {
-            FileReporter(registry)
-        } else {
-            SingleLineConsoleReporter(registry)
+
+        val reporters = mutableListOf<ScheduledReporter>()
+
+        if(writeToCsv) {
+            reporters.add(FileReporter(registry))
         }
-        val metrics = Metrics(registry, reporter)
+        reporters.add(SingleLineConsoleReporter(registry))
+
+        val metrics = Metrics(registry, reporters)
 
         val permits = concurrency
 
@@ -253,7 +257,9 @@ class Run : IStressCommand {
         Thread.sleep(1000)
 
         // dump out metrics
-        metrics.reporter.report()
+        for(reporter in metrics.reporters) {
+            reporter.report()
+        }
     }
 
 }
