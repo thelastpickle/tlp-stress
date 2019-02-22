@@ -115,14 +115,14 @@ class ProfileRunner(val context: StressContext,
                 is Operation.Mutation -> {
 //                    logger.debug { op }
 
-                    val startTimes = context.metricsList.map { it.mutations.time() }
+                    val startTime = context.metrics.mutations.time()
                     val future = context.session.executeAsync(op.bound)
 
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
-                            context.metricsList[0].errors.mark()
-                            startTimes.forEach { it.stop() }
+                            context.metrics.errors.mark()
+                            startTime.stop()
 
                         }
 
@@ -132,21 +132,20 @@ class ProfileRunner(val context: StressContext,
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
 //                            sampler.maybePut(op.partitionKey, op.fields)
-                            startTimes.forEach { it.stop() }
+                            startTime.stop()
                             runner.onSuccess(op, result)
-
                         }
                     })
                 }
 
                 is Operation.SelectStatement -> {
-                    val startTimes = context.metricsList.map { it.selects.time() }
+                    val startTime = context.metrics.selects.time()
                     val future = context.session.executeAsync(op.bound)
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
-                            context.metricsList[0].errors.mark()
-                            startTimes.forEach { it.stop() }
+                            context.metrics.errors.mark()
+                            startTime.stop()
                         }
 
                         override fun onSuccess(result: ResultSet?) {
@@ -154,8 +153,7 @@ class ProfileRunner(val context: StressContext,
                             // if the key returned in the Mutation exists in the sampler, store the fields
                             // if not, use the sampler frequency
                             // need to be mindful of memory, frequency is a stopgap
-                            startTimes.forEach { it.stop() }
-
+                            startTime.stop()
                         }
                     })
                 }

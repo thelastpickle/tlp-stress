@@ -4,6 +4,7 @@ import com.beust.jcommander.DynamicParameter
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
+import com.codahale.metrics.Metric
 import com.codahale.metrics.MetricRegistry
 import com.datastax.driver.core.*
 import com.datastax.driver.core.policies.HostFilterPolicy
@@ -217,20 +218,21 @@ class Run : IStressCommand {
 
         println("Initializing metrics")
         val registry = MetricRegistry()
-        val consoleMetrics = Metrics(registry, SingleLineConsoleReporter(registry))
-        val metricsList = if (writeToCsv) {
-            val fileMetrics = Metrics(registry, FileReporter(registry))
-            listOf(consoleMetrics, fileMetrics)
+        val consoleReporter = SingleLineConsoleReporter(registry)
+        val reporterList = if (writeToCsv) {
+            val fileReporter = FileReporter(registry)
+            listOf(consoleReporter, fileReporter)
         } else {
-            listOf(consoleMetrics)
+            listOf(consoleReporter)
         }
+        val metrics = Metrics(registry, reporterList)
 
         val permits = concurrency
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metricsList, permits.toInt(), fieldRegistry, rateLimiter)
+            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 
@@ -241,7 +243,7 @@ class Run : IStressCommand {
 
         println("$executed threads prepared.")
 
-        metricsList.forEach { it.startReporting() }
+        metrics.startReporting()
 
         val runnersExecuted = runners.parallelStream().map {
             println("Running")
@@ -254,7 +256,7 @@ class Run : IStressCommand {
         Thread.sleep(1000)
 
         // dump out metrics
-        metricsList.forEach { it.reporter.report() }
+        metrics.reporters.forEach{ it.report() }
     }
 
 }
