@@ -17,9 +17,9 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
 ) {
     private val startingTimestamp = Instant.now().toString()
     private val metricsDir = "metrics-$startingTimestamp"
-    private val readFilename = "$metricsDir/read-$startingTimestamp.csv"
-    private val writeFilename = "$metricsDir/write-$startingTimestamp.csv"
-    private val errorFilename = "$metricsDir/error-$startingTimestamp.csv"
+    private val readFilename = "$metricsDir/read.csv"
+    private val writeFilename = "$metricsDir/write.csv"
+    private val errorFilename = "$metricsDir/error.csv"
 
     private val opHeaders = listOf("Timestamp", "Count", "Latency (p99)", "1min (req/s)").joinToString(",")
     private val errorHeaders = listOf("Timestamp", "Count", "1min (errors/s)").joinToString(",")
@@ -60,7 +60,6 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
                 .joinToString(",")
         writeToFile(errorFilename, errorRow)
     }
-
 
     fun writeToFile(filename: String, text: String) {
         FileWriter(filename, true).use { out ->
