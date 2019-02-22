@@ -217,19 +217,20 @@ class Run : IStressCommand {
 
         println("Initializing metrics")
         val registry = MetricRegistry()
-        val reporter = if (writeToCsv) {
-            FileReporter(registry)
+        val consoleMetrics = Metrics(registry, SingleLineConsoleReporter(registry))
+        val metricsList = if (writeToCsv) {
+            val fileMetrics = Metrics(registry, FileReporter(registry))
+            listOf(consoleMetrics, fileMetrics)
         } else {
-            SingleLineConsoleReporter(registry)
+            listOf(consoleMetrics)
         }
-        val metrics = Metrics(registry, reporter)
 
         val permits = concurrency
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
+            val context = StressContext(session, this, it, metricsList, permits.toInt(), fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 
@@ -240,7 +241,7 @@ class Run : IStressCommand {
 
         println("$executed threads prepared.")
 
-        metrics.startReporting()
+        metricsList.map { it.startReporting() }
 
         val runnersExecuted = runners.parallelStream().map {
             println("Running")
@@ -253,7 +254,7 @@ class Run : IStressCommand {
         Thread.sleep(1000)
 
         // dump out metrics
-        metrics.reporter.report()
+        metricsList.map { it.reporter.report() }
     }
 
 }

@@ -115,13 +115,13 @@ class ProfileRunner(val context: StressContext,
                 is Operation.Mutation -> {
 //                    logger.debug { op }
 
-                    val startTime = context.metrics.mutations.time()
+                    val startTime = context.metricsList[0].mutations.time()
                     val future = context.session.executeAsync(op.bound)
 
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
-                            context.metrics.errors.mark()
+                            context.metricsList.map { it.errors.mark() }
                             startTime.stop()
 
 
@@ -141,12 +141,12 @@ class ProfileRunner(val context: StressContext,
                 }
 
                 is Operation.SelectStatement -> {
-                    val startTime = context.metrics.selects.time()
+                    val startTime = context.metricsList[0].selects.time()
                     val future = context.session.executeAsync(op.bound)
                     Futures.addCallback(future, object : FutureCallback<ResultSet> {
                         override fun onFailure(t: Throwable?) {
                             sem.release()
-                            context.metrics.errors.mark()
+                            context.metricsList.map { it.errors.mark() }
                             startTime.stop()
                         }
 
