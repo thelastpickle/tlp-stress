@@ -20,7 +20,8 @@ data class Plugin (val name: String,
             val r = Reflections("com.thelastpickle.tlpstress")
             val modules = r.getSubTypesOf(IStressProfile::class.java)
 
-            var result = mutableMapOf<String, Plugin>()
+
+            var result = sortedMapOf<String, Plugin>()
 
             for(m in modules) {
                 val instance = m.getConstructor().newInstance()
