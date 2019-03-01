@@ -103,3 +103,7 @@ test {
 task docs(type:Exec) {
     commandLine 'docker-compose', 'up', 'docs'
 }
+
+task deb(type:Exec) {
+    commandLine "docker-compose", "up", "deb"
+}
