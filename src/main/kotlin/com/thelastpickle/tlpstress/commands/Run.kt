@@ -87,7 +87,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--replication"], description = "Replication options")
     var replication = "{'class': 'SimpleStrategy', 'replication_factor':3 }"
 
-    @DynamicParameter(names = ["--field."], description = "Override a field's data generator")
+    @DynamicParameter(names = ["--field."], description = "Override a field's data generator.  Example usage: --field.tablename.fieldname='book(100,200)'")
     var fields = mutableMapOf<String, String>()
 
     @Parameter(names = ["--rate"], description = "Rate limiter, accepts human numbers. 0 = disabled", converter = HumanReadableConverter::class)

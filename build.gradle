@@ -98,3 +98,8 @@ sourceSets {
 test {
     useJUnitPlatform()
 }
+
+
+task docs(type:Exec) {
+    commandLine 'docker-compose', 'up', 'docs'
+}
