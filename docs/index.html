@@ -455,6 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_running_a_customized_stress_workload">Running a Customized Stress Workload</a></li>
 <li><a href="#_running_a_stress_test_for_a_given_duration_instead_of_a_number_of_operations">Running a stress test for a given duration instead of a number of operations</a></li>
 <li><a href="#_logging">Logging</a></li>
+<li><a href="#_exporting_metrics">Exporting Metrics</a></li>
 </ul>
 </li>
 <li><a href="#_developer_docs">Developer Docs</a>
@@ -852,6 +853,12 @@ workload to specify which fields can be used this way.</p>
 <div class="paragraph">
 <p>To use a different logging configuration, simply set the shell variable <code>TLP_STRESS_LOGBACK</code> to the path of the new logging configuration before running <code>tlp-stress</code></p>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_exporting_metrics">Exporting Metrics</h3>
+<div class="paragraph">
+<p>tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9500.</p>
+</div>
 <div class="sect3">
 <h4 id="_example">Example</h4>
 <div class="paragraph">
@@ -912,7 +919,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-03-01 19:24:15 UTC
+Last updated 2019-03-02 00:11:45 UTC
 </div>
 </div>
 </body>
