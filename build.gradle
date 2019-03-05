@@ -112,4 +112,6 @@ task docs(type:Exec) {
 
 task deb(type:Exec) {
     commandLine "docker-compose", "up", "deb"
+
 }
+deb.dependsOn assemble
