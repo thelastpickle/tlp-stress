@@ -171,7 +171,7 @@ To use a different logging configuration, simply set the shell variable `TLP_STR
 
 === Exporting Metrics
 
-tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9500.
+tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9501.
 
 ==== Example
 
