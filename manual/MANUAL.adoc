@@ -126,7 +126,7 @@ A very useful feature is controlling how many partitions are read and written to
 
 ==== Read Rate
 
-It's possible to specify the read rate of a test as a double.  For example, if you want to use 1% writes, you'd specify `-r .01`.
+It's possible to specify the read rate of a test as a double.  For example, if you want to use 1% reads, you'd specify `-r .01`.
 
 ==== Compaction
 
