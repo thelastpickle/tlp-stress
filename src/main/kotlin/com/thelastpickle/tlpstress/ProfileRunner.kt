@@ -17,6 +17,9 @@ class PartitionKeyGeneratorException(e: String) : Exception()
  * Logs all errors along the way
  * Keeps track of useful metrics, per thread
  */
+
+
+
 class ProfileRunner(val context: StressContext,
                     val profile: IStressProfile,
                     val partitionKeyGenerator: PartitionKeyGenerator) {
@@ -68,15 +71,12 @@ class ProfileRunner(val context: StressContext,
         executeOperations(context.mainArguments.iterations, context.mainArguments.duration)
 
         print("All operations complete.  Validating.")
-        // put a countdownlatch here, wait to validate
-        validate()
     }
 
     /**
      * Used for both pre-populating data and for performing the actual runner
      */
     private fun executeOperations(iterations: Long, duration: Int) {
-        // we're going to (for now) only keep 1000 in flight queries per session
 
         val desiredEndTime = DateTime.now().plusMinutes(duration)
         var operations = 0
@@ -109,79 +109,22 @@ class ProfileRunner(val context: StressContext,
 
             sem.acquire()
 
-            // TODO: instead of using the context request & errors, pass them in
-            // that way this can be reused for the pre-population
-            when (op) {
-                is Operation.Mutation -> {
-//                    logger.debug { op }
-
-                    val startTime = context.metrics.mutations.time()
-                    val future = context.session.executeAsync(op.bound)
-
-                    Futures.addCallback(future, object : FutureCallback<ResultSet> {
-                        override fun onFailure(t: Throwable?) {
-                            sem.release()
-                            context.metrics.errors.mark()
-                            startTime.stop()
-
-
-                        }
-
-                        override fun onSuccess(result: ResultSet?) {
-                            sem.release()
-                            // if the key returned in the Mutation exists in the sampler, store the fields
-                            // if not, use the sampler frequency
-                            // need to be mindful of memory, frequency is a stopgap
-//                            sampler.maybePut(op.partitionKey, op.fields)
-                            startTime.stop()
-                            runner.onSuccess(op, result)
-
-                        }
-                    })
-                }
-
-                is Operation.SelectStatement -> {
-                    val startTime = context.metrics.selects.time()
-                    val future = context.session.executeAsync(op.bound)
-                    Futures.addCallback(future, object : FutureCallback<ResultSet> {
-                        override fun onFailure(t: Throwable?) {
-                            sem.release()
-                            context.metrics.errors.mark()
-                            startTime.stop()
-                        }
-
-                        override fun onSuccess(result: ResultSet?) {
-                            sem.release()
-                            // if the key returned in the Mutation exists in the sampler, store the fields
-                            // if not, use the sampler frequency
-                            // need to be mindful of memory, frequency is a stopgap
-                            startTime.stop()
-
-                        }
-                    })
-                }
+            val startTime = when(op) {
+                is Operation.Mutation -> context.metrics.mutations.time()
+                is Operation.SelectStatement -> context.metrics.selects.time()
             }
+
+            val future = context.session.executeAsync(op.bound)
+            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op) )
+
             operations++
         }
 
         // block until all the queries are finished
         sem.acquireUninterruptibly(context.permits)
         print("Operations: $operations")
-
-        // wait for outstanding operations to complete
-
     }
 
-    /**
-     * TODO return validation statistics
-     */
-    fun validate() {
-        // sampler needs to be rethought
-//        print("Verifying dataset ${sampler.size()} samples.")
-//        val stats = sampler.validate()
-//        print("Stats: $stats")
-
-    }
 
     fun prepare() {
         profile.prepare(context.session)
@@ -198,8 +141,6 @@ class ProfileRunner(val context: StressContext,
             // for now, simply generate a single value for each partition key
             for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues)) {
                 sem.acquire()
-
-
 
                 val op = runner.getNextMutation(key)
                 if(op is Operation.Mutation) {

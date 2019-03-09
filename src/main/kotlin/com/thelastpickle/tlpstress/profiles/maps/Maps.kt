@@ -8,8 +8,6 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
-import com.thelastpickle.tlpstress.samplers.ISampler
-import com.thelastpickle.tlpstress.samplers.NoOpSampler
 
 
 class Maps : IStressProfile {

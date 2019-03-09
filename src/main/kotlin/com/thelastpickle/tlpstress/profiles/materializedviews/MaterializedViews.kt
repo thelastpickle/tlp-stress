@@ -9,8 +9,6 @@ import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
-import com.thelastpickle.tlpstress.samplers.ISampler
-import com.thelastpickle.tlpstress.samplers.NoOpSampler
 import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {

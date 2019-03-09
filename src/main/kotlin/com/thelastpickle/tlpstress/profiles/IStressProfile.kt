@@ -7,8 +7,6 @@ import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.DataGenerator
 import com.thelastpickle.tlpstress.generators.Field
-import com.thelastpickle.tlpstress.samplers.ISampler
-import com.thelastpickle.tlpstress.samplers.NoOpSampler
 
 interface IStressRunner {
     fun getNextMutation(partitionKey: PartitionKey) : Operation
@@ -70,26 +68,20 @@ interface IStressProfile {
      */
     fun getFieldGenerators() : Map<Field, DataGenerator> = mapOf()
 
-    /**
-     * returns an instance of ISampler.
-     */
-    fun getSampler(session: Session, sampleRate: Double) : ISampler { return NoOpSampler() }
-
     fun getDefaultReadRate() : Double { return .01 }
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
 }
 
 
-sealed class Operation {
+sealed class Operation(val bound: BoundStatement) {
     // we're going to track metrics on the mutations differently
     // inserts will also carry data that might be saved for later validation
     // clustering keys won't be realistic to compute in the framework
 
-    data class Mutation(val bound: BoundStatement, val callbackPayload: Any? = null ) : Operation()
+    class Mutation(bound: BoundStatement, val callbackPayload: Any? = null ) : Operation(bound)
 
-    data class SelectStatement(var bound: BoundStatement): Operation()
-    // JMX commands
+    class SelectStatement(bound: BoundStatement): Operation(bound)
 
 
 }
