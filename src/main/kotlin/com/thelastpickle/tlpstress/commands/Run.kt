@@ -68,8 +68,8 @@ class Run : IStressCommand {
     @Parameter(names = ["--concurrency", "-c"], description = "Concurrent queries allowed.  Increase for larger clusters.", converter = HumanReadableConverter::class)
     var concurrency = 100L
 
-    @Parameter(names = ["--populate"], description = "Pre-population the DB")
-    var populate = false
+    @Parameter(names = ["--populate"], description = "Pre-population the DB with N rows before starting load test.", converter = HumanReadableConverter::class)
+    var populate = 0L
 
     @Parameter(names = ["--threads", "-t"], description = "Threads to run")
     var threads = 1
@@ -238,11 +238,17 @@ class Run : IStressCommand {
         }
 
         val executed = runners.parallelStream().map {
-            println("Preparing")
+            println("Preparing statements.")
             it.prepare()
         }.count()
 
         println("$executed threads prepared.")
+
+        val populationResult = runners.parallelStream().map {
+            println("Pre-populating database")
+            it.populate(populate)
+        }.count()
+
 
         metrics.startReporting()
 

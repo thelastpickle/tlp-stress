@@ -62,7 +62,8 @@ class ProfileRunner(val context: StressContext,
      */
     fun run() {
 
-        // need to add a warmup / populate phase
+//        populate(context.mainArguments.populate)
+
         if (context.mainArguments.duration == 0) {
             print("Running the profile for ${context.mainArguments.iterations} iterations...")
         } else {
@@ -70,7 +71,7 @@ class ProfileRunner(val context: StressContext,
         }
         executeOperations(context.mainArguments.iterations, context.mainArguments.duration)
 
-        print("All operations complete.  Validating.")
+        print("All operations complete.")
     }
 
     /**
@@ -85,7 +86,10 @@ class ProfileRunner(val context: StressContext,
 
         val runner = profile.getRunner(context)
 
-        for (key in partitionKeyGenerator.generateKey(if (duration > 0) Long.MAX_VALUE else iterations, context.mainArguments.partitionValues)) {
+        // we use MAX_VALUE since it's essentially infinite if we give a duration
+        val totalValues = if (duration > 0) Long.MAX_VALUE else iterations
+
+        for (key in partitionKeyGenerator.generateKey(totalValues, context.mainArguments.partitionValues)) {
             if (duration > 0 && desiredEndTime.isBeforeNow()) {
                 break
             }
@@ -125,43 +129,41 @@ class ProfileRunner(val context: StressContext,
         print("Operations: $operations")
     }
 
+    fun populate(numRows: Long) : Long {
+        println("Prepopulating with $numRows")
+
+        val sem = Semaphore(context.permits)
+        val runner = profile.getRunner(context)
+
+        var inserted = 0L
+        // for now, simply generate a single value for each partition key
+        for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
+
+            sem.acquire()
+
+            val op = runner.getNextMutation(key) as Operation.Mutation
+            val future = context.session.executeAsync(op.bound)
+            Futures.addCallback(future, object : FutureCallback<ResultSet> {
+                override fun onFailure(t: Throwable?) {
+                    sem.release()
+                    inserted++
+                }
+
+                override fun onSuccess(result: ResultSet?) {
+                    sem.release()
+                }
+            })
+        }
+
+        println("Waiting on permits")
+        sem.acquireUninterruptibly(context.permits)
+        println("pre-populated: $inserted inserts")
+        return inserted
+    }
+
 
     fun prepare() {
         profile.prepare(context.session)
-        val prefix = context.mainArguments.id + "." + context.thread + "."
-        val sequenceGenerator = PartitionKeyGenerator.sequence(prefix)
-
-        // populate the DB with random values
-        if(context.mainArguments.populate) {
-            println("prepopulating")
-            val sem = Semaphore(context.permits)
-            val runner = profile.getRunner(context)
-
-            var inserted = 0
-            // for now, simply generate a single value for each partition key
-            for(key in sequenceGenerator.generateKey(context.mainArguments.partitionValues)) {
-                sem.acquire()
-
-                val op = runner.getNextMutation(key)
-                if(op is Operation.Mutation) {
-                    val future = context.session.executeAsync(op.bound)
-                    Futures.addCallback(future, object : FutureCallback<ResultSet> {
-                        override fun onFailure(t: Throwable?) {
-                            sem.release()
-                            inserted++
-                        }
-
-                        override fun onSuccess(result: ResultSet?) {
-                            sem.release()
-                        }
-                    })
-
-                }
-            }
-            println("Waiting on permits")
-            sem.acquireUninterruptibly(context.permits)
-            println("pre-populated: $inserted inserts")
-        }
     }
 
 
