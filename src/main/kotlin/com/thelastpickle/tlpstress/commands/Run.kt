@@ -17,7 +17,11 @@ import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
 import com.thelastpickle.tlpstress.generators.Registry
+import me.tongfei.progressbar.ProgressBar
+import me.tongfei.progressbar.ProgressBarStyle
 import java.util.concurrent.Semaphore
+import kotlin.concurrent.fixedRateTimer
+import kotlin.concurrent.thread
 
 class NoSplitter : IParameterSplitter {
     override fun split(value: String?): MutableList<String> {
@@ -244,11 +248,28 @@ class Run : IStressCommand {
 
         println("$executed threads prepared.")
 
-        val populationResult = runners.parallelStream().map {
-            println("Pre-populating database")
-            it.populate(populate)
-        }.count()
+        if(populate > 0) {
+            // .use is the kotlin version of try with resource
+            ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
+                // update the timer every second, starting 1 second from now, as a daemon thread
+                val timer = fixedRateTimer("progress-bar", true, 1000, 1000) {
+                    it.stepTo(metrics.populate.count)
+                }
 
+                runners.parallelStream().map {
+                    it.populate(populate)
+                }.count()
+
+                // stop outputting the progress bar
+                timer.cancel()
+                println("Pre-populate complete.")
+                // allow the time to die out
+                Thread.sleep(1000)
+            }
+        }
+
+
+        println("Starting main runner")
 
         metrics.startReporting()
 
