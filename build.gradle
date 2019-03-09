@@ -78,6 +78,8 @@ dependencies {
     compile 'io.prometheus:simpleclient_dropwizard:0.6.0'
     compile 'io.prometheus:simpleclient_httpserver:0.6.0'
 
+    compile group: 'me.tongfei', name: 'progressbar', version: '0.7.2'
+
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
     // exporting dropwizard metrics

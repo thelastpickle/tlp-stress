@@ -129,36 +129,23 @@ class ProfileRunner(val context: StressContext,
         print("Operations: $operations")
     }
 
-    fun populate(numRows: Long) : Long {
-        println("Prepopulating with $numRows")
+    fun populate(numRows: Long) {
 
         val sem = Semaphore(context.permits)
         val runner = profile.getRunner(context)
 
-        var inserted = 0L
-        // for now, simply generate a single value for each partition key
+        // we follow the same access pattern as normal writes when pre-populating
         for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
 
             sem.acquire()
-
             val op = runner.getNextMutation(key) as Operation.Mutation
             val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, object : FutureCallback<ResultSet> {
-                override fun onFailure(t: Throwable?) {
-                    sem.release()
-                    inserted++
-                }
+            val startTime = context.metrics.populate.time()
 
-                override fun onSuccess(result: ResultSet?) {
-                    sem.release()
-                }
-            })
+            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
         }
 
-        println("Waiting on permits")
         sem.acquireUninterruptibly(context.permits)
-        println("pre-populated: $inserted inserts")
-        return inserted
     }
 
 
