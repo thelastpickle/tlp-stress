@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.dropwizard.DropwizardExports;
+import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.dropwizard.DropwizardExports
 import io.prometheus.client.exporter.HTTPServer
 
 class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>) {

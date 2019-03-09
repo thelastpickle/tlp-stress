@@ -56,8 +56,19 @@ dependencies {
     // https://mvnrepository.com/artifact/org.reflections/reflections
     compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
 
-    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: "org.apache.logging.log4j", name: "log4j-api", version: "2.11.1"
+    compile group: "org.apache.logging.log4j", name: "log4j-core", version:"2.11.1"
+    compile "org.apache.logging.log4j:log4j-api-kotlin:1.0.0"
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j18-impl
+    // maps the datastax driver slf4j calls to log4j
+
+    compile 'org.apache.logging.log4j:log4j-slf4j18-impl:2.11.2'
+
+    // needed for yaml logging configurations
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8'
+
 
     compile group: 'org.apache.cassandra', name: 'cassandra-all', version: '3.11.2'
 
@@ -110,6 +121,8 @@ test {
 
 task docs(type:Exec) {
     commandLine 'docker-compose', 'up', 'docs'
+    group = 'Build'
+    description = "Build website documentation"
 }
 
 task deb(type:Exec) {

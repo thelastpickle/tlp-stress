@@ -1,0 +1,45 @@
+Configuration:
+
+  Properties:
+    property:
+      - name: logs
+        value: "${env:TLP_STRESS_LOG_DIR:-logs}"
+
+  status: warn
+  name: StandardConfiguration
+
+  thresholdFilter:
+    level: info
+
+
+
+  appenders:
+    File:
+      - name: File
+        fileName: "${logs}/stress.log"
+
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+
+        Filters:
+          ThresholdFilter:
+            level: info
+
+      - name: Driver
+        fileName: ${logs}/driver.log
+        PatternLayout:
+          Pattern: "%d %p %C{1.} [%t] %m%n"
+
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        ref: File
+
+    logger:
+      - name: com.datastax.driver.core
+        level: info
+        AppenderRef:
+          - ref: Driver
+            level: debug

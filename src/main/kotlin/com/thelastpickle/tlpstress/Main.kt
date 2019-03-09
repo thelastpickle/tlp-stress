@@ -1,16 +1,20 @@
 package com.thelastpickle.tlpstress
 
-import org.slf4j.LoggerFactory
+import org.apache.logging.log4j.kotlin.logger
 
 
 fun main(argv: Array<String>) {
 
+    val log = logger("main")
+    
+
+    log.info { "Parsing $argv" }
     val parser = CommandLineParser.parse(argv)
-    LoggerFactory.getLogger("main")
 
     try {
         parser.execute()
     } catch (e: Exception) {
+        log.error { "Crashed with error: " + e.message }
         println(e.message)
         e.printStackTrace()
     } finally {

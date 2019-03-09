@@ -163,33 +163,24 @@ workload to specify which fields can be used this way.
 
 === Logging
 
-`tlp-stress` uses the https://logback.qos.ch/[Logback, window="_blank"] logging utility which is similar to https://en.wikipedia.org/wiki/Log4j[log4j, window="_blank"].
+`tlp-stress` uses the https://logging.apache.org/[Log4J 2] logging framework.
 
-You can find to example logback configs in https://github.com/thelastpickle/tlp-stress/tree/master/conf[`conf`, window="_blank"]
+You can find the default log4j config in https://github.com/thelastpickle/tlp-stress/tree/master/src/main/resources/log4j.yaml[`conf`, window="_blank"].  This should be suitable for most use cases.
 
-To use a different logging configuration, simply set the shell variable `TLP_STRESS_LOGBACK` to the path of the new logging configuration before running `tlp-stress`
+To use your own logging configuration, simply set the shell variable `TLP_STRESS_LOG4J` to the path of the new logging configuration before running `tlp-stress` to point to the config file of your choice.
+
+For more information on how to configure Log4J 2 please see the https://logging.apache.org/log4j/2.x/manual/configuration.html[configuration] documentation.
+
+
+==== Debian Package
+
+The Debian package installs a basic configuration file to `/etc/tlp-stress/log4j.yaml`.
+
 
 === Exporting Metrics
 
 tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9501.
 
-==== Example
-
-Let's say you found the output to be overly verbose and only want the results and any errors. You can easily change this by setting `level` attribute to `error` like so:
-
-```
-<root level="error">
-  <appender-ref ref="STDOUT"/>
-</root>
-```
-
-Read more about logback logging levels here: https://logback.qos.ch/manual/architecture.html#LoggerContext)
-
-Assuming this repo is in your current working directory, you can set the logging config and run `tlp-stress` as follows:
-
-```
-TLP_STRESS_LOGBACK=./conf/logback-error.xml tlp-stress run KeyValue
-```
 
 == Developer Docs
 

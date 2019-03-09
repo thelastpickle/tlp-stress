@@ -2,12 +2,12 @@ package com.thelastpickle.tlpstress
 
 import com.codahale.metrics.*
 import com.codahale.metrics.Timer
-import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import com.github.ajalt.mordant.TermColors
+import org.apache.logging.log4j.kotlin.logger
 
 class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(registry,
     "single-line-console-reporter",
@@ -16,7 +16,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
     TimeUnit.MILLISECONDS
     ) {
 
-    val logger = LoggerFactory.getLogger(this.javaClass.simpleName)
+    val logger = logger()
     var lines = 0L
 
     var opHeaders = listOf("Count", "Latency (p99)", "1min (req/s)")

@@ -34,8 +34,6 @@ class NoSplitter : IParameterSplitter {
 @Parameters(commandDescription = "Run a tlp-stress profile")
 class Run : IStressCommand {
 
-//    val logger = KotlinLogging.logger {}
-
     @Parameter(names = ["--host"])
     var host = "127.0.0.1"
 

@@ -1,10 +1,9 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.ResultSet
-import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
+import org.apache.logging.log4j.kotlin.logger
 import org.joda.time.DateTime
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
@@ -17,9 +16,6 @@ class PartitionKeyGeneratorException(e: String) : Exception()
  * Logs all errors along the way
  * Keeps track of useful metrics, per thread
  */
-
-
-
 class ProfileRunner(val context: StressContext,
                     val profile: IStressProfile,
                     val partitionKeyGenerator: PartitionKeyGenerator) {
@@ -36,6 +32,8 @@ class ProfileRunner(val context: StressContext,
 
             return ProfileRunner(context, profile, partitionKeyGenerator)
         }
+
+        val log = logger()
     }
 
     val readRate: Double
@@ -129,8 +127,15 @@ class ProfileRunner(val context: StressContext,
         print("Operations: $operations")
     }
 
+    /**
+     * Prepopulates the database with numRows
+     * Mutations only, does not count towards the normal metrics
+     * Records all timers in the populateMutations metrics
+     * Can (and should) be graphed separately
+     */
     fun populate(numRows: Long) {
 
+        log.info("Populating Cassandra with $numRows rows")
         val sem = Semaphore(context.permits)
         val runner = profile.getRunner(context)
 
