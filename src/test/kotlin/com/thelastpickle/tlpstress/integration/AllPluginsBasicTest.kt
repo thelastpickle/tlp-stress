@@ -4,7 +4,6 @@ import com.datastax.driver.core.Cluster
 import com.thelastpickle.tlpstress.Plugin
 import com.thelastpickle.tlpstress.commands.Run
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
@@ -20,7 +19,7 @@ annotation class AllPlugins
  */
 class AllPluginsBasicTest {
 
-    val ip = "127.0.0.1"
+    val ip = System.getenv("TLP_STRESS_CASSANDRA_IP") ?: "127.0.0.1"
 
     val connection = Cluster.builder()
             .addContactPoint(ip)
