@@ -46,6 +46,7 @@ class AllPluginsBasicTest {
         val run = Run()
 
         run.apply {
+            host = ip
             profile = plugin.name
             iterations = 1000
         }.execute()
