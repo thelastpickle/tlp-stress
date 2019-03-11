@@ -59,6 +59,8 @@ jobs:
   cassandra_2:
     environment:
       CASSANDRA_VERSION:"2.2.13"
-    <<: *default_steps
+    
+    steps:
+      <<: *default_steps
 
 
