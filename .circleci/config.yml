@@ -21,6 +21,7 @@ commands:
       - run: sudo pip install pyYaml ccm
       - run: ccm create -n 3 -v << parameters.version >> -s << parameters.cluster_name >>
       - run: sleep 5
+      - run: ccm start
       - run: ccm status
 
 
