@@ -39,6 +39,7 @@ commands:
       - run: ccm checklogerror
 
 
+
 jobs:
 
   build:
@@ -46,19 +47,21 @@ jobs:
 
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}
+
       - install_ccm:
           version: 2.2.13
           cluster_name: cassandra_2
-      - save_cache:
-          paths:
-            - ~/.ccm/repository
-          key: dependencies
-
-      - restore_cache:
-          keys:
-            - dependencies
 
       - run: ./gradlew test
+
+      - save_cache:
+          key: deps-{{ checksum "build.gradle" }}
+          path: ~/.gradle/caches
+
+
 
   cassandra_2:
     <<: *base_job
