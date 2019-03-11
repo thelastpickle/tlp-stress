@@ -37,6 +37,7 @@ commands:
       - run: ccm start
       - run: ccm status
       - run: ccm checklogerror
+      - run: ccm node1 nodetool status
 
   gradle_test:
     description: "Run gradle test and deal with caches"
