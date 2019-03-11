@@ -6,17 +6,16 @@ version: 2.1
 
 aliases:
   base_job: &base_job
-    build:
-      docker:
-        # specify the version you desire here
-        - image: circleci/openjdk:8-jdk
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
 
-      working_directory: ~/repo
+    working_directory: ~/repo
 
-      environment:
-        # Customize the JVM maximum heap limit
-        JVM_OPTS: -Xmx3200m
-        TERM: dumb
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
 
 commands:
   install_ccm:
@@ -42,7 +41,8 @@ commands:
 
 jobs:
 
-  <<: *base_job
+  build:
+    <<: *base_job
 
     steps:
       - checkout
