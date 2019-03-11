@@ -165,7 +165,7 @@ workload to specify which fields can be used this way.
 
 `tlp-stress` uses the https://logging.apache.org/[Log4J 2] logging framework.
 
-You can find the default log4j config in https://github.com/thelastpickle/tlp-stress/tree/master/src/main/resources/log4j.yaml[`conf`, window="_blank"].  This should be suitable for most use cases.
+You can find the default log4j config in https://github.com/thelastpickle/tlp-stress/tree/master/src/main/resources/log4j2.yaml[`conf`, window="_blank"].  This should be suitable for most use cases.
 
 To use your own logging configuration, simply set the shell variable `TLP_STRESS_LOG4J` to the path of the new logging configuration before running `tlp-stress` to point to the config file of your choice.
 
