@@ -11,7 +11,7 @@ commands:
       version:
         type: string
         default: "2.2.14"
-      name:
+      cluster_name:
         type: string
         default: "test"
 
