@@ -18,6 +18,10 @@ class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledRepor
             reporter.start(3, TimeUnit.SECONDS)
     }
 
+    fun shutdown() {
+        server.stop()
+    }
+
     init {
         CollectorRegistry.defaultRegistry.register(DropwizardExports(metricRegistry))
         server = HTTPServer(9501)

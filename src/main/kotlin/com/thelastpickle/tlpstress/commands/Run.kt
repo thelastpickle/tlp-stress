@@ -285,6 +285,8 @@ class Run : IStressCommand {
         for(reporter in metrics.reporters) {
             reporter.report()
         }
+
+        metrics.shutdown()
     }
 
 }
