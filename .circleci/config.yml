@@ -4,6 +4,19 @@
 #
 version: 2.1
 
+base_job: &base_job
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
 commands:
   install_ccm:
     description: "Installs and starts CCM"
@@ -23,6 +36,7 @@ commands:
       - run: sleep 5
       - run: ccm start
       - run: ccm status
+      - run: ccm checklogerror
 
 
 jobs:
@@ -43,6 +57,15 @@ jobs:
       - install_ccm:
           version: 2.2.13
           cluster_name: cassandra_2
+      - save_cache:
+          paths:
+            - ~/.ccm/repository
+          key: dependencies
+
+      - restore_cache:
+          keys:
+            - dependencies
+
       - run: ./gradlew test
 
   cassandra_2:
