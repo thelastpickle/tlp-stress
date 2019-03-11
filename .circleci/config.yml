@@ -2,23 +2,34 @@
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
-version: 2
+version: 2.1
 
-default_steps: &default_steps
-  - run:
-      name: Download ccm
-      command: |
-        ccm create -n 3 -v $CASSANDRA_VERSION -s test
+commands:
+  installCCM:
+    description: "Installs and starts CCM"
+    parameters:
+      version:
+        type: string
+        default: "2.2.14"
+      name:
+        type: string
+        default: "test"
 
-  - save_cache:
-      paths:
-        - ~/.gradle
-        - ~/.ccm/repository
+    steps:
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+      - run: sudo pip install pyYaml ccm
+      - run: ccm create -n 3 -v << parameters.version >> -s << parameters.name >>
 
-      key: v1-dependencies-{{ checksum "build.gradle" }}
+#  - save_cache:
+#      paths:
+#        - ~/.gradle
+#        - ~/.ccm/repository
+#
+#      key: v1-dependencies-{{ checksum "build.gradle" }}
 
   # run tests!
-  - run: gradle test
+#  - run: gradle test
 
 jobs:
   build:
@@ -40,21 +51,18 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          name: Install System Dependencies
-          command: |
-            sudo apt-get update -qq
-            sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
-            sudo pip install pyYaml ccm
-
+      - installCCM:
+          version: 2.2.13
+          name: cassandra_2
 
       # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+#      - restore_cache:
+#          keys:
+#            - v1-dependencies-{{ checksum "build.gradle" }}
+#            # fallback to using the latest cache if no exact match is found
+#            - v1-dependencies-
 
+      - run: ./gradlew test
 
 #  cassandra_2:
 #    environment:
