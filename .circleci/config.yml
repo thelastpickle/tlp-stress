@@ -4,7 +4,42 @@
 #
 version: 2
 
-default_build: &default_job
+default_steps: &default_steps
+  steps:
+    - checkout
+    - run:
+        name: Install System Dependencies
+        command: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+          sudo pip install pyYaml ccm
+
+
+    # Download and cache dependencies
+    - restore_cache:
+        keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+    - run:
+        name: Download ccm
+        command: |
+          ccm create -n 3 -v $CASSANDRA_VERSION -s test
+
+    - save_cache:
+        paths:
+          - ~/.gradle
+          - ~/.ccm/repository
+
+        key: v1-dependencies-{{ checksum "build.gradle" }}
+
+    # run tests!
+    - run: gradle test
+
+
+
+jobs:
   build:
     docker:
       # specify the version you desire here
@@ -22,44 +57,9 @@ default_build: &default_job
       JVM_OPTS: -Xmx3200m
       TERM: dumb
 
-    steps:
-      - checkout
-      - run:
-          name: Install System Dependencies
-          command: |
-            sudo apt-get update -qq
-            sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
-            sudo pip install pyYaml ccm
-
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run:
-          name: Download ccm
-          command: |
-            ccm create -n 3 -v $CASSANDRA_VERSION -s test
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.ccm/repository
-
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-
-      # run tests!
-      - run: gradle test
-
-
-
-jobs:
   cassandra_2:
     environment:
       CASSANDRA_VERSION:"2.2.13"
-    <<: *default_job
+    <<: *default_steps
 
 
