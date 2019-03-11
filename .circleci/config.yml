@@ -19,7 +19,7 @@ commands:
       - run: sudo apt-get update -qq
       - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
       - run: sudo pip install pyYaml ccm
-      - run: ccm create -n 3 -v << parameters.version >> -s << parameters.cluster_name >>
+      - run: ccm create << parameters.cluster_name >> -n 3 -v << parameters.version >> -s
       - run: sleep 5
       - run: ccm start
       - run: ccm status
