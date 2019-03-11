@@ -56,11 +56,11 @@ jobs:
             - v1-dependencies-
 
 
-  cassandra_2:
-    environment:
-      CASSANDRA_VERSION:"2.2.13"
-    
-    steps:
-      <<: *default_steps
-
+#  cassandra_2:
+#    environment:
+#      CASSANDRA_VERSION:"2.2.13"
+#
+#    steps:
+#      <<: *default_steps
+#
 
