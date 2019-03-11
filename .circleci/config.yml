@@ -86,9 +86,9 @@ jobs:
             ccm create cassandra_311 --no-switch -v 3.11.4
 
       - save_cache:
-        key: ccm
-        paths:
-          - ~/.ccm/repository
+          key: ccm
+          paths:
+            - ~/.ccm/repository
 
       - run: ./gradle testClasses
 
