@@ -45,7 +45,7 @@ commands:
       - restore_cache:
           keys:
             - deps-{{ checksum "build.gradle" }}
-      - run: ./gradlew test
+      - run: ./gradlew test -i
       - save_cache:
           key: deps-{{ checksum "build.gradle" }}
           paths:
