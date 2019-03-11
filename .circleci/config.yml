@@ -2,90 +2,123 @@
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
-version: 2
-jobs:
-  build:
+version: 2.1
+
+aliases:
+  base_job: &base_job
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
 
     working_directory: ~/repo
 
     environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
       TERM: dumb
-    
+
+commands:
+  install_ccm:
+    description: "Installs and starts CCM"
+    parameters:
+      version:
+        type: string
+        default: "2.2.14"
+      cluster_name:
+        type: string
+        default: "test"
+
     steps:
-      - checkout
-      - run:
-          name: Install System Dependencies
-          command: |
-              sudo apt-get update -qq
-              sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
-              sudo pip install pyYaml ccm
-
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - ccm
+
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+      - run: sudo pip install pyYaml ccm
+      - run: ccm create test -n 1 -v << parameters.version >>
+      - run:
+          name: "Adjust cluster parameters"
+          command: |
+            for i in `seq 1 1` ; do
+              sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="256m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+              sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="128m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+              sed -i 's/num_tokens: 256/num_tokens: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/# file_cache_size_in_mb: 512/file_cache_size_in_mb: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
+            done
+            ccm start -v
+            sleep 5
+            ccm status
+            ccm checklogerror
+            ./gradlew test
+
+  gradle_test:
+    description: "Run gradle test and deal with caches"
+    steps:
+      - restore_cache:
+          keys:
+            - gradle-deps-{{ checksum "build.gradle" }}
+      - run: ./gradlew test -i
+      - save_cache:
+          key: gradle-deps-{{ checksum "build.gradle" }}
+          paths:
+            - /home/circleci/.gradle/
+
+
+jobs:
+
+  build:
+    <<: *base_job
+
+    steps:
+      - checkout
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+      - run: sudo pip install pyYaml ccm
 
       - run:
-          name: Download ccm
+          name: Download CCM for Cache
           command: |
-            ccm create test_2_2 --no-switch -v 2.2.13
-            ccm create test_3_0 --no-switch -v 3.0.17
-            ccm create test_3_11 --no-switch -v 3.11.3
+            sudo apt-get update -qq
+            sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
+            sudo pip install pyYaml ccm
+            ccm create cassandra_30 --no-switch -v 3.0.17
+            ccm create cassandra_311 --no-switch -v 3.11.4
 
       - save_cache:
+          key: ccm
           paths:
-            - ~/.gradle
             - ~/.ccm/repository
 
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-        
-      # run tests!
-      - run: gradle test
+      - run: ./gradlew testClasses
 
-      - run:
-          name: Start CCM and run tests
-          command: |
-            mkdir -p /home/circleci/.local
-            ccm create test -v 3.11.3 -n 3
+  cassandra_30:
+    <<: *base_job
 
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
-            echo "-Xmx500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+    steps:
+      - checkout
+      - install_ccm:
+          version: 3.0.17
 
-            echo "-Xms500m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
-            echo "-Xms500m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
-            echo "-Xms500m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+  cassandra_311:
+    <<: *base_job
 
-            echo "-Xmn200m" >> /home/circleci/.ccm/test/node1/conf/jvm.options
-            echo "-Xmn200m" >> /home/circleci/.ccm/test/node2/conf/jvm.options
-            echo "-Xmn200m" >> /home/circleci/.ccm/test/node3/conf/jvm.options
+    steps:
+      - checkout
+      - install_ccm:
+          version: 3.11.4
 
-            ccm start --verbose
+workflows:
+  version: 2.1
 
-            ./gradlew assemble
+  cassandra_30:
+    jobs:
+      - build
+      - cassandra_30
 
-            ls build/libs
-
-            bin/tlp-stress run BasicTimeSeries
-            bin/tlp-stress run CountersWide
-            bin/tlp-stress run KeyValue
-            bin/tlp-stress run LWT
-            bin/tlp-stress run Maps
-
-
-
-
-
+  cassandra_311:
+    jobs:
+      - build
+      - cassandra_311

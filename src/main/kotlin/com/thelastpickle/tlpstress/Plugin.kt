@@ -32,5 +32,10 @@ data class Plugin (val name: String,
 
             return result
         }
+
+
+
     }
+
+    override fun toString() = name
 }
