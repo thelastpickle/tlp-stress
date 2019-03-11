@@ -38,12 +38,12 @@ commands:
       - run: sudo pip install pyYaml ccm
       - run: ccm create << parameters.cluster_name >> -n 1 -v << parameters.version >>
       - run:
-        name: "Adjust cluster parameters"
-        command: |
-          for i in `seq 1 3` ; do
-            sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="136m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
-            sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="112M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
-          done
+          name: "Adjust cluster parameters"
+          command: |
+            for i in `seq 1 3` ; do
+              sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="136m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+              sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="112M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+            done
 
       - run: ccm start
       - run: ccm status
