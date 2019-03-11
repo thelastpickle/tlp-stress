@@ -38,6 +38,16 @@ commands:
       - run: ccm status
       - run: ccm checklogerror
 
+  gradle_test:
+    description: "Run gradle test and deal with caches"
+    steps:
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}
+      - run: ./gradlew test
+      - save_cache:
+          key: deps-{{ checksum "build.gradle" }}
+          path: ~/.gradle/caches
 
 
 jobs:
@@ -47,19 +57,12 @@ jobs:
 
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - deps-{{ checksum "build.gradle" }}
-
+      
       - install_ccm:
           version: 2.2.13
           cluster_name: cassandra_2
 
-      - run: ./gradlew test
-
-      - save_cache:
-          key: deps-{{ checksum "build.gradle" }}
-          path: ~/.gradle/caches
+      - gradle_test
 
 
 
