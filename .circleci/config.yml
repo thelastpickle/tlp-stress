@@ -5,7 +5,7 @@
 version: 2.1
 
 commands:
-  installCCM:
+  install_ccm:
     description: "Installs and starts CCM"
     parameters:
       version:
@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - checkout
-      - installCCM:
+      - install_ccm:
           version: 2.2.13
           name: cassandra_2
 
