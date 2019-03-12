@@ -30,8 +30,8 @@ commands:
 
     steps:
       - restore_cache:
-        - keys:
-          - ccm
+          keys:
+            - ccm
 
       - run: sudo apt-get update -qq
       - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
