@@ -114,4 +114,12 @@ jobs:
 
       - run: ./gradlew test
 
+workflows:
+  version: 2
+  cassandra_21:
+    jobs:
+      - build
+      - cassandra_21
+
+
 
