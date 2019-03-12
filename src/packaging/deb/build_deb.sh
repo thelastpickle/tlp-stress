@@ -12,7 +12,7 @@ mkdir -p "$DEB_ROOT/etc/tlp-stress"
 
 cp build/libs/tlp-stress-1.0-SNAPSHOT.jar "$DEB_ROOT/usr/local/lib/"
 cp bin/tlp-stress "$DEB_ROOT/usr/local/bin/"
-cp src/main/resources/log4j.yaml "$DEB_ROOT/etc/tlp-stress/log4j.yaml"
+cp src/main/resources/log4j2.yaml "$DEB_ROOT/etc/tlp-stress/log4j2.yaml"
 
 sed -i '5s/.*/TLP_STRESS_JAR="\/usr\/local\/lib\/tlp-stress-1.0-SNAPSHOT.jar"/' "$DEB_ROOT/usr/local/bin/tlp-stress"
 

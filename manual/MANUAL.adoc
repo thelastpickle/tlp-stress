@@ -174,7 +174,7 @@ For more information on how to configure Log4J 2 please see the https://logging.
 
 ==== Debian Package
 
-The Debian package installs a basic configuration file to `/etc/tlp-stress/log4j.yaml`.
+The Debian package installs a basic configuration file to `/etc/tlp-stress/log4j2.yaml`.
 
 
 === Exporting Metrics
