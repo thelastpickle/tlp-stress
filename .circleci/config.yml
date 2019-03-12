@@ -90,7 +90,7 @@ jobs:
           paths:
             - ~/.ccm/repository
 
-      - run: ./gradle testClasses
+      - run: ./gradlew testClasses
 
   cassandra_21:
     <<: *base_job
