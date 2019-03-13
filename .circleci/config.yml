@@ -46,7 +46,7 @@ commands:
             done
             ccm start -v
             sleep 5
-            ./gradle test
+            ./gradlew test
 
   gradle_test:
     description: "Run gradle test and deal with caches"
