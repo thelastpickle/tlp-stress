@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer
 import java.io.File
 import java.io.FileWriter
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -15,7 +16,9 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
         TimeUnit.SECONDS,
         TimeUnit.MILLISECONDS
 ) {
-    private val startingTimestamp = Instant.now().toString()
+    // date 24h time
+    // Thu-14Mar19-13.30.00
+    private val startingTimestamp = SimpleDateFormat("EEE-ddMMMyy-H.m.s").format(Date())
     private val metricsDir = "metrics-$startingTimestamp"
     private val readFilename = "$metricsDir/read.csv"
     private val writeFilename = "$metricsDir/write.csv"
@@ -26,7 +29,6 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
 
     init {
         File(metricsDir).mkdir()
-
         writeToFile(readFilename, opHeaders)
         writeToFile(writeFilename, opHeaders)
         writeToFile(errorFilename, errorHeaders)
