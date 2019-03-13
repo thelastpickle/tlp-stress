@@ -39,10 +39,14 @@ commands:
           name: "Adjust cluster parameters"
           command: |
             for i in `seq 1 3` ; do
-              sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="768m"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
-              sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="512M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
-              sed -i 's/num_tokens: 256/num_tokens: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/#MAX_HEAP_SIZE="4G"/MAX_HEAP_SIZE="512M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+              sed -i 's/#HEAP_NEWSIZE="800M"/HEAP_NEWSIZE="256M"/' ~/.ccm/test/node$i/conf/cassandra-env.sh
+              sed -i 's/num_tokens: 256/num_tokens: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
               echo 'phi_convict_threshold: 16' >> ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_reads: 32/concurrent_reads: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/# file_cache_size_in_mb: 512/file_cache_size_in_mb: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
             done
             ccm start -v
             sleep 5
