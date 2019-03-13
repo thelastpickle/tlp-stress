@@ -80,8 +80,6 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
             sudo pip install pyYaml ccm
-            ccm create cassanda_21 --no-switch -v 2.1.20
-            ccm create cassandra_22 --no-switch -v 2.2.13
             ccm create cassandra_30 --no-switch -v 3.0.17
             ccm create cassandra_311 --no-switch -v 3.11.4
 
@@ -92,14 +90,6 @@ jobs:
 
       - run: ./gradlew testClasses
 
-  cassandra_21:
-    <<: *base_job
-
-    steps:
-      - checkout
-      - install_ccm:
-          version: 2.1.20
-
   cassandra_30:
     <<: *base_job
 
@@ -108,15 +98,22 @@ jobs:
       - install_ccm:
           version: 3.0.17
 
+  cassandra_21:
+    <<: *base_job
+
+    steps:
+      - checkout
+      - install_ccm:
+          version: 3.11.4
 
 workflows:
   version: 2.1
-  cassandra_21:
-    jobs:
-      - build
-      - cassandra_21
-
   cassandra_30:
     jobs:
       - build
       - cassandra_30
+
+  cassandra_31:
+    jobs:
+      - build
+      - cassandra_31
