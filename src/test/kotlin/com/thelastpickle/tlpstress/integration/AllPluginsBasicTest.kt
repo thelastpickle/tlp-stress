@@ -50,6 +50,7 @@ class AllPluginsBasicTest {
             profile = plugin.name
             iterations = 1000
             rate = 100L
+            concurrency = 10L
         }.execute()
     }
 
