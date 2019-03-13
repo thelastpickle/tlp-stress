@@ -100,9 +100,8 @@ jobs:
       - checkout
       - install_ccm:
           version: 2.1.20
-          cluster_name: cassandra_21
 
-      - run: ./gradlew test
+      - gradle_test
 
   cassandra_3:
     <<: *base_job
@@ -111,9 +110,8 @@ jobs:
       - checkout
       - install_ccm:
           version: 3.0.17
-          cluster_name: cassandra_3
 
-      - run: ./gradlew test
+      - gradle_test
 
 workflows:
   version: 2
@@ -122,5 +120,7 @@ workflows:
       - build
       - cassandra_21
 
-
-
+  cassandra_30:
+    jobs:
+      - build
+      - cassandra_30
