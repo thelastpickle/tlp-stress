@@ -46,6 +46,8 @@ commands:
             done
             ccm start -v
             sleep 5
+            ccm status
+            ccm checklogerror
             ./gradlew test
 
   gradle_test:
