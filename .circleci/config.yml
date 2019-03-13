@@ -103,7 +103,7 @@ jobs:
 
       - gradle_test
 
-  cassandra_3:
+  cassandra_30:
     <<: *base_job
 
     steps:
