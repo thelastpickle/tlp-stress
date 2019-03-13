@@ -49,6 +49,7 @@ class AllPluginsBasicTest {
             host = ip
             profile = plugin.name
             iterations = 1000
+            rate = 100L
         }.execute()
     }
 
