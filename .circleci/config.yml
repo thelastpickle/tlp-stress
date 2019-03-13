@@ -56,12 +56,12 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - deps-{{ checksum "build.gradle" }}
+            - gradle-deps-{{ checksum "build.gradle" }}
       - run: ./gradlew test -i
       - save_cache:
-          key: deps-{{ checksum "build.gradle" }}
+          key: gradle-deps-{{ checksum "build.gradle" }}
           paths:
-            - ~/.gradle/caches
+            - /home/circleci/.gradle/
 
 
 jobs:
