@@ -18,7 +18,7 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
 ) {
     // date 24h time
     // Thu-14Mar19-13.30.00
-    private val startingTimestamp = SimpleDateFormat("EEE-ddMMMyy-H.m.s").format(Date())
+    private val startingTimestamp = SimpleDateFormat("ddMMMyy-H.m.s").format(Date())
     private val metricsDir = "metrics-$startingTimestamp"
     private val readFilename = "$metricsDir/read.csv"
     private val writeFilename = "$metricsDir/write.csv"
