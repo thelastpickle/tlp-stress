@@ -98,7 +98,7 @@ jobs:
       - install_ccm:
           version: 3.0.17
 
-  cassandra_21:
+  cassandra_311:
     <<: *base_job
 
     steps:
@@ -108,12 +108,13 @@ jobs:
 
 workflows:
   version: 2.1
+
   cassandra_30:
     jobs:
       - build
       - cassandra_30
 
-  cassandra_31:
+  cassandra_311:
     jobs:
       - build
-      - cassandra_31
+      - cassandra_311
