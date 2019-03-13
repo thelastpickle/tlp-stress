@@ -114,7 +114,7 @@ jobs:
       - gradle_test
 
 workflows:
-  version: 2
+  version: 2.1
   cassandra_21:
     jobs:
       - build
