@@ -1,8 +1,21 @@
-package com.thelastpickle.tlpstress.generators
+package com.thelastpickle.tlpstress.generators.functions
 
+import com.thelastpickle.tlpstress.generators.FieldGenerator
+import com.thelastpickle.tlpstress.generators.Function
 import java.util.concurrent.ThreadLocalRandom
 
-class FirstName(args: ArrayList<String> = arrayListOf()) : DataGenerator {
+@Function(name="firstname",
+        description = "First names.")
+class FirstName : FieldGenerator {
+
+    override fun setParameters(params: List<String>) {
+        // nothing to do here
+    }
+
+    override fun getDescription() = """
+        Uses common first names, both male and female.
+    """.trimIndent()
+
 
     val names = mutableListOf<String>()
 

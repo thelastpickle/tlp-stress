@@ -5,7 +5,7 @@ import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.generators.DataGenerator
+import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
 
 interface IStressRunner {
@@ -66,7 +66,7 @@ interface IStressProfile {
      * In the case of text fields, this is VERY strongly encouraged to allow for more flexibility with the size
      * of the text payload
      */
-    fun getFieldGenerators() : Map<Field, DataGenerator> = mapOf()
+    fun getFieldGenerators() : Map<Field, FieldGenerator> = mapOf()
 
     fun getDefaultReadRate() : Double { return .01 }
 

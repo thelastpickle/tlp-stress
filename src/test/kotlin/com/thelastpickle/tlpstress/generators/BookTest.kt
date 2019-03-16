@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress.generators
 
+import com.thelastpickle.tlpstress.generators.functions.Book
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 

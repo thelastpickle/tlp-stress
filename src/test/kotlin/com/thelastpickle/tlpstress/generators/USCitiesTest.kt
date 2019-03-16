@@ -1,8 +1,7 @@
 package com.thelastpickle.tlpstress.generators
 
+import com.thelastpickle.tlpstress.generators.functions.USCities
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class USCitiesTest {
 

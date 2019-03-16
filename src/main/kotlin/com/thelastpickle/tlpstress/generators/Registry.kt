@@ -1,10 +1,14 @@
 package com.thelastpickle.tlpstress.generators
 
+import org.apache.logging.log4j.kotlin.logger
+
 data class Field(val table: String, val field: String)
 
 class FieldFactory(private val table: String) {
     fun getField(field: String) : Field = Field(table, field)
 }
+
+
 
 /**
  * Registry for data generators
@@ -16,73 +20,39 @@ class FieldFactory(private val table: String) {
  * Ideally we have enough here to simulate a lot (call it 90%) of common workloads
  *
  */
-class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMapOf(),
-               val defaults: MutableMap<Field, DataGenerator> = mutableMapOf(),
-               val overrides: MutableMap<Field, DataGenerator> = mutableMapOf()) {
-
-
-
+class Registry(val defaults: MutableMap<Field, FieldGenerator> = mutableMapOf(),
+               val overrides: MutableMap<Field, FieldGenerator> = mutableMapOf()) {
 
     companion object {
-        fun create(defaults: MutableMap<Field, DataGenerator>) : Registry {
-            val data = Registry.getGenerators()
-            return Registry(data, defaults)
+
+        val log = logger()
+
+        val functionLoader = FunctionLoader()
+
+        fun create(defaults: MutableMap<Field, FieldGenerator>) : Registry {
+            return Registry(defaults)
         }
 
         fun create() : Registry {
-            val data = Registry.getGenerators()
-            return Registry(data)
+            return Registry()
         }
 
-        private fun getGenerators() : Map<String, Class<out DataGenerator>>
-                = mutableMapOf("cities" to USCities::class.java,
-                                "gaussian" to Gaussian::class.java,
-                                "book" to Book::class.java,
-                                "random" to Random::class.java,
-                                "firstname" to FirstName::class.java)
-
-        /**
-         *
-         */
-        fun getInstance(s: String) : DataGenerator {
-
-            val name = Registry.getName(s)
-            val args = Registry.getArguments(s)
-
-            val cls = getGenerators()[name]!!
-
-            val arg = ArrayList<String>().javaClass
-            val constructor = cls.getConstructor(arg)
-            return constructor.newInstance(args)
-        }
-
-
-
-        internal fun getName(s: String) : String {
-            val nameRegex = """(^[a-z]+)\(.*\)""".toRegex()
-            val result = nameRegex.find(s) ?: throw FieldNotFoundException(s)
-            return result.groupValues[1]
-
-        }
-
-        internal fun getArguments(s: String) : List<String> {
-            val nameRegex = """(^[a-z]+)\((.*)\)""".toRegex()
-            val result = nameRegex.find(s)
-            val tmp = result!!.groupValues[2]
-            return tmp.split(",").map { it.trim() }
-        }
     }
+
+    fun getFunctions() : Iterator<FunctionDescription> =
+        functionLoader.iterator()
 
     /**
      * Sets the default generator for a table / field pair
      * Not all generators work on all fields
      */
-    fun setDefault(table: String, field: String, generator: DataGenerator) : Registry {
+    fun setDefault(table: String, field: String, generator: FieldGenerator) : Registry {
         val f = Field(table, field)
         return this.setDefault(f, generator)
     }
 
-    fun setDefault(field: Field, generator: DataGenerator) : Registry {
+
+    fun setDefault(field: Field, generator: FieldGenerator) : Registry {
         defaults[field] = generator
         return this
     }
@@ -94,17 +64,24 @@ class Registry(val generators: Map<String, Class<out DataGenerator>> = mutableMa
      * @param table table that's affected
      * @param field field that's affected
      */
-    fun setOverride(table: String, field: String, generator: DataGenerator) : Registry {
+    fun setOverride(table: String, field: String, generator: FieldGenerator) : Registry {
+
         val f = Field(table, field)
+
         return this.setOverride(f, generator)
     }
 
-    fun setOverride(field: Field, generator: DataGenerator) : Registry {
+    fun setOverride(field: Field, generator: FieldGenerator) : Registry {
         overrides[field] = generator
         return this
     }
 
-    fun getGenerator(table: String, field: String) : DataGenerator {
+    fun setOverride(table: String, field: String, parsedField: ParsedFieldFunction) : Registry {
+        val instance = functionLoader.getInstance(parsedField)
+        return setOverride(table, field, instance)
+    }
+
+    fun getGenerator(table: String, field: String) : FieldGenerator {
         val tmp = Field(table, field)
         if(tmp in overrides)
             return overrides[tmp]!!

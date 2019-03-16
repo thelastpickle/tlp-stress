@@ -1,5 +1,7 @@
-package com.thelastpickle.tlpstress.generators
+package com.thelastpickle.tlpstress.generators.functions
 
+import com.thelastpickle.tlpstress.generators.FieldGenerator
+import com.thelastpickle.tlpstress.generators.Function
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.toList
 
@@ -9,10 +11,9 @@ data class City (val name:String, val stateShort:String, val stateFull:String, v
     }
 }
 
-
-class USCities(val args: ArrayList<String> = arrayListOf()) : DataGenerator {
-
-
+@Function(name="uscities",
+        description = "US Cities")
+class USCities : FieldGenerator {
     private val cities : List<City>
     private val size : Int
     init {
@@ -23,9 +24,17 @@ class USCities(val args: ArrayList<String> = arrayListOf()) : DataGenerator {
 
     }
 
+    override fun setParameters(params: List<String>) {
+
+    }
+
     override fun getText(): String {
 
         val tmp = ThreadLocalRandom.current().nextInt(0, size)
         return cities[tmp].toString()
     }
+
+    override fun getDescription() = """
+        Random US cities.
+    """.trimIndent()
 }

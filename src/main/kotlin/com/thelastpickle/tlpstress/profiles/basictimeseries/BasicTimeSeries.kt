@@ -1,18 +1,15 @@
 package com.thelastpickle.tlpstress.profiles.basictimeseries
 
-import com.beust.jcommander.Parameter
-import com.beust.jcommander.Parameters
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
+import com.thelastpickle.tlpstress.generators.functions.Random
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
-import com.thelastpickle.tlpstress.randomString
-import java.util.UUID
 
 
 /**
@@ -20,8 +17,6 @@ import java.util.UUID
  * TODO make it use TWCS
  */
 class BasicTimeSeries : IStressProfile {
-
-    data class PrimaryKey(val first: String, val timestamp: UUID)
 
     override fun schema(): List<String> {
         val query = """CREATE TABLE IF NOT EXISTS sensor_data (
@@ -64,18 +59,16 @@ class BasicTimeSeries : IStressProfile {
                 val data = dataField.getText()
                 val timestamp = UUIDs.timeBased()
                 val bound = insert.bind(partitionKey.getText(),timestamp, data)
-                val fields = mapOf("data" to data)
                 return Operation.Mutation(bound)
             }
 
         }
 
         return TimeSeriesRunner(prepared, getPartitionHead, 500)
-
     }
 
-    override fun getFieldGenerators(): Map<Field, DataGenerator> {
-        return mapOf(Field("sensor_data", "data") to Random(100, 200))
+    override fun getFieldGenerators(): Map<Field, FieldGenerator> {
+        return mapOf(Field("sensor_data", "data") to Random().apply { min=100; max=200 })
     }
 
 

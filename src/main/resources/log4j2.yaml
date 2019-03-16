@@ -5,7 +5,7 @@ Configuration:
       - name: logs
         value: "${env:TLP_STRESS_LOG_DIR:-logs}"
 
-  status: warn
+  status: info
   name: StandardConfiguration
 
   thresholdFilter:

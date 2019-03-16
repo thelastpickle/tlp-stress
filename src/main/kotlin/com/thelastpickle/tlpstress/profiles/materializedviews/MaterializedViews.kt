@@ -1,11 +1,13 @@
 package com.thelastpickle.tlpstress.profiles.materializedviews
 
-import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
+import com.thelastpickle.tlpstress.generators.functions.FirstName
+import com.thelastpickle.tlpstress.generators.functions.LastName
+import com.thelastpickle.tlpstress.generators.functions.USCities
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -64,7 +66,7 @@ class MaterializedViews : IStressProfile {
         return MVRunner()
     }
 
-    override fun getFieldGenerators(): Map<Field, DataGenerator> {
+    override fun getFieldGenerators(): Map<Field, FieldGenerator> {
         val person = FieldFactory("person")
         return mapOf(person.getField("firstname") to FirstName(),
                      person.getField("lastname") to LastName(),

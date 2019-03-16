@@ -1,6 +1,6 @@
 package com.thelastpickle.tlpstress.generators
 
-import org.junit.jupiter.api.Assertions.*
+import com.thelastpickle.tlpstress.generators.functions.FirstName
 import org.junit.jupiter.api.Test
 
 internal class FirstNameTest {

@@ -5,7 +5,7 @@ Configuration:
     Console:
       name: STDOUT
       PatternLayout:
-        Pattern: "%m%n"
+        Pattern: "%d %p %C{1.} [%t] %m%n"
 
     File:
       - name: Debug
@@ -34,7 +34,7 @@ Configuration:
     logger:
       -
         name: com.thelastpickle.tlpstress
-        level: info
+        level: debug
         AppenderRef:
           - ref: STDOUT
           - ref: Info

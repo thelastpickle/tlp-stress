@@ -4,10 +4,10 @@ import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.generators.DataGenerator
+import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.generators.FieldFactory
-import com.thelastpickle.tlpstress.generators.Random
+import com.thelastpickle.tlpstress.generators.functions.Random
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -18,7 +18,6 @@ class KeyValue : IStressProfile {
     lateinit var insert: PreparedStatement
     lateinit var select: PreparedStatement
 
-    data class PrimaryKey(val first: String)
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO keyvalue (key, value) VALUES (?, ?)")
@@ -51,7 +50,6 @@ class KeyValue : IStressProfile {
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val data = value.getText()
                 val bound = insert.bind(partitionKey.getText(),  data)
-                val fields = mapOf("value" to data)
 
                 return Operation.Mutation(bound)
             }
@@ -61,8 +59,8 @@ class KeyValue : IStressProfile {
         return KeyValueRunner(insert, select)
     }
 
-    override fun getFieldGenerators(): Map<Field, DataGenerator> {
+    override fun getFieldGenerators(): Map<Field, FieldGenerator> {
         val kv = FieldFactory("keyvalue")
-        return mapOf(kv.getField("value") to Random(100, 200))
+        return mapOf(kv.getField("value") to Random().apply{min=100; max=200})
     }
 }
