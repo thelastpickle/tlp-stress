@@ -4,7 +4,7 @@ import org.apache.logging.log4j.kotlin.logger
 import org.reflections.Reflections
 
 data class FunctionDescription(val name: String,
-                               val description: String = "")
+                               val description: String)
 
 class AnnotationMissingException(val name: Class<out FieldGenerator>) : Exception()
 
@@ -23,7 +23,7 @@ class FunctionLoader : Iterable<FunctionDescription> {
                 val tmp = iter.next()
                 val annotation = tmp.value.getAnnotation(Function::class.java) ?: throw AnnotationMissingException(tmp.value)
 
-                return FunctionDescription(annotation.name)
+                return FunctionDescription(annotation.name, annotation.description)
             }
 
         }
@@ -31,14 +31,13 @@ class FunctionLoader : Iterable<FunctionDescription> {
 
     class FunctionNotFound(val name: String) : Exception()
 
-    val map : MutableMap<String, Class<out FieldGenerator>>
+    val map : MutableMap<String, Class<out FieldGenerator>> = mutableMapOf()
 
     init {
         val r = Reflections("com.thelastpickle.tlpstress")
         log.debug { "Getting FieldGenerator subtypes" }
         val modules = r.getSubTypesOf(FieldGenerator::class.java)
 
-        map = mutableMapOf()
 
         modules.forEach {
             log.debug { "Getting annotations for $it" }
