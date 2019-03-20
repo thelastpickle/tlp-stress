@@ -6,6 +6,7 @@ import java.util.*
 import com.codahale.metrics.Timer
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
+import org.apache.logging.log4j.kotlin.logger
 import java.util.concurrent.Semaphore
 
 /**
@@ -19,10 +20,16 @@ class OperationCallback(val context: StressContext,
                         val runner: IStressRunner,
                         val op: Operation) : FutureCallback<ResultSet> {
 
+    companion object {
+        val log = logger()
+    }
+
     override fun onFailure(t: Throwable?) {
         semaphore.release()
         context.metrics.errors.mark()
         startTime.stop()
+
+        log.error { t }
 
     }
 

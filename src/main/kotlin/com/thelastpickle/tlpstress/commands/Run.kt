@@ -254,6 +254,11 @@ class Run : IStressCommand {
 
         println("$executed threads prepared.")
 
+        if(plugin.instance.customPopulate()) {
+            runners.parallelStream().map {
+                it.populate(populate)
+            }.count()
+        }
         if(populate > 0) {
             // .use is the kotlin version of try with resource
             ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
