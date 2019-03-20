@@ -6,12 +6,10 @@ import com.datastax.driver.core.utils.UUIDs
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
+import com.thelastpickle.tlpstress.generators.functions.Random
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
-import java.util.UUID
-
-
 
 
 /**
@@ -19,8 +17,6 @@ import java.util.UUID
  * TODO make it use TWCS
  */
 class UdtTimeSeries : IStressProfile {
-
-    data class PrimaryKey(val first: String, val timestamp: UUID)
 
     override fun schema(): List<String> {
         val queryUdt = """CREATE TYPE IF NOT EXISTS sensor_data_details (
@@ -83,8 +79,8 @@ class UdtTimeSeries : IStressProfile {
 
     }
 
-    override fun getFieldGenerators(): Map<Field, DataGenerator> {
-        return mapOf(Field("sensor_data", "data") to Random(100, 200))
+    override fun getFieldGenerators(): Map<Field, FieldGenerator> {
+        return mapOf(Field("sensor_data", "data") to Random().apply {min=100; max=200})
     }
 
 

@@ -16,6 +16,7 @@ import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
+import com.thelastpickle.tlpstress.generators.ParsedFieldFunction
 import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
@@ -169,7 +170,7 @@ class Run : IStressCommand {
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
-        // used for the DataGenerator
+        // used for the FieldGenerator
 
         /*
         Here we add the compaction and compression options.  in the future we'll be able to do stuff like
@@ -207,12 +208,19 @@ class Run : IStressCommand {
             fieldRegistry.setDefault(field, generator)
         }
 
+        // Fields  is the raw --fields
         for((field, generator) in fields) {
             println("$field, $generator")
-            val instance = Registry.getInstance(generator)
+            // Parsed field, switch this to use the new parser
+            //val instance = Registry.getInstance(generator)
+            val instance = ParsedFieldFunction(generator)
+
             val parts = field.split(".")
+            val table = parts[0]
+            val fieldName = parts[1]
+//            val
             // TODO check to make sure the fields exist
-            fieldRegistry.setOverride(parts[0], parts[1], instance)
+            fieldRegistry.setOverride(table, fieldName, instance)
         }
 
         println("Preparing queries")
