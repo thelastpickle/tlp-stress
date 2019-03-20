@@ -70,7 +70,7 @@ dependencies {
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8'
 
 
-    compile group: 'org.apache.cassandra', name: 'cassandra-all', version: '3.11.2'
+    compile group: 'org.apache.cassandra', name: 'cassandra-all', version: '3.11.4'
 
     // https://mvnrepository.com/artifact/io.dropwizard.metrics/metrics-core
     // compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.2'

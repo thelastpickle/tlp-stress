@@ -22,19 +22,26 @@ class ProfileRunner(val context: StressContext,
 
     companion object {
         fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
+
+            val partitionKeyGenerator = getGenerator(context, context.mainArguments.partitionKeyGenerator)
+
+            return ProfileRunner(context, profile, partitionKeyGenerator)
+        }
+
+        fun getGenerator(context: StressContext, name: String) : PartitionKeyGenerator {
             val prefix = context.mainArguments.id + "." + context.thread + "."
-            val partitionKeyGenerator = when(context.mainArguments.partitionKeyGenerator) {
+            val partitionKeyGenerator = when(name) {
                 "normal" -> PartitionKeyGenerator.normal(prefix)
                 "random" -> PartitionKeyGenerator.random(prefix)
                 "sequence" -> PartitionKeyGenerator.sequence(prefix)
                 else -> throw PartitionKeyGeneratorException("not a valid generator")
             }
-
-            return ProfileRunner(context, profile, partitionKeyGenerator)
+            return partitionKeyGenerator
         }
 
         val log = logger()
     }
+
 
     val readRate: Double
 
@@ -135,21 +142,34 @@ class ProfileRunner(val context: StressContext,
      */
     fun populate(numRows: Long) {
 
-        log.info("Populating Cassandra with $numRows rows")
-        val sem = Semaphore(context.permits)
         val runner = profile.getRunner(context)
+        val sem = Semaphore(context.permits)
 
-        // we follow the same access pattern as normal writes when pre-populating
-        for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
+        if(profile.customPopulate()) {
+            log.info { "Starting a custom population" }
 
-            sem.acquire()
-            val op = runner.getNextMutation(key) as Operation.Mutation
-            val future = context.session.executeAsync(op.bound)
-            val startTime = context.metrics.populate.time()
-
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            for(op in runner.customPopulateIter()) {
+                val future = context.session.executeAsync(op.bound)
+                val startTime = context.metrics.populate.time()
+                Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            }
         }
+        else {
 
+            log.info("Populating Cassandra with $numRows rows")
+
+            // we follow the same access pattern as normal writes when pre-populating
+            for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
+
+                sem.acquire()
+                val op = runner.getNextMutation(key) as Operation.Mutation
+                val startTime = context.metrics.populate.time()
+                val future = context.session.executeAsync(op.bound)
+
+                Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            }
+
+        }
         sem.acquireUninterruptibly(context.permits)
     }
 

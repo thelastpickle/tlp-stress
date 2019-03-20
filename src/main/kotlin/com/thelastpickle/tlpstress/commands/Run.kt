@@ -20,9 +20,7 @@ import com.thelastpickle.tlpstress.generators.ParsedFieldFunction
 import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
-import java.util.concurrent.Semaphore
 import kotlin.concurrent.fixedRateTimer
-import kotlin.concurrent.thread
 
 class NoSplitter : IParameterSplitter {
     override fun split(value: String?): MutableList<String> {
@@ -113,7 +111,41 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
     var writeToCsv = false
-    
+
+    val session by lazy {
+            var builder = Cluster.builder()
+                    .addContactPoint(host)
+                    .withCredentials(username, password)
+                    .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
+                    .withPoolingOptions(PoolingOptions()
+                            .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
+                            .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+                            .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+                            .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
+
+            if(coordinatorOnlyMode) {
+                println("Using experimental coordinator only mode.")
+                val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
+                builder = builder.withLoadBalancingPolicy(policy)
+            }
+
+
+            val cluster = builder.build()
+
+            // set up the keyspace
+//        val commandArgs = parser.getParsedPlugin()!!.arguments
+
+            // get all the initial schema
+            println("Creating schema")
+
+            println("Executing $iterations operations with consistency level $consistencyLevel")
+
+            val session = cluster.connect()
+
+            println("Connected")
+            session
+        }
+
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
@@ -122,158 +154,26 @@ class Run : IStressCommand {
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
-        // we're going to build one session per thread for now
-        var builder = Cluster.builder()
-                .addContactPoint(host)
-                .withCredentials(username, password)
-                .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
-                .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
-
-        if(coordinatorOnlyMode) {
-            println("Using experimental coordinator only mode.")
-            val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
-            builder = builder.withLoadBalancingPolicy(policy)
-        }
-
-
-        val cluster = builder.build()
-
-        // set up the keyspace
-//        val commandArgs = parser.getParsedPlugin()!!.arguments
-
-        // get all the initial schema
-        println("Creating schema")
-
-        println("Executing $iterations operations with consistency level $consistencyLevel")
-
-        val session = cluster.connect()
-
-        println("Connected")
-
-        if(dropKeyspace) {
-            println("Dropping $keyspace")
-            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
-        }
-
-        val createKeyspace = """CREATE KEYSPACE
-            | IF NOT EXISTS $keyspace
-            | WITH replication = $replication""".trimMargin()
-
-        println("Creating $keyspace: \n$createKeyspace\n")
-        session.execute(createKeyspace)
-
-        session.execute("USE $keyspace")
+        createKeyspace()
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
-        // used for the FieldGenerator
+        val rateLimiter = getRateLimiter()
 
-        /*
-        Here we add the compaction and compression options.  in the future we'll be able to do stuff like
-        compression.mytable.chunk_length_in_kb=4
-        compaction.mytable.class=TimeWindowCompactionStrategy
+        createSchema(plugin)
+        executeAdditionalCQL()
 
-        ideally we should have shortcuts
-
-        compaction.mytable.class=twcs
-         */
-
-        val rateLimiter = if(rate > 0) {
-            RateLimiter.create(rate.toDouble())
-        } else null
-
-        println("Creating Tables")
-        for (statement in plugin.instance.schema()) {
-            val s = SchemaBuilder.create(statement)
-                    .withCompaction(compaction)
-                    .withCompression(compression)
-                    .build()
-            println(s)
-            session.execute(s)
-        }
-
-        // run additional CQL
-        for (statement in additionalCQL) {
-            println(statement)
-            session.execute(statement)
-        }
-
-        val fieldRegistry = Registry.create()
-
-        for((field,generator) in plugin.instance.getFieldGenerators()) {
-            fieldRegistry.setDefault(field, generator)
-        }
-
-        // Fields  is the raw --fields
-        for((field, generator) in fields) {
-            println("$field, $generator")
-            // Parsed field, switch this to use the new parser
-            //val instance = Registry.getInstance(generator)
-            val instance = ParsedFieldFunction(generator)
-
-            val parts = field.split(".")
-            val table = parts[0]
-            val fieldName = parts[1]
-//            val
-            // TODO check to make sure the fields exist
-            fieldRegistry.setOverride(table, fieldName, instance)
-        }
+        val fieldRegistry = createFieldRegistry(plugin)
 
         println("Preparing queries")
         plugin.instance.prepare(session)
 
-        println("Initializing metrics")
-        val registry = MetricRegistry()
-
-        val reporters = mutableListOf<ScheduledReporter>()
-
-        if(writeToCsv) {
-            reporters.add(FileReporter(registry))
-        }
-        reporters.add(SingleLineConsoleReporter(registry))
-
-        val metrics = Metrics(registry, reporters)
-
-        val permits = concurrency
+        val metrics = createMetrics()
 
         // run the prepare for each
-        val runners = IntRange(0, threads - 1).map {
-            println("Connecting")
-            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
-            ProfileRunner.create(context, plugin.instance)
-        }
+        val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
 
-        val executed = runners.parallelStream().map {
-            println("Preparing statements.")
-            it.prepare()
-        }.count()
-
-        println("$executed threads prepared.")
-
-        if(populate > 0) {
-            // .use is the kotlin version of try with resource
-            ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
-                // update the timer every second, starting 1 second from now, as a daemon thread
-                val timer = fixedRateTimer("progress-bar", true, 1000, 1000) {
-                    it.stepTo(metrics.populate.count)
-                }
-
-                runners.parallelStream().map {
-                    it.populate(populate)
-                }.count()
-
-                // stop outputting the progress bar
-                timer.cancel()
-                println("Pre-populate complete.")
-                // allow the time to die out
-                Thread.sleep(1000)
-            }
-        }
-
+        populateData(plugin, runners, metrics)
 
         println("Starting main runner")
 
@@ -296,5 +196,132 @@ class Run : IStressCommand {
 
         metrics.shutdown()
     }
+
+    
+
+    private fun getRateLimiter() = if(rate > 0) {
+            RateLimiter.create(rate.toDouble())
+        } else null
+
+    private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
+        if(plugin.instance.customPopulate()) {
+            runners.parallelStream().map {
+                it.populate(populate)
+            }.count()
+        }
+        if(populate > 0) {
+            // .use is the kotlin version of try with resource
+            ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
+                // update the timer every second, starting 1 second from now, as a daemon thread
+                val timer = fixedRateTimer("progress-bar", true, 1000, 1000) {
+                    it.stepTo(metrics.populate.count)
+                }
+
+                runners.parallelStream().map {
+                    it.populate(populate)
+                }.count()
+
+                // stop outputting the progress bar
+                timer.cancel()
+                println("Pre-populate complete.")
+                // allow the time to die out
+                Thread.sleep(1000)
+            }
+        }
+    }
+
+    private fun createRunners(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): List<ProfileRunner> {
+        val runners = IntRange(0, threads - 1).map {
+            println("Connecting")
+            val context = StressContext(session, this, it, metrics, concurrency.toInt(), fieldRegistry, rateLimiter)
+            ProfileRunner.create(context, plugin.instance)
+        }
+
+        val executed = runners.parallelStream().map {
+            println("Preparing statements.")
+            it.prepare()
+        }.count()
+
+        println("$executed threads prepared.")
+        return runners
+    }
+
+    private fun createMetrics(): Metrics {
+        println("Initializing metrics")
+        val registry = MetricRegistry()
+
+        val reporters = mutableListOf<ScheduledReporter>()
+
+        if(writeToCsv) {
+            reporters.add(FileReporter(registry))
+        }
+        reporters.add(SingleLineConsoleReporter(registry))
+
+        return Metrics(registry, reporters)
+    }
+
+    private fun createFieldRegistry(plugin: Plugin): Registry {
+
+        val fieldRegistry = Registry.create()
+
+        for((field,generator) in plugin.instance.getFieldGenerators()) {
+            fieldRegistry.setDefault(field, generator)
+        }
+
+        // Fields  is the raw --fields
+        for((field, generator) in fields) {
+            println("$field, $generator")
+            // Parsed field, switch this to use the new parser
+            //val instance = Registry.getInstance(generator)
+            val instance = ParsedFieldFunction(generator)
+
+            val parts = field.split(".")
+            val table = parts[0]
+            val fieldName = parts[1]
+//            val
+            // TODO check to make sure the fields exist
+            fieldRegistry.setOverride(table, fieldName, instance)
+        }
+        return fieldRegistry
+    }
+
+    private fun createKeyspace() {
+
+        if(dropKeyspace) {
+            println("Dropping $keyspace")
+            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
+        }
+
+        val createKeyspace = """CREATE KEYSPACE
+            | IF NOT EXISTS $keyspace
+            | WITH replication = $replication""".trimMargin()
+
+        println("Creating $keyspace: \n$createKeyspace\n")
+        session.execute(createKeyspace)
+
+        session.execute("USE $keyspace")
+    }
+
+
+    private fun executeAdditionalCQL() {
+        // run additional CQL
+        for (statement in additionalCQL) {
+            println(statement)
+            session.execute(statement)
+        }
+    }
+
+    fun createSchema(plugin: Plugin) {
+        println("Creating Tables")
+        for (statement in plugin.instance.schema()) {
+            val s = SchemaBuilder.create(statement)
+                    .withCompaction(compaction)
+                    .withCompression(compression)
+                    .build()
+            println(s)
+            session.execute(s)
+        }
+    }
+
 
 }

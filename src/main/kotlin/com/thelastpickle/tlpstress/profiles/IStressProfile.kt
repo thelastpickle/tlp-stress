@@ -17,6 +17,11 @@ interface IStressRunner {
      * doing post-workload correctness checks
      */
     fun onSuccess(op: Operation.Mutation, result: ResultSet?) { }
+
+    fun customPopulateIter() : Iterator<Operation.Mutation> {
+        return listOf<Operation.Mutation>().iterator()
+    }
+
 }
 
 /**
@@ -71,6 +76,13 @@ interface IStressProfile {
     fun getDefaultReadRate() : Double { return .01 }
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
+
+    fun customPopulate()  = false
+
+
+
+
+
 }
 
 

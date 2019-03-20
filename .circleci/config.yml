@@ -47,6 +47,7 @@ commands:
               sed -i 's/concurrent_writes: 32/concurrent_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
               sed -i 's/concurrent_counter_writes: 32/concurrent_counter_writes: 4/' ~/.ccm/test/node$i/conf/cassandra.yaml
               sed -i 's/# file_cache_size_in_mb: 512/file_cache_size_in_mb: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
+              sed -i 's/enable_materialized_views: false/enable_materialized_views: true/' ~/.ccm/test/node$i/conf/cassandra.yaml
             done
             ccm start -v
             sleep 5
