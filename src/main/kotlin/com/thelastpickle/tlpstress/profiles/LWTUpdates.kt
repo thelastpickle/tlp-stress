@@ -43,7 +43,7 @@ class LWTUpdates : IStressProfile {
                 item_id text primary key,
                 name text,
                 status int
-            );
+            )
         """.trimIndent()
         return listOf(query)
     }
