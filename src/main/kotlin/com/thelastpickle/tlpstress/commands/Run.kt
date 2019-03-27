@@ -253,7 +253,7 @@ class Run : IStressCommand {
             println("Running")
             it.run()
         }.count()
-        
+
         // hopefully at this point we have a valid stress profile to run
         println("Stress complete, $runnersExecuted.")
 
