@@ -113,7 +113,41 @@ class Run : IStressCommand {
 
     @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
     var writeToCsv = false
-    
+
+    val session by lazy {
+            var builder = Cluster.builder()
+                    .addContactPoint(host)
+                    .withCredentials(username, password)
+                    .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
+                    .withPoolingOptions(PoolingOptions()
+                            .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
+                            .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+                            .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+                            .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
+
+            if(coordinatorOnlyMode) {
+                println("Using experimental coordinator only mode.")
+                val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
+                builder = builder.withLoadBalancingPolicy(policy)
+            }
+
+
+            val cluster = builder.build()
+
+            // set up the keyspace
+//        val commandArgs = parser.getParsedPlugin()!!.arguments
+
+            // get all the initial schema
+            println("Creating schema")
+
+            println("Executing $iterations operations with consistency level $consistencyLevel")
+
+            val session = cluster.connect()
+
+            println("Connected")
+            session
+        }
+
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
@@ -122,85 +156,24 @@ class Run : IStressCommand {
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
-        // we're going to build one session per thread for now
-        var builder = Cluster.builder()
-                .addContactPoint(host)
-                .withCredentials(username, password)
-                .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
-                .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
-
-        if(coordinatorOnlyMode) {
-            println("Using experimental coordinator only mode.")
-            val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
-            builder = builder.withLoadBalancingPolicy(policy)
-        }
-
-
-        val cluster = builder.build()
-
-        // set up the keyspace
-//        val commandArgs = parser.getParsedPlugin()!!.arguments
-
-        // get all the initial schema
-        println("Creating schema")
-
-        println("Executing $iterations operations with consistency level $consistencyLevel")
-
-        val session = cluster.connect()
-
-        println("Connected")
-
         if(dropKeyspace) {
             println("Dropping $keyspace")
             session.execute("DROP KEYSPACE IF EXISTS $keyspace")
         }
 
-        val createKeyspace = """CREATE KEYSPACE
-            | IF NOT EXISTS $keyspace
-            | WITH replication = $replication""".trimMargin()
+        createKeyspace()
 
-        println("Creating $keyspace: \n$createKeyspace\n")
-        session.execute(createKeyspace)
 
-        session.execute("USE $keyspace")
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
-        // used for the FieldGenerator
-
-        /*
-        Here we add the compaction and compression options.  in the future we'll be able to do stuff like
-        compression.mytable.chunk_length_in_kb=4
-        compaction.mytable.class=TimeWindowCompactionStrategy
-
-        ideally we should have shortcuts
-
-        compaction.mytable.class=twcs
-         */
 
         val rateLimiter = if(rate > 0) {
             RateLimiter.create(rate.toDouble())
         } else null
 
-        println("Creating Tables")
-        for (statement in plugin.instance.schema()) {
-            val s = SchemaBuilder.create(statement)
-                    .withCompaction(compaction)
-                    .withCompression(compression)
-                    .build()
-            println(s)
-            session.execute(s)
-        }
-
-        // run additional CQL
-        for (statement in additionalCQL) {
-            println(statement)
-            session.execute(statement)
-        }
+        createSchema(plugin)
+        executeAdditionalCQL()
 
         val fieldRegistry = Registry.create()
 
@@ -238,12 +211,10 @@ class Run : IStressCommand {
 
         val metrics = Metrics(registry, reporters)
 
-        val permits = concurrency
-
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, permits.toInt(), fieldRegistry, rateLimiter)
+            val context = StressContext(session, this, it, metrics, concurrency.toInt(), fieldRegistry, rateLimiter)
             ProfileRunner.create(context, plugin.instance)
         }
 
@@ -253,6 +224,7 @@ class Run : IStressCommand {
         }.count()
 
         println("$executed threads prepared.")
+
 
         if(plugin.instance.customPopulate()) {
             runners.parallelStream().map {
@@ -301,5 +273,38 @@ class Run : IStressCommand {
 
         metrics.shutdown()
     }
+
+    private fun createKeyspace() {
+        val createKeyspace = """CREATE KEYSPACE
+            | IF NOT EXISTS $keyspace
+            | WITH replication = $replication""".trimMargin()
+
+        println("Creating $keyspace: \n$createKeyspace\n")
+        session.execute(createKeyspace)
+
+        session.execute("USE $keyspace")
+    }
+
+
+    private fun executeAdditionalCQL() {
+        // run additional CQL
+        for (statement in additionalCQL) {
+            println(statement)
+            session.execute(statement)
+        }
+    }
+
+    fun createSchema(plugin: Plugin) {
+        println("Creating Tables")
+        for (statement in plugin.instance.schema()) {
+            val s = SchemaBuilder.create(statement)
+                    .withCompaction(compaction)
+                    .withCompression(compression)
+                    .build()
+            println(s)
+            session.execute(s)
+        }
+    }
+
 
 }
