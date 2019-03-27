@@ -20,9 +20,7 @@ import com.thelastpickle.tlpstress.generators.ParsedFieldFunction
 import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
-import java.util.concurrent.Semaphore
 import kotlin.concurrent.fixedRateTimer
-import kotlin.concurrent.thread
 
 class NoSplitter : IParameterSplitter {
     override fun split(value: String?): MutableList<String> {
@@ -160,7 +158,6 @@ class Run : IStressCommand {
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
-
         val rateLimiter = if(rate > 0) {
             RateLimiter.create(rate.toDouble())
         } else null
@@ -168,41 +165,12 @@ class Run : IStressCommand {
         createSchema(plugin)
         executeAdditionalCQL()
 
-        val fieldRegistry = Registry.create()
-
-        for((field,generator) in plugin.instance.getFieldGenerators()) {
-            fieldRegistry.setDefault(field, generator)
-        }
-
-        // Fields  is the raw --fields
-        for((field, generator) in fields) {
-            println("$field, $generator")
-            // Parsed field, switch this to use the new parser
-            //val instance = Registry.getInstance(generator)
-            val instance = ParsedFieldFunction(generator)
-
-            val parts = field.split(".")
-            val table = parts[0]
-            val fieldName = parts[1]
-//            val
-            // TODO check to make sure the fields exist
-            fieldRegistry.setOverride(table, fieldName, instance)
-        }
+        val fieldRegistry = createFieldRegistry(plugin)
 
         println("Preparing queries")
         plugin.instance.prepare(session)
 
-        println("Initializing metrics")
-        val registry = MetricRegistry()
-
-        val reporters = mutableListOf<ScheduledReporter>()
-
-        if(writeToCsv) {
-            reporters.add(FileReporter(registry))
-        }
-        reporters.add(SingleLineConsoleReporter(registry))
-
-        val metrics = Metrics(registry, reporters)
+        val metrics = createMetrics()
 
         // run the prepare for each
         val runners = IntRange(0, threads - 1).map {
@@ -219,6 +187,32 @@ class Run : IStressCommand {
         println("$executed threads prepared.")
 
 
+        populateData(plugin, runners, metrics)
+
+
+        println("Starting main runner")
+
+        metrics.startReporting()
+
+        val runnersExecuted = runners.parallelStream().map {
+            println("Running")
+            it.run()
+        }.count()
+
+        // hopefully at this point we have a valid stress profile to run
+        println("Stress complete, $runnersExecuted.")
+
+        Thread.sleep(1000)
+
+        // dump out metrics
+        for(reporter in metrics.reporters) {
+            reporter.report()
+        }
+
+        metrics.shutdown()
+    }
+
+    private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
         if(plugin.instance.customPopulate()) {
             runners.parallelStream().map {
                 it.populate(populate)
@@ -243,28 +237,45 @@ class Run : IStressCommand {
                 Thread.sleep(1000)
             }
         }
+    }
 
+    private fun createMetrics(): Metrics {
+        println("Initializing metrics")
+        val registry = MetricRegistry()
 
-        println("Starting main runner")
+        val reporters = mutableListOf<ScheduledReporter>()
 
-        metrics.startReporting()
+        if(writeToCsv) {
+            reporters.add(FileReporter(registry))
+        }
+        reporters.add(SingleLineConsoleReporter(registry))
 
-        val runnersExecuted = runners.parallelStream().map {
-            println("Running")
-            it.run()
-        }.count()
+        return Metrics(registry, reporters)
+    }
 
-        // hopefully at this point we have a valid stress profile to run
-        println("Stress complete, $runnersExecuted.")
+    private fun createFieldRegistry(plugin: Plugin): Registry {
 
-        Thread.sleep(1000)
+        val fieldRegistry = Registry.create()
 
-        // dump out metrics
-        for(reporter in metrics.reporters) {
-            reporter.report()
+        for((field,generator) in plugin.instance.getFieldGenerators()) {
+            fieldRegistry.setDefault(field, generator)
         }
 
-        metrics.shutdown()
+        // Fields  is the raw --fields
+        for((field, generator) in fields) {
+            println("$field, $generator")
+            // Parsed field, switch this to use the new parser
+            //val instance = Registry.getInstance(generator)
+            val instance = ParsedFieldFunction(generator)
+
+            val parts = field.split(".")
+            val table = parts[0]
+            val fieldName = parts[1]
+//            val
+            // TODO check to make sure the fields exist
+            fieldRegistry.setOverride(table, fieldName, instance)
+        }
+        return fieldRegistry
     }
 
     private fun createKeyspace() {

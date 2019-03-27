@@ -2,10 +2,7 @@ package com.thelastpickle.tlpstress
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
-import com.thelastpickle.tlpstress.commands.Fields
-import com.thelastpickle.tlpstress.commands.IStressCommand
-import com.thelastpickle.tlpstress.commands.Info
-import com.thelastpickle.tlpstress.commands.Run
+import com.thelastpickle.tlpstress.commands.*
 
 class MainArgs {
 
@@ -33,7 +30,7 @@ class CommandLineParser(val jCommander: JCommander,
             val commands = mapOf(
                     "run" to Run(),
                     "info" to Info(),
-                    "list" to com.thelastpickle.tlpstress.commands.List(),
+                    "list" to ListCommand(),
                     "fields" to Fields())
 
             for(x in commands.entries) {
