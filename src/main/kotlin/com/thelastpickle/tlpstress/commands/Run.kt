@@ -156,14 +156,7 @@ class Run : IStressCommand {
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
-        if(dropKeyspace) {
-            println("Dropping $keyspace")
-            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
-        }
-
         createKeyspace()
-
-
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
@@ -260,7 +253,7 @@ class Run : IStressCommand {
             println("Running")
             it.run()
         }.count()
-
+        
         // hopefully at this point we have a valid stress profile to run
         println("Stress complete, $runnersExecuted.")
 
@@ -275,6 +268,12 @@ class Run : IStressCommand {
     }
 
     private fun createKeyspace() {
+
+        if(dropKeyspace) {
+            println("Dropping $keyspace")
+            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
+        }
+
         val createKeyspace = """CREATE KEYSPACE
             | IF NOT EXISTS $keyspace
             | WITH replication = $replication""".trimMargin()
