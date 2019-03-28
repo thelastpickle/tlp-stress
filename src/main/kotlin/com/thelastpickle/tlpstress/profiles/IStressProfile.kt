@@ -3,10 +3,10 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
-import com.thelastpickle.tlpstress.PartitionKey
-import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
+import com.thelastpickle.tlpstress.prepopulate.Option
 
 interface IStressRunner {
     fun getNextMutation(partitionKey: PartitionKey) : Operation
@@ -77,11 +77,7 @@ interface IStressProfile {
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
 
-    fun customPopulate()  = false
-
-
-
-
+    fun getPrePopulateConfiguration() = Option.Standard()
 
 }
 

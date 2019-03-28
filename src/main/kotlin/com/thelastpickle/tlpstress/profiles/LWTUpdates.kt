@@ -48,7 +48,7 @@ class LWTUpdates : IStressProfile {
         return listOf(query)
     }
 
-    override fun customPopulate() = true
+    override fun getPrePopulateConfiguration() = true
 
 
 

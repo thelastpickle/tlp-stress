@@ -145,7 +145,7 @@ class ProfileRunner(val context: StressContext,
         val runner = profile.getRunner(context)
         val sem = Semaphore(context.permits)
 
-        if(profile.customPopulate()) {
+        if(profile.getPrePopulateConfiguration()) {
             log.info { "Starting a custom population" }
 
             for(op in runner.customPopulateIter()) {

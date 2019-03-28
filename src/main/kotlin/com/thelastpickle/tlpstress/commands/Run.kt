@@ -204,7 +204,7 @@ class Run : IStressCommand {
         } else null
 
     private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
-        if(plugin.instance.customPopulate()) {
+        if(plugin.instance.getPrePopulateConfiguration()) {
             runners.parallelStream().map {
                 it.populate(populate)
             }.count()
