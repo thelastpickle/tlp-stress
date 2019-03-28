@@ -171,22 +171,9 @@ class Run : IStressCommand {
         val metrics = createMetrics()
 
         // run the prepare for each
-        val runners = IntRange(0, threads - 1).map {
-            println("Connecting")
-            val context = StressContext(session, this, it, metrics, concurrency.toInt(), fieldRegistry, rateLimiter)
-            ProfileRunner.create(context, plugin.instance)
-        }
-
-        val executed = runners.parallelStream().map {
-            println("Preparing statements.")
-            it.prepare()
-        }.count()
-
-        println("$executed threads prepared.")
-
+        val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
 
         populateData(plugin, runners, metrics)
-
 
         println("Starting main runner")
 
@@ -241,6 +228,22 @@ class Run : IStressCommand {
                 Thread.sleep(1000)
             }
         }
+    }
+
+    private fun createRunners(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): List<ProfileRunner> {
+        val runners = IntRange(0, threads - 1).map {
+            println("Connecting")
+            val context = StressContext(session, this, it, metrics, concurrency.toInt(), fieldRegistry, rateLimiter)
+            ProfileRunner.create(context, plugin.instance)
+        }
+
+        val executed = runners.parallelStream().map {
+            println("Preparing statements.")
+            it.prepare()
+        }.count()
+
+        println("$executed threads prepared.")
+        return runners
     }
 
     private fun createMetrics(): Metrics {
