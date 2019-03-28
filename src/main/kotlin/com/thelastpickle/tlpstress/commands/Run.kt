@@ -158,9 +158,7 @@ class Run : IStressCommand {
 
         val plugin = Plugin.getPlugins().get(profile)!!
 
-        val rateLimiter = if(rate > 0) {
-            RateLimiter.create(rate.toDouble())
-        } else null
+        val rateLimiter = getRateLimiter()
 
         createSchema(plugin)
         executeAdditionalCQL()
@@ -211,6 +209,12 @@ class Run : IStressCommand {
 
         metrics.shutdown()
     }
+
+    
+
+    private fun getRateLimiter() = if(rate > 0) {
+            RateLimiter.create(rate.toDouble())
+        } else null
 
     private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
         if(plugin.instance.customPopulate()) {
