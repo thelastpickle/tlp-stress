@@ -4,7 +4,9 @@ import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.thelastpickle.tlpstress.PartitionKey
+import com.thelastpickle.tlpstress.PopulateOption
 import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.commands.Run
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
 
@@ -77,8 +79,7 @@ interface IStressProfile {
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
 
-    fun customPopulate()  = false
-
+    fun getPopulateOption(args: Run)  : PopulateOption = PopulateOption.Standard()
 
 
 

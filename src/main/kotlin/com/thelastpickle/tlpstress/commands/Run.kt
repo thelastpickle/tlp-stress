@@ -20,6 +20,7 @@ import com.thelastpickle.tlpstress.generators.ParsedFieldFunction
 import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
+import org.apache.logging.log4j.kotlin.logger
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -112,6 +113,8 @@ class Run : IStressCommand {
     @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
     var writeToCsv = false
 
+    val log = logger()
+
     val session by lazy {
             var builder = Cluster.builder()
                     .addContactPoint(host)
@@ -203,31 +206,38 @@ class Run : IStressCommand {
             RateLimiter.create(rate.toDouble())
         } else null
 
+
     private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
-        if(plugin.instance.customPopulate()) {
-            runners.parallelStream().map {
-                it.populate(populate)
-            }.count()
-        }
-        if(populate > 0) {
-            // .use is the kotlin version of try with resource
-            ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
+
+        val max = when(val option = plugin.instance.getPopulateOption(this)) {
+            is PopulateOption.Standard -> populate
+            is PopulateOption.Custom -> option.rows
+        } * threads
+
+        log.info { "Prepopulating data with $max records per thread" }
+
+        if(max > 0) {
+            ProgressBar("Populate Progress", max, ProgressBarStyle.ASCII).use {
                 // update the timer every second, starting 1 second from now, as a daemon thread
                 val timer = fixedRateTimer("progress-bar", true, 1000, 1000) {
                     it.stepTo(metrics.populate.count)
                 }
 
+                // calling it on the runner
                 runners.parallelStream().map {
                     it.populate(populate)
                 }.count()
 
+                // have we really reached 100%?
+                Thread.sleep(1000)
                 // stop outputting the progress bar
                 timer.cancel()
-                println("Pre-populate complete.")
                 // allow the time to die out
                 Thread.sleep(1000)
+                println("\nPre-populate complete.")
             }
         }
+
     }
 
     private fun createRunners(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): List<ProfileRunner> {

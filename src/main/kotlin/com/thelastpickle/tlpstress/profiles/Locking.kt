@@ -3,8 +3,10 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
+import com.thelastpickle.tlpstress.PopulateOption
 import com.thelastpickle.tlpstress.ProfileRunner
 import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.commands.Run
 import org.apache.logging.log4j.kotlin.logger
 import java.util.concurrent.ConcurrentHashMap
 
@@ -48,7 +50,7 @@ class Locking : IStressProfile {
         return listOf(query)
     }
 
-    override fun customPopulate() = true
+    override fun getPopulateOption(args: Run) : PopulateOption = PopulateOption.Custom(args.partitionValues)
 
 
 

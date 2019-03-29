@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress
 
+import com.datastax.driver.core.BoundStatement
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -145,30 +146,36 @@ class ProfileRunner(val context: StressContext,
         val runner = profile.getRunner(context)
         val sem = Semaphore(context.permits)
 
-        if(profile.customPopulate()) {
-            log.info { "Starting a custom population" }
-
-            for(op in runner.customPopulateIter()) {
-                val future = context.session.executeAsync(op.bound)
-                val startTime = context.metrics.populate.time()
-                Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+        fun executePopulate(op: Operation.Mutation) {
+            context.rateLimiter?.run {
+                acquire(1)
             }
+            sem.acquire()
+
+            val startTime = context.metrics.populate.time()
+            val future = context.session.executeAsync(op.bound)
+            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
         }
-        else {
 
-            log.info("Populating Cassandra with $numRows rows")
+        when(profile.getPopulateOption(context.mainArguments)) {
+            is PopulateOption.Custom -> {
+                log.info { "Starting a custom population" }
 
-            // we follow the same access pattern as normal writes when pre-populating
-            for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
-
-                sem.acquire()
-                val op = runner.getNextMutation(key) as Operation.Mutation
-                val startTime = context.metrics.populate.time()
-                val future = context.session.executeAsync(op.bound)
-
-                Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+                for (op in runner.customPopulateIter()) {
+                    executePopulate(op)
+                }
             }
+            is PopulateOption.Standard -> {
 
+                log.info("Populating Cassandra with $numRows rows")
+
+                // we follow the same access pattern as normal writes when pre-populating
+                for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
+                    val op = runner.getNextMutation(key) as Operation.Mutation
+                    executePopulate(op)
+                }
+
+            }
         }
         sem.acquireUninterruptibly(context.permits)
     }
