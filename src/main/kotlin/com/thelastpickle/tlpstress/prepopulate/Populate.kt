@@ -1,21 +1,22 @@
 package com.thelastpickle.tlpstress.prepopulate
 
-import com.datastax.driver.core.Session
+import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.Metrics
-import com.thelastpickle.tlpstress.Plugin
+import com.thelastpickle.tlpstress.OperationCallback
 import com.thelastpickle.tlpstress.ProfileRunner
 import com.thelastpickle.tlpstress.commands.Run
+import com.thelastpickle.tlpstress.profiles.Operation
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import kotlin.concurrent.fixedRateTimer
 
-sealed class Option {
+sealed class Populate {
 
     abstract fun execute(runArgs: Run,
                          runners: List<ProfileRunner>,
                          metrics: Metrics)
 
-    class Standard : Option() {
+    class Standard : Populate() {
         override fun execute(runArgs: Run,
                              runners: List<ProfileRunner>,
                              metrics: Metrics) {
@@ -43,12 +44,27 @@ sealed class Option {
 
     }
 
-    class Custom : Option() {
+    class Custom : Populate() {
         override fun execute(runArgs: Run,
                              runners: List<ProfileRunner>,
                              metrics: Metrics) {
+
+            val numRows = runArgs.populate
+            var partitionKeyGenerator = runArgs.partitionKeyGenerator
+
             runners.parallelStream().map {
-                it.populate(runArgs.populate)
+                ProfileRunner.log.info("Populating Cassandra with $numRows rows")
+
+                // we follow the same access pattern as normal writes when pre-populating
+                for (key in partitionKeyGenerator.generateKey(numRows, context.mainArguments.partitionValues)) {
+
+                    sem.acquire()
+                    val op = runner.getNextMutation(key) as Operation.Mutation
+                    val startTime = context.metrics.populate.time()
+                    val future = context.session.executeAsync(op.bound)
+
+                    Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+                }
             }.count()
         }
 

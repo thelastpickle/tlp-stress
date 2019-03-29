@@ -6,7 +6,7 @@ import com.datastax.driver.core.ResultSet
 import com.thelastpickle.tlpstress.*
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
-import com.thelastpickle.tlpstress.prepopulate.Option
+import com.thelastpickle.tlpstress.prepopulate.Populate
 
 interface IStressRunner {
     fun getNextMutation(partitionKey: PartitionKey) : Operation
@@ -77,7 +77,7 @@ interface IStressProfile {
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
 
-    fun getPrePopulateConfiguration() : Option = Option.Standard()
+    fun getPrePopulateConfiguration() : Populate = Populate.Standard()
 
 }
 
