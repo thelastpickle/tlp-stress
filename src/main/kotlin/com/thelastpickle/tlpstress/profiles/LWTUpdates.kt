@@ -5,6 +5,7 @@ import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.ProfileRunner
 import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.prepopulate.Option
 import org.apache.logging.log4j.kotlin.logger
 import java.util.concurrent.ConcurrentHashMap
 
@@ -48,8 +49,7 @@ class LWTUpdates : IStressProfile {
         return listOf(query)
     }
 
-    override fun getPrePopulateConfiguration() = true
-
+    override fun getPrePopulateConfiguration() = Option.Custom()
 
 
     override fun getRunner(context: StressContext): IStressRunner {

@@ -77,7 +77,7 @@ interface IStressProfile {
 
     fun getCustomArguments() : Map<String, String> { return mapOf() }
 
-    fun getPrePopulateConfiguration() = Option.Standard()
+    fun getPrePopulateConfiguration() : Option = Option.Standard()
 
 }
 

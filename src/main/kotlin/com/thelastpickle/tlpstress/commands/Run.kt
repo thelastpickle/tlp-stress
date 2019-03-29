@@ -146,6 +146,10 @@ class Run : IStressCommand {
             session
         }
 
+    val plugin by lazy {
+        Plugin.getPlugins().get(profile)!!
+    }
+
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
@@ -155,8 +159,6 @@ class Run : IStressCommand {
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
         createKeyspace()
-
-        val plugin = Plugin.getPlugins().get(profile)!!
 
         val rateLimiter = getRateLimiter()
 
@@ -173,7 +175,9 @@ class Run : IStressCommand {
         // run the prepare for each
         val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
 
-        populateData(plugin, runners, metrics)
+        plugin.instance
+                .getPrePopulateConfiguration()
+                .execute(this, runners, metrics)
 
         println("Starting main runner")
 
@@ -202,33 +206,6 @@ class Run : IStressCommand {
     private fun getRateLimiter() = if(rate > 0) {
             RateLimiter.create(rate.toDouble())
         } else null
-
-    private fun populateData(plugin: Plugin, runners: List<ProfileRunner>, metrics: Metrics) {
-        if(plugin.instance.getPrePopulateConfiguration()) {
-            runners.parallelStream().map {
-                it.populate(populate)
-            }.count()
-        }
-        if(populate > 0) {
-            // .use is the kotlin version of try with resource
-            ProgressBar("Populate Progress", threads * populate, ProgressBarStyle.ASCII).use {
-                // update the timer every second, starting 1 second from now, as a daemon thread
-                val timer = fixedRateTimer("progress-bar", true, 1000, 1000) {
-                    it.stepTo(metrics.populate.count)
-                }
-
-                runners.parallelStream().map {
-                    it.populate(populate)
-                }.count()
-
-                // stop outputting the progress bar
-                timer.cancel()
-                println("Pre-populate complete.")
-                // allow the time to die out
-                Thread.sleep(1000)
-            }
-        }
-    }
 
     private fun createRunners(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): List<ProfileRunner> {
         val runners = IntRange(0, threads - 1).map {
