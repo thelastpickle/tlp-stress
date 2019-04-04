@@ -31,6 +31,5 @@ internal class HumanReadableTimeConverterTest {
     @Test
     fun convertAndFail() {
         assertFailsWith<java.lang.IllegalArgumentException> {val cl = converter.convert("BLAh")}
-        assertFailsWith<java.lang.IllegalArgumentException> {val cl = converter.convert("1m 1h")}
     }
 }

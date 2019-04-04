@@ -1,40 +1,35 @@
 package com.thelastpickle.tlpstress.converters
 
 import com.beust.jcommander.IStringConverter
-import org.joda.time.Period
-import org.joda.time.format.PeriodFormatterBuilder
-import org.joda.time.format.PeriodFormatter
+import java.time.Duration
 
 
+class HumanReadableTimeConverter : IStringConverter<Long> {
+    override fun convert(value: String?): Long {
+        var duration = Duration.ofMinutes(0)
 
-class HumanReadableTimeConverter : IStringConverter<Int> {
-    override fun convert(value: String?): Int {
-        val daysFormatter = PeriodFormatterBuilder()
-                .appendDays().appendSuffix("d").appendSeparatorIfFieldsAfter(" ")
-                .appendHours().appendSuffix("h").appendSeparatorIfFieldsAfter(" ")
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
+        /**
+         * The duration string could contain multiple time values e.g. "1d 2h 3m". Split the string by space then
+         * operate on the collection of values using the following steps:
+         * 1. Run a filter so that we only select values with a number and a unit. The unit must be either
+         *      'd' (days), 'h' (hours), or 'm' (mins).
+         * 2. Iterate through remaining values. Add to the duration based on the units in each value.
+         */
+        value!!
+            .split(" ")
+            .filter{ "[\\d]+[dhm]".toRegex().matches(it) }
+            .forEach {
+                val quantity = "[\\d]+".toRegex().findAll(it).first().value.toLong()
+                when ("[dhm]".toRegex().findAll(it).first().value) {
+                    "d" -> duration = duration.plusDays(quantity)
+                    "h" -> duration = duration.plusHours(quantity)
+                    "m" -> duration = duration.plusMinutes(quantity)
+                }
+            }
 
-        val hoursFormatter = PeriodFormatterBuilder()
-                .appendHours().appendSuffix("h").appendSeparatorIfFieldsAfter(" ")
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
+        if (duration.isZero)
+            throw IllegalArgumentException("Value ${value} resulted in 0 time duration")
 
-        val minutesFormatter = PeriodFormatterBuilder()
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
-
-
-        var duration = Period()
-
-        if (value!!.contains('d')) {
-            duration = daysFormatter.parsePeriod(value)
-        } else if (value!!.contains('h')) {
-            duration = hoursFormatter.parsePeriod(value)
-        } else {
-            duration = minutesFormatter.parsePeriod(value)
-        }
-
-        return duration.toStandardMinutes().minutes
+        return duration.toMinutes()
     }
 }
