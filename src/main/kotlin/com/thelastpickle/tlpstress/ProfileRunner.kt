@@ -1,11 +1,10 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.BoundStatement
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.Operation
 import org.apache.logging.log4j.kotlin.logger
-import org.joda.time.DateTime
+import java.time.LocalDateTime
 import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadLocalRandom
 
@@ -68,7 +67,7 @@ class ProfileRunner(val context: StressContext,
      */
     fun run() {
 
-        if (context.mainArguments.duration == 0) {
+        if (context.mainArguments.duration == 0L) {
             print("Running the profile for ${context.mainArguments.iterations} iterations...")
         } else {
             print("Running the profile for ${context.mainArguments.duration}min...")
@@ -79,9 +78,9 @@ class ProfileRunner(val context: StressContext,
     /**
      * Used for both pre-populating data and for performing the actual runner
      */
-    private fun executeOperations(iterations: Long, duration: Int) {
+    private fun executeOperations(iterations: Long, duration: Long) {
 
-        val desiredEndTime = DateTime.now().plusMinutes(duration)
+        val desiredEndTime = LocalDateTime.now().plusMinutes(duration)
         var operations = 0
         // create a semaphore local to the thread to limit the query concurrency
         val sem = Semaphore(context.permits)
@@ -92,7 +91,7 @@ class ProfileRunner(val context: StressContext,
         val totalValues = if (duration > 0) Long.MAX_VALUE else iterations
 
         for (key in partitionKeyGenerator.generateKey(totalValues, context.mainArguments.partitionValues)) {
-            if (duration > 0 && desiredEndTime.isBeforeNow()) {
+            if (duration > 0 && desiredEndTime.isBefore(LocalDateTime.now())) {
                 break
             }
             // get next thing from the profile
