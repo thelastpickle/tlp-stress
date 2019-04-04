@@ -1,40 +1,38 @@
 package com.thelastpickle.tlpstress.converters
 
 import com.beust.jcommander.IStringConverter
-import org.joda.time.Period
-import org.joda.time.format.PeriodFormatterBuilder
-import org.joda.time.format.PeriodFormatter
+import java.time.Duration
 
 
+class HumanReadableTimeConverter : IStringConverter<Long> {
+    override fun convert(value: String?): Long {
+        var duration = Duration.ofMinutes(0)
 
-class HumanReadableTimeConverter : IStringConverter<Int> {
-    override fun convert(value: String?): Int {
-        val daysFormatter = PeriodFormatterBuilder()
-                .appendDays().appendSuffix("d").appendSeparatorIfFieldsAfter(" ")
-                .appendHours().appendSuffix("h").appendSeparatorIfFieldsAfter(" ")
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
+        val integer = "\\d+"
+        val units = "[dhms]"
+        val valueCharSequence = value!!.subSequence(0, value.length)
+        /**
+         * The duration is passed in via the value variable. It could contain multiple time values e.g. "1d 2h 3m 4s".
+         * Parse the string using the following process:
+         * 1. Find all occurrences of of an integer with a time unit and iterate through the matches. Note we need
+         *      to convert the value from a String to CharSequence so we can pass it to findAll.
+         * 2. Iterate through the matched values. Add to the duration based on the units of each value.
+         */
+        Regex("$integer$units")
+            .findAll(valueCharSequence)
+            .forEach {
+                val quantity = Regex(integer).findAll(it.value).first().value.toLong()
+                when (Regex(units).findAll(it.value).first().value) {
+                    "d" -> duration = duration.plusDays(quantity)
+                    "h" -> duration = duration.plusHours(quantity)
+                    "m" -> duration = duration.plusMinutes(quantity)
+                    "s" -> duration = duration.plusSeconds(quantity)
+                }
+            }
 
-        val hoursFormatter = PeriodFormatterBuilder()
-                .appendHours().appendSuffix("h").appendSeparatorIfFieldsAfter(" ")
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
+        if (duration.isZero)
+            throw IllegalArgumentException("Value ${value} resulted in 0 time duration")
 
-        val minutesFormatter = PeriodFormatterBuilder()
-                .appendMinutes().appendSuffix("m")
-                .toFormatter();
-
-
-        var duration = Period()
-
-        if (value!!.contains('d')) {
-            duration = daysFormatter.parsePeriod(value)
-        } else if (value!!.contains('h')) {
-            duration = hoursFormatter.parsePeriod(value)
-        } else {
-            duration = minutesFormatter.parsePeriod(value)
-        }
-
-        return duration.toStandardMinutes().minutes
+        return duration.toMinutes()
     }
 }

@@ -81,7 +81,7 @@ class Run : IStressCommand {
     val DEFAULT_ITERATIONS : Long = 1000000
 
     @Parameter(names = ["--duration", "-d"], description = "Duration of the stress test.  Expressed in format 1d 3h 15m", converter = HumanReadableTimeConverter::class)
-    var duration : Int = 0
+    var duration : Long = 0
 
     @Parameter(names = ["-h", "--help"], description = "Show this help", help = true)
     var help = false
@@ -151,7 +151,7 @@ class Run : IStressCommand {
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
-        iterations = if (duration == 0 && iterations == 0L) DEFAULT_ITERATIONS else iterations // apply the default if the number of iterations wasn't set
+        iterations = if (duration == 0L && iterations == 0L) DEFAULT_ITERATIONS else iterations // apply the default if the number of iterations wasn't set
 
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
