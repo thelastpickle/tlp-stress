@@ -13,7 +13,7 @@ class ListCommand : IStressCommand {
         for((key, _) in plugins) {
             println("$key ")
         }
-        println("\nDone.")
+        println("\nYou can run any of these workloads by running tlp-cluster run WORKLOAD.")
 
     }
 
