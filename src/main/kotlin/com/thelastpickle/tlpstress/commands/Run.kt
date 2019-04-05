@@ -188,7 +188,6 @@ class Run : IStressCommand {
         }.count()
 
         // hopefully at this point we have a valid stress profile to run
-        println("Stress complete, $runnersExecuted.")
 
         Thread.sleep(1000)
 
@@ -196,8 +195,9 @@ class Run : IStressCommand {
         for(reporter in metrics.reporters) {
             reporter.report()
         }
-
         metrics.shutdown()
+        Thread.sleep(1000)
+        println("Stress complete, $runnersExecuted.")
     }
 
     

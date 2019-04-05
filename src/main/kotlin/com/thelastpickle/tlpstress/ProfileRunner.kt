@@ -68,16 +68,12 @@ class ProfileRunner(val context: StressContext,
      */
     fun run() {
 
-//        populate(context.mainArguments.populate)
-
         if (context.mainArguments.duration == 0) {
             print("Running the profile for ${context.mainArguments.iterations} iterations...")
         } else {
             print("Running the profile for ${context.mainArguments.duration}min...")
         }
         executeOperations(context.mainArguments.iterations, context.mainArguments.duration)
-
-        print("All operations complete.")
     }
 
     /**
@@ -132,7 +128,6 @@ class ProfileRunner(val context: StressContext,
 
         // block until all the queries are finished
         sem.acquireUninterruptibly(context.permits)
-        print("Operations: $operations")
     }
 
     /**
