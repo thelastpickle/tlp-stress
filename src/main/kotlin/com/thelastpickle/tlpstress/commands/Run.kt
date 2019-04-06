@@ -233,9 +233,9 @@ class Run : IStressCommand {
                 // stop outputting the progress bar
                 timer.cancel()
                 // allow the time to die out
-                Thread.sleep(1000)
-                println("\nPre-populate complete.")
             }
+            Thread.sleep(1000)
+            println("\nPre-populate complete.")
         }
 
     }
