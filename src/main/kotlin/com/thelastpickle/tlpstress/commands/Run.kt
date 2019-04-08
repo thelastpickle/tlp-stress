@@ -131,8 +131,7 @@ class Run : IStressCommand {
                 val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
                 builder = builder.withLoadBalancingPolicy(policy)
             }
-
-
+        
             val cluster = builder.build()
 
             // set up the keyspace

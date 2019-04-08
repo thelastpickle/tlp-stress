@@ -4,11 +4,11 @@ import com.codahale.metrics.*
 import com.codahale.metrics.Timer
 import java.io.File
 import java.io.FileWriter
-import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
+
 
 class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
         "file-reporter",
@@ -18,14 +18,16 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
 ) {
     // date 24h time
     // Thu-14Mar19-13.30.00
-    private val startingTimestamp = SimpleDateFormat("ddMMMyy-H.m.s").format(Date())
+    private val startTime = Date()
+    private val startingTimestamp = SimpleDateFormat("ddMMMyy-H.m.s").format(startTime)
+
     private val metricsDir = "metrics-$startingTimestamp"
     private val readFilename = "$metricsDir/read.csv"
     private val writeFilename = "$metricsDir/write.csv"
     private val errorFilename = "$metricsDir/error.csv"
 
-    private val opHeaders = listOf("Timestamp", "Count", "Latency (p99)", "1min (req/s)").joinToString(",")
-    private val errorHeaders = listOf("Timestamp", "Count", "1min (errors/s)").joinToString(",")
+    private val opHeaders = listOf("Timestamp", "Elapsed Time", "Count", "Latency (p99)", "1min (req/s)").joinToString(",")
+    private val errorHeaders = listOf("Timestamp", "Elapsed Time", "Count", "1min (errors/s)").joinToString(",")
 
     init {
         File(metricsDir).mkdir()
@@ -36,7 +38,9 @@ class FileReporter(registry: MetricRegistry) : ScheduledReporter(registry,
 
     private fun Timer.getMetricsList(timestamp: String): List<Any> {
         val duration = convertDuration(this.snapshot.get99thPercentile())
-        return listOf(timestamp, this.count, duration, this.oneMinuteRate)
+        val elapsedTime = Instant.now().minusMillis(startTime.time).toEpochMilli() / 1000
+
+        return listOf(timestamp, elapsedTime, this.count, duration, this.oneMinuteRate)
     }
 
     override fun report(gauges: SortedMap<String, Gauge<Any>>?,
