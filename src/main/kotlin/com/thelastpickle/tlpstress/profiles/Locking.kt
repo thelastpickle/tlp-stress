@@ -82,7 +82,7 @@ class Locking : IStressProfile {
             override fun customPopulateIter() = iterator {
 
                 val generator = ProfileRunner.getGenerator(context, "sequence")
-                for(partitionKey in generator.generateKey(context.mainArguments.partitionValues, context.mainArguments.partitionValues)) {
+                for(partitionKey in generator.generateKey(context.mainArguments.iterations, context.mainArguments.partitionValues)) {
                     val bound = insert.bind(partitionKey.getText(), "test")
                     yield(Operation.Mutation(bound))
                 }
