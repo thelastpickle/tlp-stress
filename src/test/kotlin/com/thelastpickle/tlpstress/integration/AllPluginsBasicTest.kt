@@ -51,6 +51,7 @@ class AllPluginsBasicTest {
             iterations = 1000
             rate = 100L
             concurrency = 10L
+            partitionValues = 1000
         }.execute()
     }
 
