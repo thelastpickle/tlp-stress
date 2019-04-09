@@ -1,9 +1,32 @@
 package com.thelastpickle.tlpstress
 
+import org.apache.logging.log4j.kotlin.logger
+
 
 class SchemaBuilder(var baseStatement : String) {
     private var compaction = ""
     private var compression = ""
+
+    private var isCreateTable : Boolean
+
+    var rowCache = "NONE"
+    var keyCache = "ALL"
+
+    var log = logger()
+
+    init {
+
+        val options = setOf(RegexOption.IGNORE_CASE,
+                            RegexOption.MULTILINE,
+                            RegexOption.DOT_MATCHES_ALL)
+
+        val r = "^\\s?create\\s+table\\s.*".toRegex(options)
+
+        isCreateTable = r.matches(baseStatement)
+        log.debug("checking $baseStatement, isCreateTable=$isCreateTable")
+
+
+    }
 
     companion object {
         fun create(baseStatement: String) : SchemaBuilder {
@@ -24,13 +47,22 @@ class SchemaBuilder(var baseStatement : String) {
     fun build() : String {
         val sb = StringBuilder(baseStatement)
 
+
         val parts = mutableListOf<String>()
 
-        if(compaction.length > 0)
-            parts.add("compaction = $compaction")
-        if(compression.length > 0)
-            parts.add("compression = $compression")
+        // there's a whole bunch of flags we can only use in CREATE TABLE statements
 
+        if(isCreateTable) {
+
+            if(compaction.length > 0)
+                parts.add("compaction = $compaction")
+            if(compression.length > 0)
+                parts.add("compression = $compression")
+
+            parts.add("caching = {'keys': '$keyCache', 'rows_per_partition': '$rowCache'}")
+
+
+        }
         val stuff = parts.joinToString(" AND ")
 
         if(stuff.length > 0 && !baseStatement.toLowerCase().contains("\\swith\\s".toRegex())) {
@@ -38,10 +70,19 @@ class SchemaBuilder(var baseStatement : String) {
         } else if(stuff.count() > 0) {
             sb.append(" AND ")
         }
-
         sb.append(stuff)
 
         return sb.toString()
+    }
+
+    fun withRowCache(rowCache: String): SchemaBuilder {
+        this.rowCache = rowCache
+        return this
+    }
+
+    fun withKeyCache(keyCache: String): SchemaBuilder {
+        this.keyCache = keyCache
+        return this
     }
 
 

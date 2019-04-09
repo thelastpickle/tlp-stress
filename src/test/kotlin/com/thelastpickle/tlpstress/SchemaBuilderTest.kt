@@ -52,4 +52,21 @@ internal class SchemaBuilderTest {
         assertThat(query.toLowerCase()).containsOnlyOnce("with")
 
     }
+
+    @Test
+    fun createTypeShouldNotHaveWithClause() {
+        val query = """CREATE TYPE IF NOT EXISTS sensor_data_details (
+                          data1 text,
+                          data2 text,
+                          data3 text
+                        )"""
+
+        val result = SchemaBuilder.create(query)
+                .withKeyCache("NONE")
+                .build()
+
+        assertThat(result).doesNotContain("WITH")
+
+
+    }
 }

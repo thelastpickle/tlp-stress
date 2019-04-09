@@ -23,8 +23,7 @@ class UdtTimeSeries : IStressProfile {
                           data1 text,
                           data2 text,
                           data3 text
-                        );
-                           """.trimIndent()
+                        )""".trimIndent()
 
         val queryTable = """CREATE TABLE IF NOT EXISTS sensor_data_udt (
                             sensor_id text,

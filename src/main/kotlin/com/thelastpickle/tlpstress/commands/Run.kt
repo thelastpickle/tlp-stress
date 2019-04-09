@@ -116,6 +116,12 @@ class Run : IStressCommand {
     @Parameter(names = ["--paging"], description = "Override the driver's default page size.")
     var paging : Int? = null
 
+    @Parameter(names = ["--rowcache"], description = "Row cache setting")
+    var rowCache = "NONE"
+
+    @Parameter(names = ["--keycache"], description = "Key cache setting")
+    var keyCache = "ALL"
+
     val log = logger()
 
     /**
@@ -342,6 +348,8 @@ class Run : IStressCommand {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)
                     .withCompression(compression)
+                    .withRowCache(rowCache)
+                    .withKeyCache(keyCache)
                     .build()
             println(s)
             session.execute(s)
