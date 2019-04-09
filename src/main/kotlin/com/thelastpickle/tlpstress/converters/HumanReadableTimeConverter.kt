@@ -8,8 +8,6 @@ class HumanReadableTimeConverter : IStringConverter<Long> {
     override fun convert(value: String?): Long {
         var duration = Duration.ofMinutes(0)
 
-        val integer = "\\d+"
-        val units = "[dhms]"
         val valueCharSequence = value!!.subSequence(0, value.length)
         /**
          * The duration is passed in via the value variable. It could contain multiple time values e.g. "1d 2h 3m 4s".
@@ -18,11 +16,11 @@ class HumanReadableTimeConverter : IStringConverter<Long> {
          *      to convert the value from a String to CharSequence so we can pass it to findAll.
          * 2. Iterate through the matched values. Add to the duration based on the units of each value.
          */
-        Regex("$integer$units")
+        Regex("(?<num>\\d+)(?<str>[dhms])")
             .findAll(valueCharSequence)
             .forEach {
-                val quantity = Regex(integer).findAll(it.value).first().value.toLong()
-                when (Regex(units).findAll(it.value).first().value) {
+                val quantity = it.groups["num"]!!.value.toLong()
+                when (it.groups["str"]!!.value) {
                     "d" -> duration = duration.plusDays(quantity)
                     "h" -> duration = duration.plusHours(quantity)
                     "m" -> duration = duration.plusMinutes(quantity)
