@@ -113,40 +113,56 @@ class Run : IStressCommand {
     @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
     var writeToCsv = false
 
+    @Parameter(names = ["--paging"], description = "Override the driver's default page size.")
+    var paging : Int? = null
+
     val log = logger()
 
+    /**
+     * Lazily generate query options
+     */
+    val options by lazy {
+        val tmp = QueryOptions().setConsistencyLevel(consistencyLevel)
+        if(paging != null) {
+            println("Using custom paging size of $paging")
+            tmp.setFetchSize(paging!!)
+        }
+        tmp
+    }
+
     val session by lazy {
-            var builder = Cluster.builder()
-                    .addContactPoint(host)
-                    .withCredentials(username, password)
-                    .withQueryOptions(QueryOptions().setConsistencyLevel(consistencyLevel))
-                    .withPoolingOptions(PoolingOptions()
-                            .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                            .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                            .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-                            .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
 
-            if(coordinatorOnlyMode) {
-                println("Using experimental coordinator only mode.")
-                val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
-                builder = builder.withLoadBalancingPolicy(policy)
-            }
-        
-            val cluster = builder.build()
+        var builder = Cluster.builder()
+                .addContactPoint(host)
+                .withCredentials(username, password)
+                .withQueryOptions(options)
+                .withPoolingOptions(PoolingOptions()
+                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
+                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
 
-            // set up the keyspace
+        if(coordinatorOnlyMode) {
+            println("Using experimental coordinator only mode.")
+            val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
+            builder = builder.withLoadBalancingPolicy(policy)
+        }
+
+        val cluster = builder.build()
+
+        // set up the keyspace
 //        val commandArgs = parser.getParsedPlugin()!!.arguments
 
-            // get all the initial schema
-            println("Creating schema")
+        // get all the initial schema
+        println("Creating schema")
 
-            println("Executing $iterations operations with consistency level $consistencyLevel")
+        println("Executing $iterations operations with consistency level $consistencyLevel")
 
-            val session = cluster.connect()
+        val session = cluster.connect()
 
-            println("Connected")
-            session
-        }
+        println("Connected")
+        session
+    }
 
     override fun execute() {
 
