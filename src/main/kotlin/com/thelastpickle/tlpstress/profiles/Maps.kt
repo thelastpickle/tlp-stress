@@ -1,4 +1,4 @@
-package com.thelastpickle.tlpstress.profiles.maps
+package com.thelastpickle.tlpstress.profiles
 
 import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
@@ -15,8 +15,6 @@ class Maps : IStressProfile {
     lateinit var insert : PreparedStatement
     lateinit var select : PreparedStatement
 
-    data class PrimaryKey(val field: String)
-
     override fun prepare(session: Session) {
         insert = session.prepare("UPDATE map_stress SET data[?] = ? WHERE id = ?")
         select = session.prepare("SELECT * from map_stress WHERE id = ?")
@@ -29,7 +27,7 @@ class Maps : IStressProfile {
 
 
     override fun getRunner(context: StressContext): IStressRunner {
-        class MapRunner : IStressRunner {
+        return object : IStressRunner {
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 return Operation.SelectStatement(insert.bind("key", "value", partitionKey.getText()))
             }
@@ -40,6 +38,5 @@ class Maps : IStressProfile {
             }
 
         }
-        return MapRunner()
     }
 }

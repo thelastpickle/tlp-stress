@@ -1,4 +1,4 @@
-package com.thelastpickle.tlpstress.profiles.keyvalue
+package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
@@ -8,9 +8,6 @@ import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.generators.FieldFactory
 import com.thelastpickle.tlpstress.generators.functions.Random
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
 
 
 class KeyValue : IStressProfile {
@@ -40,7 +37,7 @@ class KeyValue : IStressProfile {
 
         val value = context.registry.getGenerator("keyvalue", "value")
 
-        class KeyValueRunner(val insert: PreparedStatement, val select: PreparedStatement) : IStressRunner {
+        return object : IStressRunner {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = select.bind(partitionKey.getText())
@@ -55,8 +52,6 @@ class KeyValue : IStressProfile {
             }
 
         }
-
-        return KeyValueRunner(insert, select)
     }
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {

@@ -1,4 +1,4 @@
-package com.thelastpickle.tlpstress.profiles.materializedviews
+package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
@@ -8,9 +8,6 @@ import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.FirstName
 import com.thelastpickle.tlpstress.generators.functions.LastName
 import com.thelastpickle.tlpstress.generators.functions.USCities
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
 import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {
@@ -39,7 +36,7 @@ class MaterializedViews : IStressProfile {
 
     override fun getRunner(context: StressContext): IStressRunner {
 
-        class MVRunner : IStressRunner {
+        return object : IStressRunner {
             var select_count = 0L
 
             val cities = context.registry.getGenerator("person", "city")
@@ -63,7 +60,6 @@ class MaterializedViews : IStressProfile {
             }
 
         }
-        return MVRunner()
     }
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {

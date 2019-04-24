@@ -1,15 +1,13 @@
-package com.thelastpickle.tlpstress.profiles.udttimeseries
+package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
+import com.thelastpickle.tlpstress.WorkloadParameter
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.Random
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
 
 
 /**
@@ -36,13 +34,15 @@ class UdtTimeSeries : IStressProfile {
         return listOf(queryUdt, queryTable)
     }
 
-    lateinit var prepared: PreparedStatement
+    lateinit var insert: PreparedStatement
     lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
 
+    @WorkloadParameter("Limit select to N rows.")
+    var limit = 500
+
     override fun prepare(session: Session) {
-        prepared = session.prepare("INSERT INTO sensor_data_udt (sensor_id, timestamp, data) VALUES (?, ?, ?)")
-        getRow = session.prepare("SELECT * from sensor_data_udt WHERE sensor_id = ? AND timestamp = ? ")
+        insert = session.prepare("INSERT INTO sensor_data_udt (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getPartitionHead = session.prepare("SELECT * from sensor_data_udt WHERE sensor_id = ? LIMIT ?")
     }
 
@@ -53,13 +53,13 @@ class UdtTimeSeries : IStressProfile {
 
         val dataField = context.registry.getGenerator("sensor_data", "data")
 
-        class TimeSeriesRunner(val insert: PreparedStatement, val select: PreparedStatement, val limit: Int) : IStressRunner {
+        return object : IStressRunner {
 
             val udt = context.session.cluster.getMetadata().getKeyspace(context.session.loggedKeyspace).getUserType("sensor_data_details")
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
 
-                val bound = select.bind(partitionKey.getText(), limit)
+                val bound = getPartitionHead.bind(partitionKey.getText(), limit)
                 return Operation.SelectStatement(bound)
             }
 
@@ -73,9 +73,6 @@ class UdtTimeSeries : IStressProfile {
             }
 
         }
-
-        return TimeSeriesRunner(prepared, getPartitionHead, 500)
-
     }
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {

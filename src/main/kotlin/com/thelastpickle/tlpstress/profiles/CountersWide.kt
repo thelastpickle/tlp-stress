@@ -1,12 +1,10 @@
-package com.thelastpickle.tlpstress.profiles.counterswide
+package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
+import com.thelastpickle.tlpstress.WorkloadParameter
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.roundToLong
 
@@ -15,6 +13,9 @@ class CountersWide : IStressProfile {
     lateinit var increment: PreparedStatement
     lateinit var selectOne: PreparedStatement
     lateinit var selectAll: PreparedStatement
+
+    @WorkloadParameter("Total rows per partition.")
+    val rowsPerPartition = 10000
 
     override fun prepare(session: Session) {
         increment = session.prepare("UPDATE counter_wide SET value = value + 1 WHERE key = ? and cluster = ?")
@@ -37,9 +38,8 @@ class CountersWide : IStressProfile {
         // for now i'm just going to hardcode this at 10K items
         // later when a profile can accept dynamic parameters i'll make it configurable
 
-        val rowsPerPartition = 10000
 
-        class CountersWideRunner : IStressRunner {
+        return object : IStressRunner {
 
             var iterations = 0L
 
@@ -62,6 +62,5 @@ class CountersWide : IStressProfile {
             }
 
         }
-        return CountersWideRunner()
     }
 }

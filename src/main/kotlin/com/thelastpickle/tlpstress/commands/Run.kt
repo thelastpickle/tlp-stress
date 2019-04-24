@@ -122,6 +122,14 @@ class Run : IStressCommand {
     @Parameter(names = ["--keycache"], description = "Key cache setting")
     var keyCache = "ALL"
 
+    @DynamicParameter(names = ["--workload."], description = "Override workload specific parameters.")
+
+    @Parameter(names = ["--prometheusport"], description = "Override the default prometheus port.")
+    var prometheusPort = 9500
+
+    @DynamicParameter(names = ["--workload.", "-w."], description = "Override workload specific parameters.")
+    var workloadParameters: Map<String, String> = mutableMapOf()
+
     val log = logger()
 
     /**
@@ -170,6 +178,7 @@ class Run : IStressCommand {
         session
     }
 
+
     override fun execute() {
 
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
@@ -184,6 +193,8 @@ class Run : IStressCommand {
 
         val rateLimiter = getRateLimiter()
 
+        plugin.applyDynamicSettings(workloadParameters)
+
         createSchema(plugin)
         executeAdditionalCQL()
 
@@ -192,33 +203,41 @@ class Run : IStressCommand {
         println("Preparing queries")
         plugin.instance.prepare(session)
 
+        // Both of the following are set in the try block, so this is OK
         val metrics = createMetrics()
+        var runnersExecuted = 0L
 
-        // run the prepare for each
-        val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
+        try {
+            // run the prepare for each
+            val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
 
-        populateData(plugin, runners, metrics)
+            populateData(plugin, runners, metrics)
 
-        println("Starting main runner")
+            println("Starting main runner")
 
-        metrics.startReporting()
+            metrics.startReporting()
 
-        val runnersExecuted = runners.parallelStream().map {
-            println("Running")
-            it.run()
-        }.count()
+            runnersExecuted = runners.parallelStream().map {
+                println("Running")
+                it.run()
+            }.count()
 
-        // hopefully at this point we have a valid stress profile to run
+            // hopefully at this point we have a valid stress profile to run
 
-        Thread.sleep(1000)
+            Thread.sleep(1000)
 
-        // dump out metrics
-        for(reporter in metrics.reporters) {
-            reporter.report()
+            // dump out metrics
+            for (reporter in metrics.reporters) {
+                reporter.report()
+            }
+        } finally {
+            // we need to be able to run multiple tests in the same JVM
+            // without this cleanup we could have the metrics runner still running and it will cause subsequent tests to fail
+            metrics.shutdown()
+            Thread.sleep(1000)
+            println("Stress complete, $runnersExecuted.")
         }
-        metrics.shutdown()
-        Thread.sleep(1000)
-        println("Stress complete, $runnersExecuted.")
+
     }
 
     
@@ -288,7 +307,7 @@ class Run : IStressCommand {
         }
         reporters.add(SingleLineConsoleReporter(registry))
 
-        return Metrics(registry, reporters)
+        return Metrics(registry, reporters, prometheusPort)
     }
 
     private fun createFieldRegistry(plugin: Plugin): Registry {

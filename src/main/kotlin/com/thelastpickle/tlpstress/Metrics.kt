@@ -9,7 +9,7 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.dropwizard.DropwizardExports
 import io.prometheus.client.exporter.HTTPServer
 
-class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>) {
+class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>, val httpPort : Int) {
 
     val server: HTTPServer
 
@@ -24,7 +24,7 @@ class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledRepor
 
     init {
         CollectorRegistry.defaultRegistry.register(DropwizardExports(metricRegistry))
-        server = HTTPServer(9501)
+        server = HTTPServer(httpPort)
 
     }
 
