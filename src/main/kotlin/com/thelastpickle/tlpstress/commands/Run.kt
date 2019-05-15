@@ -230,6 +230,9 @@ class Run : IStressCommand {
             for (reporter in metrics.reporters) {
                 reporter.report()
             }
+        } catch (e: Exception) {
+            println("There was an error with tlp-stress.  Please file a bug at https://github.com/thelastpickle/tlp-stress and report the following exception:\n $e")
+            throw e
         } finally {
             // we need to be able to run multiple tests in the same JVM
             // without this cleanup we could have the metrics runner still running and it will cause subsequent tests to fail

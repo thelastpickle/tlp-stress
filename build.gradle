@@ -88,7 +88,7 @@ dependencies {
 
     compile group: 'me.tongfei', name: 'progressbar', version: '0.7.2'
 
-    implementation 'org.apache.commons:commons-math3:3.6.1'
+    compile 'org.apache.commons:commons-math3:3.6.1'
 
     // exporting dropwizard metrics
 

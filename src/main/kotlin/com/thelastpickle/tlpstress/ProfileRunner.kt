@@ -30,6 +30,7 @@ class ProfileRunner(val context: StressContext,
 
         fun getGenerator(context: StressContext, name: String) : PartitionKeyGenerator {
             val prefix = context.mainArguments.id + "." + context.thread + "."
+            println("Creating generator $name")
             val partitionKeyGenerator = when(name) {
                 "normal" -> PartitionKeyGenerator.normal(prefix)
                 "random" -> PartitionKeyGenerator.random(prefix)
