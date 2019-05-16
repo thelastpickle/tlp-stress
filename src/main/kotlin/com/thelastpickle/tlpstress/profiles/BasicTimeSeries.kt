@@ -1,9 +1,8 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
-import com.datastax.driver.core.utils.UUIDs
+import com.datastax.oss.driver.api.core.uuid.Uuids
 import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
@@ -59,7 +58,7 @@ class BasicTimeSeries : IStressProfile {
 
             override fun getNextMutation(partitionKey: PartitionKey) : Operation {
                 val data = dataField.getText()
-                val timestamp = UUIDs.timeBased()
+                val timestamp = Uuids.timeBased()
                 val bound = prepared.bind(partitionKey.getText(),timestamp, data)
                 return Operation.Mutation(bound)
             }
