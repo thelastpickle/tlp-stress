@@ -99,7 +99,7 @@ class Run : IStressCommand {
     var dropKeyspace = false
 
     @Parameter(names = ["--cl"], description = "Consistency level for reads/writes (Defaults to LOCAL_ONE).", converter = ConsistencyLevelConverter::class)
-    var consistencyLevel = ConsistencyLevel.LOCAL_ONE
+    var consistencyLevel = DefaultConsistencyLevel.LOCAL_ONE
 
     @Parameter(names = ["--cql"], description = "Additional CQL to run after the schema is created.  Use for DDL modifications such as creating indexes.", splitter = NoSplitter::class)
     var additionalCQL = mutableListOf<String>()
