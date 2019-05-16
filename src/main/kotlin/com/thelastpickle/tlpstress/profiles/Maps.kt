@@ -1,13 +1,10 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
 
 
 class Maps : IStressProfile {
@@ -15,7 +12,7 @@ class Maps : IStressProfile {
     lateinit var insert : PreparedStatement
     lateinit var select : PreparedStatement
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("UPDATE map_stress SET data[?] = ? WHERE id = ?")
         select = session.prepare("SELECT * from map_stress WHERE id = ?")
     }

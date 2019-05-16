@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
@@ -41,7 +42,7 @@ class UdtTimeSeries : IStressProfile {
     @WorkloadParameter("Limit select to N rows.")
     var limit = 500
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO sensor_data_udt (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getPartitionHead = session.prepare("SELECT * from sensor_data_udt WHERE sensor_id = ? LIMIT ?")
     }

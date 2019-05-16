@@ -1,8 +1,8 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.Session
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.BoundStatement
+import com.datastax.oss.driver.api.core.cql.ResultSet
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.PopulateOption
 import com.thelastpickle.tlpstress.StressContext
@@ -37,7 +37,7 @@ interface IStressProfile {
      * the class should track all prepared statements internally
      * and pass them on to the Runner
      */
-    fun prepare(session: Session)
+    fun prepare(session: CqlSession)
     /**
      * returns a bunch of DDL statements
      * this can be create table, index, materialized view, etc

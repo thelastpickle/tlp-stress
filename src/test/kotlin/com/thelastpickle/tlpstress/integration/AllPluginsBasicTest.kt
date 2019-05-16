@@ -1,12 +1,13 @@
 package com.thelastpickle.tlpstress.integration
 
-import com.datastax.driver.core.Cluster
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.Plugin
 import com.thelastpickle.tlpstress.commands.Run
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.net.InetSocketAddress
 
 
 @Retention(AnnotationRetention.RUNTIME)
@@ -22,9 +23,9 @@ class AllPluginsBasicTest {
 
     val ip = System.getenv("TLP_STRESS_CASSANDRA_IP") ?: "127.0.0.1"
 
-    val connection = Cluster.builder()
-            .addContactPoint(ip)
-            .build().connect()
+    val connection = CqlSession.builder()
+            .addContactPoint(InetSocketAddress(ip, 9200))
+            .build()
 
     lateinit var run : Run
 

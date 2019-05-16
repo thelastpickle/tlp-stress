@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.utils.UUIDs
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
@@ -35,7 +36,7 @@ class BasicTimeSeries : IStressProfile {
     @WorkloadParameter("Number of rows to fetch back on SELECT queries")
     val limit = 500
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
         getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")

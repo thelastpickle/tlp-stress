@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
@@ -17,7 +18,7 @@ class CountersWide : IStressProfile {
     @WorkloadParameter("Total rows per partition.")
     val rowsPerPartition = 10000
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         increment = session.prepare("UPDATE counter_wide SET value = value + 1 WHERE key = ? and cluster = ?")
         selectOne = session.prepare("SELECT * from counter_wide WHERE key = ? AND cluster = ?")
         selectAll = session.prepare("SELECT * from counter_wide WHERE key = ?")

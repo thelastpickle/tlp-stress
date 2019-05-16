@@ -3,6 +3,7 @@ package com.thelastpickle.tlpstress.profiles
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 
@@ -16,7 +17,7 @@ class LWT : IStressProfile {
         return arrayListOf("""CREATE TABLE IF NOT EXISTS lwt (id text primary key, value int) """)
     }
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO lwt (id, value) VALUES (?, ?) IF NOT EXISTS")
         update = session.prepare("UPDATE lwt SET value = ? WHERE id = ? IF value = ?")
         select = session.prepare("SELECT * from lwt WHERE id = ?")
