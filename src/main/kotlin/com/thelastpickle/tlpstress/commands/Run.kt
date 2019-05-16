@@ -7,6 +7,10 @@ import com.beust.jcommander.converters.IParameterSplitter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
 import com.datastax.oss.driver.api.core.*
+import com.datastax.oss.driver.api.core.config.DriverConfig
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader
+import com.datastax.oss.driver.api.core.config.DriverExecutionProfile
+import com.datastax.oss.driver.api.core.context.DriverContext
 import com.datastax.oss.driver.api.core.policies.HostFilterPolicy
 import com.datastax.oss.driver.api.core.policies.RoundRobinPolicy
 import com.google.common.base.Preconditions
@@ -21,6 +25,10 @@ import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -146,19 +154,53 @@ class Run : IStressCommand {
 
     val session by lazy {
 
+        val hostAddress = InetSocketAddress(host, 9042)
+
+        val driverConfig = object : DriverConfigLoader {
+            override fun reload(): CompletionStage<Boolean> {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun close() = Unit
+
+            override fun onDriverInit(context: DriverContext) = Unit
+
+            override fun supportsReloading() = false
+
+            override fun getInitialConfig(): DriverConfig {
+
+
+
+                return object : DriverConfig {
+
+
+                    override fun getProfiles(): MutableMap<String, out DriverExecutionProfile> {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+
+                    override fun getProfile(profileName: String): DriverExecutionProfile {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+                }
+            }
+
+        }
+
         var builder = CqlSession.builder()
-                .addContactPoint(host)
-                .withCredentials(username, password)
-                .withQueryOptions(options)
-                .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
+                .addContactPoint(hostAddress)
+                .withConfigLoader(driverConfig)
+//                .withCredentials(username, password)
+//                .withQueryOptions(options)
+//                .withPoolingOptions(PoolingOptions()
+//                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
+//                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+//                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+//                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
 
         if(coordinatorOnlyMode) {
             println("Using experimental coordinator only mode.")
             val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
+
             builder = builder.withLoadBalancingPolicy(policy)
         }
 
