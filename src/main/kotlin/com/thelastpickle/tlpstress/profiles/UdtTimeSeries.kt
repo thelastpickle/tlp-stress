@@ -54,8 +54,8 @@ class UdtTimeSeries : IStressProfile {
         val dataField = context.registry.getGenerator("sensor_data", "data")
 
         return object : IStressRunner {
-
-            val udt = context.session.cluster.getMetadata().getKeyspace(context.session.loggedKeyspace).getUserType("sensor_data_details")
+            val keyspace = context.mainArguments.keyspace
+            val udt = context.session.getMetadata().getKeyspace(keyspace).get().getUserDefinedType("sensor_data_details").get()
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
 
@@ -67,7 +67,7 @@ class UdtTimeSeries : IStressProfile {
                 val data = dataField.getText()
                 val chunks = data.chunked(data.length/3)
                 val udtValue = udt.newValue().setString("data1", chunks[0]).setString("data2", chunks[1]).setString("data3", chunks[2])
-                val timestamp = UUIDs.timeBased()
+                val timestamp = Uuids.timeBased()
                 val bound = insert.bind(partitionKey.getText(),timestamp, udtValue)
                 return Operation.Mutation(bound)
             }
