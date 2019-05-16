@@ -1,6 +1,6 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.Host
+import com.datastax.oss.driver.api.core.
 import com.google.common.base.Predicate
 
 class CoordinatorHostPredicate : Predicate<Host> {

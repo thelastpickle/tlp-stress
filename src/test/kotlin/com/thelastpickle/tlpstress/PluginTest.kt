@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.cql.BoundStatement
+import com.datastax.oss.driver.api.core.CqlSession
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -32,7 +32,7 @@ internal class PluginTest {
 
         var notWorkloadParameter : String = "oh nooo"
 
-        override fun prepare(session: Session) = Unit
+        override fun prepare(session: CqlSession) = Unit
         override fun schema(): List<String> = listOf()
 
         override fun getRunner(context: StressContext): IStressRunner {

@@ -6,9 +6,9 @@ import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
-import com.datastax.driver.core.*
-import com.datastax.driver.core.policies.HostFilterPolicy
-import com.datastax.driver.core.policies.RoundRobinPolicy
+import com.datastax.oss.driver.api.core.*
+import com.datastax.oss.driver.api.core.policies.HostFilterPolicy
+import com.datastax.oss.driver.api.core.policies.RoundRobinPolicy
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
@@ -146,7 +146,7 @@ class Run : IStressCommand {
 
     val session by lazy {
 
-        var builder = Cluster.builder()
+        var builder = CqlSession.builder()
                 .addContactPoint(host)
                 .withCredentials(username, password)
                 .withQueryOptions(options)
