@@ -13,6 +13,7 @@ import com.datastax.oss.driver.api.core.config.DriverExecutionProfile
 import com.datastax.oss.driver.api.core.context.DriverContext
 import com.datastax.oss.driver.api.core.policies.HostFilterPolicy
 import com.datastax.oss.driver.api.core.policies.RoundRobinPolicy
+import com.datastax.oss.driver.internal.core.config.typesafe.DefaultDriverConfigLoader
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
@@ -155,40 +156,41 @@ class Run : IStressCommand {
     val session by lazy {
 
         val hostAddress = InetSocketAddress(host, 9042)
-
-        val driverConfig = object : DriverConfigLoader {
-            override fun reload(): CompletionStage<Boolean> {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun close() = Unit
-
-            override fun onDriverInit(context: DriverContext) = Unit
-
-            override fun supportsReloading() = false
-
-            override fun getInitialConfig(): DriverConfig {
-
-
-
-                return object : DriverConfig {
-
-
-                    override fun getProfiles(): MutableMap<String, out DriverExecutionProfile> {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                    }
-
-                    override fun getProfile(profileName: String): DriverExecutionProfile {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                    }
-                }
-            }
-
-        }
+        val driverConfig = DefaultDriverConfigLoader().initialConfig.defaultProfile
+        driverConfig.initialConfig
+//
+//        val driverConfig = object : DriverConfigLoader {
+//            override fun reload(): CompletionStage<Boolean> {
+//                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//            }
+//
+//            override fun close() = Unit
+//
+//            override fun onDriverInit(context: DriverContext) = Unit
+//
+//            override fun supportsReloading() = false
+//
+//            override fun getInitialConfig(): DriverConfig {
+//
+//
+//
+//                return object : DriverConfig {
+//
+//
+//                    override fun getProfiles(): MutableMap<String, out DriverExecutionProfile> {
+//                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//                    }
+//
+//                    override fun getProfile(profileName: String): DriverExecutionProfile {
+//                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//                    }
+//                }
+//            }
+//
+//        }
 
         var builder = CqlSession.builder()
                 .addContactPoint(hostAddress)
-                .withConfigLoader(driverConfig)
 //                .withCredentials(username, password)
 //                .withQueryOptions(options)
 //                .withPoolingOptions(PoolingOptions()
