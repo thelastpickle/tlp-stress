@@ -127,8 +127,13 @@ class Run : IStressCommand {
     @Parameter(names = ["--prometheusport"], description = "Override the default prometheus port.")
     var prometheusPort = 9500
 
+    @Parameter(names = ["--ssl"], description = "Enable SSL")
+    var ssl = false
+
     @DynamicParameter(names = ["--workload.", "-w."], description = "Override workload specific parameters.")
     var workloadParameters: Map<String, String> = mutableMapOf()
+
+
 
     val log = logger()
 
@@ -155,7 +160,10 @@ class Run : IStressCommand {
                         .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
                         .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
                         .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
-
+        if(ssl) {
+            builder = builder.withSSL()
+        }
+        
         if(coordinatorOnlyMode) {
             println("Using experimental coordinator only mode.")
             val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
