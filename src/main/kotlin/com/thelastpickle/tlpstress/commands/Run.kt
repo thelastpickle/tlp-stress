@@ -383,6 +383,7 @@ class Run : IStressCommand {
                     .withCompression(compression)
                     .withRowCache(rowCache)
                     .withKeyCache(keyCache)
+                    .withDefaultTTL(ttl)
                     .build()
             println(s)
             session.execute(s)
