@@ -130,6 +130,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--ssl"], description = "Enable SSL")
     var ssl = false
 
+    @Parameter(names = ["--ttl"], description = "Table level TTL, 0 to disable.")
+    var ttl : Long = 0
+
     @DynamicParameter(names = ["--workload.", "-w."], description = "Override workload specific parameters.")
     var workloadParameters: Map<String, String> = mutableMapOf()
 
@@ -163,7 +166,7 @@ class Run : IStressCommand {
         if(ssl) {
             builder = builder.withSSL()
         }
-        
+
         if(coordinatorOnlyMode) {
             println("Using experimental coordinator only mode.")
             val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())

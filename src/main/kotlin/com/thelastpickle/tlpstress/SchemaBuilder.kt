@@ -4,6 +4,7 @@ import org.apache.logging.log4j.kotlin.logger
 
 
 class SchemaBuilder(var baseStatement : String) {
+    private var ttl: Long = 0
     private var compaction = ""
     private var compression = ""
 
@@ -43,6 +44,11 @@ class SchemaBuilder(var baseStatement : String) {
         this.compression = compression.trim()
         return this
     }
+    
+    fun withDefaultTTL(ttl: Long) : SchemaBuilder {
+        this.ttl = ttl
+        return this
+    }
 
     fun build() : String {
         val sb = StringBuilder(baseStatement)
@@ -63,6 +69,8 @@ class SchemaBuilder(var baseStatement : String) {
 
 
         }
+        parts.add("default_time_to_live = $ttl")
+
         val stuff = parts.joinToString(" AND ")
 
         if(stuff.length > 0 && !baseStatement.toLowerCase().contains("\\swith\\s".toRegex())) {
@@ -70,6 +78,9 @@ class SchemaBuilder(var baseStatement : String) {
         } else if(stuff.count() > 0) {
             sb.append(" AND ")
         }
+
+
+
         sb.append(stuff)
 
         return sb.toString()
