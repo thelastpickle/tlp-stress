@@ -179,7 +179,7 @@ The Debian package installs a basic configuration file to `/etc/tlp-stress/log4j
 
 === Exporting Metrics
 
-tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9501.
+tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9500.
 
 
 == Developer Docs
