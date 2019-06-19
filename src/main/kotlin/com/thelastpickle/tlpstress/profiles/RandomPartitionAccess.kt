@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 class RandomPartitionAccess : IStressProfile {
 
-    @WorkloadParameter(description = "Number of rows per partition.")
+    @WorkloadParameter(description = "Number of rows per partition, defaults to 100")
     var rows = 100
 
     @WorkloadParameter("Select random row or the entire partition.  Acceptable values: row, partition")
@@ -27,10 +27,14 @@ class RandomPartitionAccess : IStressProfile {
 
         query = when(select) {
 
-            "partition" ->
+            "partition" -> {
+                println("Preparing full partition reads")
                 session.prepare("SELECT * from random_access WHERE partition_id = ?")
-            "row" ->
+            }
+            "row" -> {
+                println("Preparing single row reads")
                 session.prepare("SELECT * from random_access WHERE partition_id = ? and row_id = ?")
+            }
             else ->
                 throw RuntimeException("select must be row or partition.")
 
@@ -84,7 +88,7 @@ class RandomPartitionAccess : IStressProfile {
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {
         val ra = FieldFactory("random_access")
-        return mapOf(ra.getField("value") to Random())
+        return mapOf(ra.getField("value") to Random().apply{ min=100; max=200})
     }
 
 }
