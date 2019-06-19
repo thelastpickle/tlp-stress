@@ -29,7 +29,7 @@ class Info : IStressCommand {
 
         if(params.size > 0) {
 
-            println("Dynamic workload parameters (override with --workload.name X)\n")
+            println("Dynamic workload parameters (override with --workload.name=X)\n")
             // TODO: Show dynamic parameters
 
             val cols = arrayOf(0, 0, 0)
