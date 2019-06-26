@@ -122,8 +122,6 @@ class Run : IStressCommand {
     @Parameter(names = ["--keycache"], description = "Key cache setting")
     var keyCache = "ALL"
 
-    @DynamicParameter(names = ["--workload."], description = "Override workload specific parameters.")
-
     @Parameter(names = ["--prometheusport"], description = "Override the default prometheus port.")
     var prometheusPort = 9500
 
