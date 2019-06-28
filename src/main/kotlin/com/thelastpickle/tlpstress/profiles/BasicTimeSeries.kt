@@ -33,7 +33,7 @@ class BasicTimeSeries : IStressProfile {
     lateinit var getPartitionHead: PreparedStatement
 
     @WorkloadParameter("Number of rows to fetch back on SELECT queries")
-    val limit = 500
+    var limit = 500
 
     override fun prepare(session: Session) {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")

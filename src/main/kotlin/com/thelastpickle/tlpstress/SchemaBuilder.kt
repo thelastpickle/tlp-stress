@@ -66,10 +66,8 @@ class SchemaBuilder(var baseStatement : String) {
                 parts.add("compression = $compression")
 
             parts.add("caching = {'keys': '$keyCache', 'rows_per_partition': '$rowCache'}")
-
-
+            parts.add("default_time_to_live = $ttl")
         }
-        parts.add("default_time_to_live = $ttl")
 
         val stuff = parts.joinToString(" AND ")
 
