@@ -21,6 +21,7 @@ import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
+import java.io.File
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -110,8 +111,8 @@ class Run : IStressCommand {
     @Parameter(names = ["--coordinatoronly", "--co"], description = "Coordinator only made.  This will cause tlp-stress to round robin between nodes without tokens.  Requires using -Djoin_ring=false in cassandra-env.sh.  When using this option you must only provide a coordinator to --host.")
     var coordinatorOnlyMode = false
 
-    @Parameter(names = ["--csv"], description = "When this flag is set, the metrics will be written to .csv files")
-    var writeToCsv = false
+    @Parameter(names = ["--csv"], description = "Write metrics to this file in CSV format.")
+    var writeToCsv = ""
 
     @Parameter(names = ["--paging"], description = "Override the driver's default page size.")
     var paging : Int? = null
@@ -314,8 +315,9 @@ class Run : IStressCommand {
 
         val reporters = mutableListOf<ScheduledReporter>()
 
-        if(writeToCsv) {
-            reporters.add(FileReporter(registry))
+        if(writeToCsv.isNotEmpty()) {
+            val fp = File(writeToCsv)
+            reporters.add(FileReporter(registry, fp))
         }
         reporters.add(SingleLineConsoleReporter(registry))
 

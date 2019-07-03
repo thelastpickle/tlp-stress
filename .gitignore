@@ -16,3 +16,4 @@ settings.gradle
 *.deb
 /metrics*
 /logs/
+/*.csv
