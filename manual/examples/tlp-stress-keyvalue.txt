@@ -1,27 +1,27 @@
 $ bin/tlp-stress run KeyValue -n 10000
-Creating schema
-Executing 10000 operations with consistency level LOCAL_ONE
-Connected
 Creating tlp_stress: 
 CREATE KEYSPACE
  IF NOT EXISTS tlp_stress
  WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
 
+Creating schema
+Executing 10000 operations with consistency level LOCAL_ONE
+Connected
 Creating Tables
 CREATE TABLE IF NOT EXISTS keyvalue (
                         key text PRIMARY KEY,
                         value text
-                        )
+                        ) WITH caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'} AND default_time_to_live = 0
 Preparing queries
 Initializing metrics
 Connecting
-Preparing
+Creating generator random
+Preparing statements.
 1 threads prepared.
+Starting main runner
 Running
 [Thread 0]: Running the profile for 10000 iterations...
-[Thread 0]: Operations: 10000
-[Thread 0]: All operations complete.  Validating.
-Stress complete, 1.
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   5014          31.61             0 |    4986          30.79             0 |       0                0
+   5004           4.46             0 |    4996              4             0 |       0                0
+Stress complete, 1.

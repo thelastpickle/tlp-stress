@@ -1,11 +1,14 @@
 $ bin/tlp-stress list
 Available Workloads:
 
+BasicTimeSeries 
+CountersWide 
 KeyValue 
 LWT 
-MaterializedViews 
-CountersWide 
+Locking 
 Maps 
-BasicTimeSeries 
+MaterializedViews 
+RandomPartitionAccess 
+UdtTimeSeries 
 
-Done.
+You can run any of these workloads by running tlp-cluster run WORKLOAD.

@@ -120,9 +120,11 @@ test {
 
 
 task docs(type:Exec) {
+    dependsOn("assemble")
     commandLine 'docker-compose', 'up', 'docs'
     group = 'Build'
     description = "Build website documentation"
+
 }
 
 task deb(type:Exec) {

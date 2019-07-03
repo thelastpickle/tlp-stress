@@ -3,4 +3,6 @@ CREATE TABLE IF NOT EXISTS keyvalue (
                         key text PRIMARY KEY,
                         value text
                         )
-Default read rate: 0.5
+Default read rate: 0.5 (override with -r)
+
+No dynamic workload parameters.

@@ -3,7 +3,7 @@ package com.thelastpickle.tlpstress.commands
 import com.beust.jcommander.Parameters
 import com.thelastpickle.tlpstress.Plugin
 
-@Parameters(commandDescription = "ListCommand all workloads.")
+@Parameters(commandDescription = "List all workloads.")
 class ListCommand : IStressCommand {
     override fun execute() {
 

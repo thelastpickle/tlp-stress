@@ -32,6 +32,9 @@ Usage: tlp-stress [options] [command] [command options]
             Additional CQL to run after the schema is created.  Use for DDL 
             modifications such as creating indexes.
             Default: []
+          --csv
+            Write metrics to this file in CSV format.
+            Default: <empty string>
           --drop
             Drop the keyspace before starting.
             Default: false
@@ -39,7 +42,8 @@ Usage: tlp-stress [options] [command] [command options]
             Duration of the stress test.  Expressed in format 1d 3h 15m
             Default: 0
           --field.
-            Override a field's data generator
+            Override a field's data generator.  Example usage: 
+            --field.tablename.fieldname='book(100,200)' 
             Syntax: --field.key=value
             Default: {}
           -h, --help
@@ -54,9 +58,14 @@ Usage: tlp-stress [options] [command] [command options]
           --iterations, -i, -n
             Number of operations to run.
             Default: 0
+          --keycache
+            Key cache setting
+            Default: ALL
           --keyspace
             Keyspace to use
             Default: tlp_stress
+          --paging
+            Override the driver's default page size.
           --partitiongenerator, --pg
             Method of generating partition keys.  Supports random, normal 
             (gaussian), and sequence.
@@ -68,8 +77,11 @@ Usage: tlp-stress [options] [command] [command options]
 
             Default: cassandra
           --populate
-            Pre-population the DB
-            Default: false
+            Pre-population the DB with N rows before starting load test.
+            Default: 0
+          --prometheusport
+            Override the default prometheus port.
+            Default: 9500
           --rate
             Rate limiter, accepts human numbers. 0 = disabled
             Default: 0
@@ -79,17 +91,33 @@ Usage: tlp-stress [options] [command] [command options]
           --replication
             Replication options
             Default: {'class': 'SimpleStrategy', 'replication_factor':3 }
+          --rowcache
+            Row cache setting
+            Default: NONE
+          --ssl
+            Enable SSL
+            Default: false
           --threads, -t
             Threads to run
             Default: 1
+          --ttl
+            Table level TTL, 0 to disable.
+            Default: 0
           --username, -U
 
             Default: cassandra
+          --workload., -w.
+            Override workload specific parameters.
+            Syntax: --workload.key=value
+            Default: {}
 
     info      Get details of a specific workload.
       Usage: info
 
     list      List all workloads.
       Usage: list
+
+    fields      null
+      Usage: fields
 
 
