@@ -6,7 +6,6 @@ import org.apache.logging.log4j.kotlin.logger
 fun main(argv: Array<String>) {
 
     val log = logger("main")
-    
 
     log.info { "Parsing $argv" }
     val parser = CommandLineParser.parse(argv)
