@@ -21,7 +21,8 @@ if [ "x$TLP_STRESS_LOG4J" != "x" ]; then
 fi
 
 if [[ $(java -version 2>&1 | head -n 1 | grep -c "1.8") != "1" ]]; then
-    exit "tlp-stress requires Java 8."
+    echo "tlp-stress requires Java 8."
+    exit 1
 fi
 
 java -Xmx1G -XX:+UseG1GC -jar $TLP_STRESS_JAR "$@"
