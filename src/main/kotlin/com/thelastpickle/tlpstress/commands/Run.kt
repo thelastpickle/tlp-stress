@@ -39,6 +39,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--host"])
     var host = "127.0.0.1"
 
+    @Parameter(names = ["--port"], description = "Override the cql port. Defaults to 9042.")
+    var cqlPort = 9042
+
     @Parameter(names = ["--username", "-U"])
     var username = "cassandra"
 
@@ -159,6 +162,7 @@ class Run : IStressCommand {
 
         var builder = Cluster.builder()
                 .addContactPoint(host)
+                .withPort(cqlPort)
                 .withCredentials(username, password)
                 .withQueryOptions(options)
                 .withPoolingOptions(PoolingOptions()
