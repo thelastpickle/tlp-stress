@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.9">
+<meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="Jon Haddad">
 <title>tlp-stress</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -241,7 +241,7 @@ table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;pad
 pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
 pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock{margin:0 1em 1.25em 1.5em;display:table}
-.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
 .quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
 .quoteblock blockquote{margin:0;padding:0;border:0}
 .quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
@@ -258,7 +258,8 @@ pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
 .quoteblock.abstract{margin:0 1em 1.25em;display:block}
 .quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
-.quoteblock.excerpt,.quoteblock .quoteblock{margin:0 0 1.25em;padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
 .quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
 .quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
 table.tableblock{max-width:100%;border-collapse:separate}
@@ -448,7 +449,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#_quickstart_example">Quickstart Example</a>
 <ul class="sectlevel2">
-<li><a href="#_building_the_stress_tool">Building the Stress Tool</a></li>
+<li><a href="#_installing">Installing</a></li>
+<li><a href="#_building_using_the_stress_tool_from_source">Building / Using the Stress Tool from Source</a></li>
 <li><a href="#_run_your_first_stress_workload">Run Your First Stress Workload</a></li>
 </ul>
 </li>
@@ -522,7 +524,67 @@ automatically captured by the Dropwizard metrics library.</p>
 <p>The goal of this project is to be testing common workloads (time series, key value) against a Cassandra cluster in 15 minutes or less.</p>
 </div>
 <div class="sect2">
-<h3 id="_building_the_stress_tool">Building the Stress Tool</h3>
+<h3 id="_installing">Installing</h3>
+<div class="sect3">
+<h4 id="_installing_a_package">Installing a Package</h4>
+<div class="paragraph">
+<p>The easiest way to get started is to use your favorite package manager.</p>
+</div>
+<div class="paragraph">
+<p>The current version is 0.6.0</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_deb_packages">Deb Packages</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>echo "deb https://dl.bintray.com/thelastpickle/tlp-tools-deb weezy main" | sudo tee -a /etc/apt/sources.list
+apt install tlp-stress</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_rpm_packages">RPM Packages</h4>
+<div class="paragraph">
+<p>You&#8217;ll need the bintray repo set up on your machine.  Create this `/etc/yum.repos.d/tlp-tools.repo `:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>[bintraybintray-thelastpickle-tlp-tools-rpm]
+name=bintray-thelastpickle-tlp-tools-rpm
+baseurl=https://dl.bintray.com/thelastpickle/tlp-tools-rpm
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then run the following to install:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum install tlp-stress</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Further information can be found on the <a href="https://bintray.com/beta/#/thelastpickle/tlp-tools-rpm?tab=packages">BinTray website</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tarball_install">Tarball Install</h4>
+<div class="paragraph">
+<p>If you&#8217;re using mac, for now you&#8217;ll need to grab our tarball.</p>
+</div>
+<div class="paragraph">
+<p>curl -L "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-0.6.0.tar</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_using_the_stress_tool_from_source">Building / Using the Stress Tool from Source</h3>
+<div class="paragraph">
+<p>This is advisable only if you&#8217;re comfortable debugging the bash scripts, gradle, and Kotlin yourself and want to be either on the bleeding edge or add a feature.  If not, that&#8217;s OK, we recommend using one of the above packages instead.</p>
+</div>
 <div class="paragraph">
 <p>First you&#8217;ll need to clone and build the repo.  You can grab the source here and build via the included gradle script:</p>
 </div>
@@ -530,8 +592,11 @@ automatically captured by the Dropwizard metrics library.</p>
 <div class="content">
 <pre class="highlight"><code class="language-bash" data-lang="bash">git clone https://github.com/thelastpickle/tlp-stress.git
 cd tlp-stress
-./gradlew assemble</code></pre>
+./gradlew shadowJar</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>You can now run the stress tool via the <code>bin/tlp-stress</code> script.  This is not the same script you&#8217;ll be running if you&#8217;ve installed from a package or the tarball.</p>
 </div>
 </div>
 <div class="sect2">
@@ -578,8 +643,8 @@ Running
 [Thread 0]: Running the profile for 10000 iterations...
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   5060           4.93             0 |    4940           5.26             0 |       0                0
-   5060           4.93             0 |    4940           5.26             0 |       0                0
+   4908          10.67             0 |    5092          12.62             0 |       0                0
+   4908          10.67             0 |    5092          12.62             0 |       0                0
 Stress complete, 1.</code></pre>
 </div>
 </div>
@@ -718,7 +783,7 @@ Usage: tlp-stress [options] [command] [command options]
     info      Get details of a specific workload.
       Usage: info
 
-    list      ListCommand all workloads.
+    list      List all workloads.
       Usage: list
 
     fields      null
@@ -943,7 +1008,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-03-31 17:20:14 UTC
+Last updated 2019-08-01 22:44:26 UTC
 </div>
 </div>
 </body>

@@ -67,6 +67,10 @@ commands:
           paths:
             - /home/circleci/.gradle/
 
+  build_packages:
+    description: "Build packages through gradle"
+    steps:
+      - run: ./gradlew buildAll
 
 jobs:
 
@@ -111,6 +115,13 @@ jobs:
       - install_ccm:
           version: 3.11.4
 
+  build_packages:
+    <<: *base_job
+
+    steps:
+      - checkout
+      - build_packages
+
 workflows:
   version: 2.1
 
@@ -123,3 +134,7 @@ workflows:
     jobs:
       - build
       - cassandra_311
+
+  build_everything:
+    jobs:
+      - build_packages

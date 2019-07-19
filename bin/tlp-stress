@@ -1,28 +1,13 @@
 #!/bin/bash
 
-# You may define TLP_STRESS_LOG4J or let stress figure it out.
+dir=$(dirname $0)
+BASE_STRESS_DIR="$(dirname "$dir")"
+cd $BASE_STRESS_DIR
 
-# the next lines are for setting up various configs and are there
-# for package management
+JAR=$(find build/libs -name '*-all.jar' | tail -n 1)
 
-# TLP_STRESS_JAR
-# TLP_STRESS_LOG4J
+java -jar $JAR $@
 
-if [[ -z "$TLP_STRESS_JAR" ]]
-then
-    dir=$(dirname $0)
-    BASE_STRESS_DIR="$(dirname "$dir")"
-    TLP_STRESS_JAR="${BASE_STRESS_DIR}/build/libs/tlp-stress-1.0-SNAPSHOT.jar"
-fi
 
-# LOG4J can use the LOG4J_CONFIGURATION_FILE environment variable
-if [ "x$TLP_STRESS_LOG4J" != "x" ]; then
-    export LOG4J_CONFIGURATION_FILE="$TLP_STRESS_LOG4J"
-fi
 
-if [[ $(java -version 2>&1 | head -n 1 | grep -c "1.8") != "1" ]]; then
-    echo "tlp-stress requires Java 8."
-    exit 1
-fi
 
-java -Xmx1G -XX:+UseG1GC -jar $TLP_STRESS_JAR "$@"

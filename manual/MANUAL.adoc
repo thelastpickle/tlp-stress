@@ -29,7 +29,53 @@ automatically captured by the Dropwizard metrics library.
 
 The goal of this project is to be testing common workloads (time series, key value) against a Cassandra cluster in 15 minutes or less.
 
-=== Building the Stress Tool
+=== Installation
+
+==== Installing a Package
+
+The easiest way to get started is to use your favorite package manager.
+
+The current version is {TLP_STRESS_VERSION}.
+
+==== Deb Packages
+
+```
+$ echo "deb https://dl.bintray.com/thelastpickle/tlp-tools-deb weezy main" | sudo tee -a /etc/apt/sources.list
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 2895100917357435
+$ sudo apt install tlp-stress
+```
+
+==== RPM Packages
+
+You'll need the bintray repo set up on your machine.  Create this `/etc/yum.repos.d/tlp-tools.repo`:
+
+```
+[bintraybintray-thelastpickle-tlp-tools-rpm]
+name=bintray-thelastpickle-tlp-tools-rpm
+baseurl=https://dl.bintray.com/thelastpickle/tlp-tools-rpm
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1
+```
+
+Then run the following to install:
+
+```
+yum install tlp-stress
+```
+
+
+Further information can be found on the https://bintray.com/beta/#/thelastpickle/tlp-tools-rpm?tab=packages[BinTray website].
+
+==== Tarball Install
+
+If you're using mac, for now you'll need to grab our tarball.
+
+curl -L "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-{TLP_STRESS_VERSION}.tar
+
+=== Building / Using the Stress Tool from Source
+
+This is advisable only if you're comfortable debugging the bash scripts, gradle, and Kotlin yourself and want to be either on the bleeding edge or add a feature.  If not, that's OK, we recommend using one of the above packages instead.
 
 First you'll need to clone and build the repo.  You can grab the source here and build via the included gradle script:
 
@@ -37,8 +83,10 @@ First you'll need to clone and build the repo.  You can grab the source here and
 ```bash
 git clone https://github.com/thelastpickle/tlp-stress.git
 cd tlp-stress
-./gradlew assemble
+./gradlew shadowJar
 ```
+
+You can now run the stress tool via the `bin/tlp-stress` script.  This is not the same script you'll be running if you've installed from a package or the tarball.
 
 === Run Your First Stress Workload
 

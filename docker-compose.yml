@@ -7,12 +7,6 @@ services:
           - ./:/source
         command: -s --toc manual/MANUAL.md -o docs/index.html
 
-    deb:
-        build: ./src/packaging/deb
-        volumes:
-          - ./:/data
-        command: sh /data/src/packaging/deb/build_deb.sh
-
     docs:
         image: asciidoctor/docker-asciidoctor
 
@@ -20,5 +14,5 @@ services:
         - ./manual:/documents
         - ./docs:/html
 
-        command: asciidoctor -o /html/index.html MANUAL.adoc
+        command: asciidoctor -o /html/index.html MANUAL.adoc -a TLP_STRESS_VERSION=${TLP_STRESS_VERSION}
 
