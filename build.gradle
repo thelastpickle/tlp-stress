@@ -3,6 +3,7 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -11,8 +12,10 @@ buildscript {
 
 plugins {
     id 'com.google.cloud.tools.jib' version '0.9.11'
+    id "com.jfrog.bintray" version "1.8.4"
 }
 
+apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'application'
@@ -39,7 +42,19 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
 
+    pkg {
+        repo = "tlp-tools"
+        name = "tlp-stress"
+        userOrg = "thelastpickle"
+        licenses = ['Apache-2.0']
+        vcsUrl = "https://github.com/thelastpickle/tlp-stress"
+    }
+
+}
 
 
 dependencies {
