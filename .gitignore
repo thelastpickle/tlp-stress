@@ -19,3 +19,6 @@ settings.gradle
 /*.csv
 tlp-stress.ipr
 tlp-stress.iws
+/*.rpm
+buildSrc/.gradle/
+buildSrc/build/

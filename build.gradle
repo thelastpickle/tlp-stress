@@ -7,55 +7,36 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.netflix.nebula:gradle-ospackage-plugin:6.2.1"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
     }
 }
 
 plugins {
     id 'com.google.cloud.tools.jib' version '0.9.11'
-    id "com.jfrog.bintray" version "1.8.4"
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'application'
+apply plugin: "nebula.ospackage"
+apply plugin: 'nebula.ospackage-application'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.thelastpickle'
-version '1.0-SNAPSHOT'
+version '0.6.0'
 
-
-mainClassName = "com.thelastpickle.tlpstress.MainKt"
 sourceCompatibility = 1.8
+
+application {
+    applicationName = "tlp-stress"
+    mainClassName = "com.thelastpickle.tlpstress.MainKt"
+}
 
 repositories {
     mavenCentral()
 }
-
-jar {
-    manifest {
-        attributes 'Main-Class': 'com.thelastpickle.tlpstress.MainKt'
-    }
-    // This line of code recursively collects and copies all of a project's files
-    // and adds them to the JAR itself. One can extend this task, to skip certain
-    // files or particular types at will
-    baseName = "tlp-stress"
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-}
-
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-
-    pkg {
-        repo = "tlp-tools"
-        name = "tlp-stress"
-        userOrg = "thelastpickle"
-        licenses = ['Apache-2.0']
-        vcsUrl = "https://github.com/thelastpickle/tlp-stress"
-    }
-
-}
-
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -83,9 +64,6 @@ dependencies {
 
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.8'
-
-    // https://mvnrepository.com/artifact/io.dropwizard.metrics/metrics-core
-    // compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.2'
 
     // https://mvnrepository.com/artifact/io.dropwizard.metrics/metrics-core
     // need to use the same version as datastax driver
@@ -133,17 +111,91 @@ test {
     useJUnitPlatform()
 }
 
-
 task docs(type:Exec) {
     dependsOn("assemble")
+    dependsOn("generateExamples")
+
+    environment "TLP_STRESS_VERSION", "${version}"
     commandLine 'docker-compose', 'up', 'docs'
-    group = 'Build'
+    group = "Documentation"
     description = "Build website documentation"
+}
+
+task generateExamples(type: Exec) {
+    commandLine "manual/generate_examples.sh"
+    group = "Documentation"
+    description = "Generate examples for documentation"
+}
+
+ospackage {
+    os = LINUX
+    link("/usr/local/bin/tlp-stress", "/opt/tlp-stress/bin/tlp-stress" )
+    packager "Jon Haddad"
+    maintainer "Jon Haddad"
+    vendor "The Last Pickle"
+    url "http://thelastpickle.com/tlp-stress/"
+    license "Apache License 2.0"
+    description "Stress Tool for Apache Cassandra by The Last Pickle"
+}
+
+buildDeb {
+    distribution "weezy,bionic,xenial,jessie"
+    requires("openjdk-8-jre")
+}
+
+buildRpm {
+    requires("java-1.8.0-openjdk")
+    user "root"
+}
+
+task buildAll {
+    dependsOn "buildDeb"
+    dependsOn "buildRpm"
+    dependsOn "distTar"
+}
+
+//deb.dependsOn assemble
+//deb.dependsOn clean
+
+assemble.mustRunAfter clean
+
+task uploadDeb(type: Exec) {
+    group = "Publish"
+    workingDir 'build/distributions'
+
+    def debPackage = "tlp-stress_${version}_all.deb"
+
+    // get the deb package
+
+    logger.info("Uploading DEB $debPackage")
+    commandLine "curl", "-T", debPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-deb/tlp-stress/${version}/$debPackage;deb_distribution=weezy;deb_component=main;deb_architecture=amd64;publish=1"
 
 }
 
-task deb(type:Exec) {
-    commandLine "docker-compose", "up", "deb"
+task uploadRpm(type: Exec) {
+    group = "Publish"
+    workingDir 'build/distributions'
 
+    def rpmPackage = "tlp-stress-${version}.noarch.rpm"
+
+    logger.info("Uploading RPM $rpmPackage")
+    commandLine "curl", "-T", rpmPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-rpm/tlp-stress/${version}/$rpmPackage;publish=1"
 }
-deb.dependsOn assemble
+
+
+
+task uploadTar(type:Exec) {
+    group = "Publish"
+    workingDir 'build/distributions'
+    def tarball = "tlp-stress-${version}.tar"
+
+    logger.info("Uploading Tar $tarball")
+    commandLine "curl", "-T", tarball, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-tarball/tlp-stress/${version}/$tarball;publish=1"
+}
+
+task uploadAll  {
+    group = "Publish"
+    dependsOn "uploadDeb"
+    dependsOn "uploadRpm"
+    dependsOn "uploadTar"
+}
