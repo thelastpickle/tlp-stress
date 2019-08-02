@@ -35,7 +35,7 @@ The goal of this project is to be testing common workloads (time series, key val
 
 The easiest way to get started is to use your favorite package manager.
 
-The current version is {TLP_STRESS_VERSION}
+The current version is {TLP_STRESS_VERSION}.
 
 ==== Deb Packages
 

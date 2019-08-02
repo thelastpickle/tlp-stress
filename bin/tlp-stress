@@ -1,5 +1,9 @@
 #!/bin/bash
 
+dir=$(dirname $0)
+BASE_STRESS_DIR="$(dirname "$dir")"
+cd $BASE_STRESS_DIR
+
 JAR=$(find build/libs -name '*-all.jar' | tail -n 1)
 
 java -jar $JAR $@

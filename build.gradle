@@ -165,7 +165,7 @@ task uploadDeb(type: Exec) {
     // get the deb package
 
     logger.info("Uploading DEB $debPackage")
-    commandLine "curl", "-T", debPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-deb/tlp-stress/${version}/$debPackage;deb_distribution=weezy,bionic;deb_component=main;deb_architecture=amd64;publish=1"
+    commandLine "curl", "-T", debPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-deb/tlp-stress/${version}/$debPackage;deb_distribution=weezy,bionic,jessie,xenial;deb_component=main;deb_architecture=amd64;publish=1"
 
 }
 
