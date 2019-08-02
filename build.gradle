@@ -154,9 +154,6 @@ task buildAll {
     dependsOn "distTar"
 }
 
-//deb.dependsOn assemble
-//deb.dependsOn clean
-
 assemble.mustRunAfter clean
 
 task uploadDeb(type: Exec) {
@@ -168,7 +165,7 @@ task uploadDeb(type: Exec) {
     // get the deb package
 
     logger.info("Uploading DEB $debPackage")
-    commandLine "curl", "-T", debPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-deb/tlp-stress/${version}/$debPackage;deb_distribution=weezy;deb_component=main;deb_architecture=amd64;publish=1"
+    commandLine "curl", "-T", debPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-deb/tlp-stress/${version}/$debPackage;deb_distribution=weezy,bionic;deb_component=main;deb_architecture=amd64;publish=1"
 
 }
 
@@ -181,8 +178,6 @@ task uploadRpm(type: Exec) {
     logger.info("Uploading RPM $rpmPackage")
     commandLine "curl", "-T", rpmPackage, "-u", System.getenv("BINTRAY_USER") + ":" + System.getenv("BINTRAY_KEY"), "https://api.bintray.com/content/thelastpickle/tlp-tools-rpm/tlp-stress/${version}/$rpmPackage;publish=1"
 }
-
-
 
 task uploadTar(type:Exec) {
     group = "Publish"
