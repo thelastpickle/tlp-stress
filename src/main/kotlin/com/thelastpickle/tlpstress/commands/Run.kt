@@ -7,6 +7,7 @@ import com.beust.jcommander.converters.IParameterSplitter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
 import com.datastax.driver.core.*
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy
 import com.datastax.driver.core.policies.HostFilterPolicy
 import com.datastax.driver.core.policies.RoundRobinPolicy
 import com.google.common.base.Preconditions
@@ -132,6 +133,9 @@ class Run : IStressCommand {
     @Parameter(names = ["--ttl"], description = "Table level TTL, 0 to disable.")
     var ttl : Long = 0
 
+    @Parameter(names = ["--dc"], description = "The data center to which requests should be sent")
+    var dc : String = ""
+
     @DynamicParameter(names = ["--workload.", "-w."], description = "Override workload specific parameters.")
     var workloadParameters: Map<String, String> = mutableMapOf()
 
@@ -164,6 +168,13 @@ class Run : IStressCommand {
                         .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
         if(ssl) {
             builder = builder.withSSL()
+        }
+
+        if (dc != "") {
+            builder.withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder()
+                    .withLocalDc(dc)
+                    .withUsedHostsPerRemoteDc(0)
+                    .build())
         }
 
         if(coordinatorOnlyMode) {
