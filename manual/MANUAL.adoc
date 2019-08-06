@@ -42,6 +42,7 @@ The current version is {TLP_STRESS_VERSION}.
 ```
 $ echo "deb https://dl.bintray.com/thelastpickle/tlp-tools-deb weezy main" | sudo tee -a /etc/apt/sources.list
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 2895100917357435
+$ sudo apt update
 $ sudo apt install tlp-stress
 ```
 
@@ -61,7 +62,7 @@ enabled=1
 Then run the following to install:
 
 ```
-yum install tlp-stress
+$ yum install tlp-stress
 ```
 
 
@@ -69,9 +70,12 @@ Further information can be found on the https://bintray.com/beta/#/thelastpickle
 
 ==== Tarball Install
 
-If you're using mac, for now you'll need to grab our tarball.
+If you're using mac, for now you'll need to grab our tarball using:
 
-curl -L "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-{TLP_STRESS_VERSION}.tar
+```
+$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-{TLP_STRESS_VERSION}.tar
+$ tar -xzf tlp-stress-{TLP_STRESS_VERSION}.tar
+```
 
 === Building / Using the Stress Tool from Source
 
@@ -81,9 +85,9 @@ First you'll need to clone and build the repo.  You can grab the source here and
 
 
 ```bash
-git clone https://github.com/thelastpickle/tlp-stress.git
-cd tlp-stress
-./gradlew shadowJar
+$ git clone https://github.com/thelastpickle/tlp-stress.git
+$ cd tlp-stress
+$ ./gradlew shadowJar
 ```
 
 You can now run the stress tool via the `bin/tlp-stress` script.  This is not the same script you'll be running if you've installed from a package or the tarball.
@@ -158,13 +162,13 @@ You might need to run a stress test for a given duration instead of providing a 
 For example, running a test for 1 hours and 30 minutes will be done as follows:
 
 ```
-tlp-stress run KeyValue -d "1h 30m"
+$ tlp-stress run KeyValue -d "1h 30m"
 ```
 
 To run a test for 1 days, 3 hours and 15 minutes (why not?), run tlp-stress as follows:
 
 ```
-tlp-stress run KeyValue -d "1d 3h 15m"
+$ tlp-stress run KeyValue -d "1d 3h 15m"
 ```
 
 ==== Partition Keys
@@ -237,7 +241,7 @@ tlp-stress automatically runs an HTTP server exporting metrics in Prometheus for
 First generate the command examples with the following shell script:
 
 ```bash
-manual/generate_examples.sh
+$ manual/generate_examples.sh
 ```
 
 There’s a docker service to build the HTML manual:
