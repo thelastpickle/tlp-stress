@@ -35,6 +35,9 @@ Usage: tlp-stress [options] [command] [command options]
           --csv
             Write metrics to this file in CSV format.
             Default: <empty string>
+          --dc
+            The data center to which requests should be sent
+            Default: <empty string>
           --drop
             Drop the keyspace before starting.
             Default: false

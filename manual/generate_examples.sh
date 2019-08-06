@@ -3,19 +3,18 @@
 # requires a running ccm cluster (otherwise certain tests will fail)
 
 set -x
+
 print_shell() {
     # params
     # $1 = name
     # #2 = command
-
     echo "running $1"
 
     printf "$ %s\n" "$2" > manual/examples/"${1}.txt"
     eval $2 >> manual/examples/"${1}.txt"
+    echo "Sleeping"
+    sleep 5
 }
-
-
-./gradlew assemble
 
 # help
 print_shell "tlp-stress-help" "bin/tlp-stress"
