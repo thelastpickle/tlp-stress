@@ -17,3 +17,8 @@ settings.gradle
 /metrics*
 /logs/
 /*.csv
+tlp-stress.ipr
+tlp-stress.iws
+/*.rpm
+buildSrc/.gradle/
+buildSrc/build/

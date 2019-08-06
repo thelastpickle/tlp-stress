@@ -29,16 +29,68 @@ automatically captured by the Dropwizard metrics library.
 
 The goal of this project is to be testing common workloads (time series, key value) against a Cassandra cluster in 15 minutes or less.
 
-=== Building the Stress Tool
+=== Installation
+
+==== Installing a Package
+
+The easiest way to get started is to use your favorite package manager.
+
+The current version is {TLP_STRESS_VERSION}.
+
+==== Deb Packages
+
+```
+$ echo "deb https://dl.bintray.com/thelastpickle/tlp-tools-deb weezy main" | sudo tee -a /etc/apt/sources.list
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 2895100917357435
+$ sudo apt update
+$ sudo apt install tlp-stress
+```
+
+==== RPM Packages
+
+You'll need the bintray repo set up on your machine.  Create this `/etc/yum.repos.d/tlp-tools.repo`:
+
+```
+[bintraybintray-thelastpickle-tlp-tools-rpm]
+name=bintray-thelastpickle-tlp-tools-rpm
+baseurl=https://dl.bintray.com/thelastpickle/tlp-tools-rpm
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1
+```
+
+Then run the following to install:
+
+```
+$ yum install tlp-stress
+```
+
+
+Further information can be found on the https://bintray.com/beta/#/thelastpickle/tlp-tools-rpm?tab=packages[BinTray website].
+
+==== Tarball Install
+
+If you're using mac, for now you'll need to grab our tarball using:
+
+```
+$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-{TLP_STRESS_VERSION}.tar
+$ tar -xzf tlp-stress-{TLP_STRESS_VERSION}.tar
+```
+
+=== Building / Using the Stress Tool from Source
+
+This is advisable only if you're comfortable debugging the bash scripts, gradle, and Kotlin yourself and want to be either on the bleeding edge or add a feature.  If not, that's OK, we recommend using one of the above packages instead.
 
 First you'll need to clone and build the repo.  You can grab the source here and build via the included gradle script:
 
 
 ```bash
-git clone https://github.com/thelastpickle/tlp-stress.git
-cd tlp-stress
-./gradlew assemble
+$ git clone https://github.com/thelastpickle/tlp-stress.git
+$ cd tlp-stress
+$ ./gradlew shadowJar
 ```
+
+You can now run the stress tool via the `bin/tlp-stress` script.  This is not the same script you'll be running if you've installed from a package or the tarball.
 
 === Run Your First Stress Workload
 
@@ -110,13 +162,13 @@ You might need to run a stress test for a given duration instead of providing a 
 For example, running a test for 1 hours and 30 minutes will be done as follows:
 
 ```
-tlp-stress run KeyValue -d "1h 30m"
+$ tlp-stress run KeyValue -d "1h 30m"
 ```
 
 To run a test for 1 days, 3 hours and 15 minutes (why not?), run tlp-stress as follows:
 
 ```
-tlp-stress run KeyValue -d "1d 3h 15m"
+$ tlp-stress run KeyValue -d "1d 3h 15m"
 ```
 
 ==== Partition Keys
@@ -189,7 +241,7 @@ tlp-stress automatically runs an HTTP server exporting metrics in Prometheus for
 First generate the command examples with the following shell script:
 
 ```bash
-manual/generate_examples.sh
+$ manual/generate_examples.sh
 ```
 
 There’s a docker service to build the HTML manual:

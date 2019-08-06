@@ -1,15 +1,56 @@
-$ bin/tlp-stress run KeyValue --field.keyvalue.value='book(20,40)'
-Creating schema
-Executing 1000000 operations with consistency level LOCAL_ONE
-Connected
+$ bin/tlp-stress run KeyValue --field.keyvalue.value="book(20,40)"
 Creating tlp_stress: 
 CREATE KEYSPACE
  IF NOT EXISTS tlp_stress
  WITH replication = {'class': 'SimpleStrategy', 'replication_factor':3 }
 
+Creating schema
+Executing 1000000 operations with consistency level LOCAL_ONE
+Connected
 Creating Tables
 CREATE TABLE IF NOT EXISTS keyvalue (
                         key text PRIMARY KEY,
                         value text
-                        )
-keyvalue.value, 'book(20,40)'
+                        ) WITH caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'} AND default_time_to_live = 0
+keyvalue.value, book(20,40)
+Preparing queries
+Initializing metrics
+Connecting
+Creating generator random
+Preparing statements.
+1 threads prepared.
+Starting main runner
+Running
+[Thread 0]: Running the profile for 1000000 iterations...
+                  Writes                                    Reads                  Errors
+  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
+  17794           9.72             0 |   18109          10.69             0 |       0                0
+  37139           12.2        6237.4 |   37298          13.95        6278.6 |       0                0
+  55635          10.99        6237.4 |   55789          11.74        6278.6 |       0                0
+  75610           9.48       6229.39 |   75984           9.72       6268.97 |       0                0
+  94456           8.62       6250.55 |   95047          10.48       6291.03 |       0                0
+ 113917          12.92       6250.55 |  114468          11.54       6291.03 |       0                0
+ 132192          12.92       6251.14 |  132908          13.26       6289.94 |       0                0
+ 151326          12.92       6251.14 |  152161          13.26       6289.94 |       0                0
+ 170805           16.7       6266.88 |  171095          11.76       6302.83 |       0                0
+ 191411          11.87       6300.26 |  191758          11.63       6327.95 |       0                0
+                  Writes                                    Reads                  Errors
+  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
+ 215019          17.06       6300.26 |  215109          11.76       6327.95 |       0                0
+ 237973           19.4       6421.49 |  238234          16.51        6444.5 |       0                0
+ 261328           19.4       6421.49 |  261500          18.59        6444.5 |       0                0
+ 284564           19.4       6527.07 |  284429          18.92        6545.6 |       0                0
+ 307100          18.32       6612.07 |  306974          18.63       6626.47 |       0                0
+ 328013          17.36       6612.07 |  328250          18.63       6626.47 |       0                0
+ 348965           16.7       6647.28 |  349284          18.59       6671.53 |       0                0
+ 369723           16.7       6647.28 |  370043          18.59       6671.53 |       0                0
+ 391495           16.7       6678.22 |  392030          18.16       6696.45 |       0                0
+ 413805           16.7       6723.98 |  414517          18.59       6747.44 |       0                0
+                  Writes                                    Reads                  Errors
+  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
+ 435811          17.92       6723.98 |  436424          18.16       6747.44 |       0                0
+ 457257          17.36       6769.06 |  457989          18.16       6788.12 |       0                0
+ 478589          17.57       6769.06 |  478919          18.59       6788.12 |       0                0
+ 497318          17.57       6772.22 |  497624          18.16       6783.81 |       0                0
+ 499877          17.57       6772.22 |  500123          18.16       6783.81 |       0                0
+Stress complete, 1.
