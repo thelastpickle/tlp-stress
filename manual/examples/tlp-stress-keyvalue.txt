@@ -23,5 +23,6 @@ Running
 [Thread 0]: Running the profile for 10000 iterations...
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   4978          19.09             0 |    5022          14.91             0 |       0                0
+   4992          26.62             0 |    5008         343.53             0 |       0                0
+   4992          26.62             0 |    5008         343.53             0 |       0                0
 Stress complete, 1.

@@ -72,6 +72,7 @@ Further information can be found on the https://bintray.com/beta/#/thelastpickle
 
 If you're using mac, for now you'll need to grab our tarball using:
 
+[subs="attributes"]
 ```
 $ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-{TLP_STRESS_VERSION}.tar
 $ tar -xzf tlp-stress-{TLP_STRESS_VERSION}.tar
