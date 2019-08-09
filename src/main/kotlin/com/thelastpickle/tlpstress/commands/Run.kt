@@ -39,7 +39,7 @@ class Run : IStressCommand {
     @Parameter(names = ["--host"])
     var host = "127.0.0.1"
 
-    @Parameter(names = ["--cqlport"], description = "Override the cql port. Defaults to 9042.")
+    @Parameter(names = ["--port"], description = "Override the cql port. Defaults to 9042.")
     var cqlPort = 9042
 
     @Parameter(names = ["--username", "-U"])
