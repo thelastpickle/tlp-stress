@@ -3,7 +3,7 @@ Configuration:
   Properties:
     property:
       - name: logs
-        value: "${env:TLP_STRESS_LOG_DIR:-logs}"
+        value: "${env:TLP_STRESS_LOG_DIR:-${sys:user.home}/.tlp-stress}"
 
   status: info
   name: StandardConfiguration
@@ -14,21 +14,23 @@ Configuration:
 
 
   appenders:
-    File:
+    RollingFile:
       - name: File
         fileName: "${logs}/stress.log"
 
+        filePattern: "${logs}/stress.%i.log.gz"
+
         PatternLayout:
           Pattern: "%d %p %C{1.} [%t] %m%n"
+
+        policies:
+          SizeBasedTriggeringPolicy:
+            size: 10MB
+          OnStartupTriggeringPolicy: {}
 
         Filters:
           ThresholdFilter:
             level: info
-
-      - name: Driver
-        fileName: ${logs}/driver.log
-        PatternLayout:
-          Pattern: "%d %p %C{1.} [%t] %m%n"
 
 
   Loggers:
