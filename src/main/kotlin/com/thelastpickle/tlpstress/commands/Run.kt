@@ -34,7 +34,7 @@ class NoSplitter : IParameterSplitter {
 
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
-class Run : IStressCommand {
+class Run(val command: String) : IStressCommand {
 
     @Parameter(names = ["--host"])
     var host = System.getenv("TLP_STRESS_CASSANDRA_HOST") ?: "127.0.0.1"
@@ -332,7 +332,7 @@ class Run : IStressCommand {
 
         if(writeToCsv.isNotEmpty()) {
             val fp = File(writeToCsv)
-            reporters.add(FileReporter(registry, fp))
+            reporters.add(FileReporter(registry, fp, command))
         }
         reporters.add(SingleLineConsoleReporter(registry))
 

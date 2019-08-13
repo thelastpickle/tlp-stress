@@ -45,7 +45,7 @@ class AllPluginsBasicTest {
     @BeforeEach
     fun cleanup() {
         connection.execute("DROP KEYSPACE IF EXISTS tlp_stress")
-        run = Run()
+        run = Run("placeholder")
     }
 
     @AfterEach

@@ -24,11 +24,10 @@ class CommandLineParser(val jCommander: JCommander,
 
             // needed to get help
             jcommander.addObject(args)
-
-
             // subcommands
+
             val commands = mapOf(
-                    "run" to Run(),
+                    "run" to Run(arguments.joinToString(" ")),
                     "info" to Info(),
                     "list" to ListCommand(),
                     "fields" to Fields())

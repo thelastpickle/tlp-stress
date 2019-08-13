@@ -15,7 +15,7 @@ class FlagsTest {
             .addContactPoint(ip)
             .build().connect()
 
-    var keyvalue = Run()
+    var keyvalue = Run("placeholder")
 
 
     @BeforeEach

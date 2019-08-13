@@ -11,7 +11,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-class FileReporter(registry: MetricRegistry, outputFile: File) : ScheduledReporter(registry,
+class FileReporter(registry: MetricRegistry, outputFile: File, command: String) : ScheduledReporter(registry,
         "file-reporter",
         MetricFilter.ALL,
         TimeUnit.SECONDS,
@@ -29,6 +29,11 @@ class FileReporter(registry: MetricRegistry, outputFile: File) : ScheduledReport
     val buffer = outputFile.bufferedWriter()
 
     init {
+        buffer.write("# tlp-stress run at $startTime")
+        buffer.newLine()
+        buffer.write("# $command")
+        buffer.newLine()
+
         buffer.write(",,Mutations,,,")
         buffer.write("Reads,,,")
         buffer.write("Errors,")
