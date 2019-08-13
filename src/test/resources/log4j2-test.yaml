@@ -13,11 +13,6 @@ Configuration:
         PatternLayout:
           Pattern: "%d %p %C{1.} [%t] %m%n"
 
-      - name: Driver
-        fileName: logs/test-driver.log
-        PatternLayout:
-          Pattern: "%d %p %C{1.} [%t] %m%n"
-
       - name: Info
         fileName: logs/test-info.log
         PatternLayout:
@@ -39,10 +34,5 @@ Configuration:
           - ref: STDOUT
           - ref: Info
 
-      -
-        name: com.datastax.driver.core
-        level: debug
-        AppenderRef:
-          - ref: Driver
-            level: debug
+
 

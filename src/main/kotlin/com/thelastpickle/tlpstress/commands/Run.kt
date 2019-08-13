@@ -37,7 +37,7 @@ class NoSplitter : IParameterSplitter {
 class Run : IStressCommand {
 
     @Parameter(names = ["--host"])
-    var host = "127.0.0.1"
+    var host = System.getenv("TLP_STRESS_CASSANDRA_HOST") ?: "127.0.0.1"
 
     @Parameter(names = ["--port"], description = "Override the cql port. Defaults to 9042.")
     var cqlPort = 9042

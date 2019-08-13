@@ -39,9 +39,3 @@ Configuration:
       AppenderRef:
         ref: File
 
-    logger:
-      - name: com.datastax.driver.core
-        level: info
-        AppenderRef:
-          - ref: Driver
-            level: debug
