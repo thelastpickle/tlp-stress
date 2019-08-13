@@ -1,7 +1,17 @@
 package com.thelastpickle.tlpstress
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.FormatFeature
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.kotlin.logger
 
+fun MutableMap<String, String?>.putInt(key: String, value: Int?) : MutableMap<String, String?> {
+    if(value != null) {
+        this[key] = value.toString()
+    }
+    return this
+}
 
 class SchemaBuilder(var baseStatement : String) {
     private var ttl: Long = 0
@@ -14,6 +24,67 @@ class SchemaBuilder(var baseStatement : String) {
     var keyCache = "ALL"
 
     var log = logger()
+
+    val compactionShortcutRegex = """^(stcs|lcs|twcs)((?:,[0-9a-z]+)*)$""".toRegex()
+
+    enum class WindowUnit(val s : String) {
+        MINUTES("MINUTES"),
+        HOURS("HOURS"),
+        DAYS("DAYS");
+
+        companion object {
+            fun get(s: String) : WindowUnit = when(s.toLowerCase()) {
+                "minutes" -> MINUTES
+                "hours" -> HOURS
+                "days" -> DAYS
+                else -> throw Exception("not a thing")
+            }
+        }
+
+
+    }
+
+    sealed class Compaction {
+
+        val mapper = ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL) // no nulls
+                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY) // no empty fields
+                .writerWithDefaultPrettyPrinter()
+
+        open fun toCQL() = mapper.writeValueAsString(getOptions()).replace("\"", "'")
+
+        abstract fun getOptions() : Map<String, String?>
+
+        data class STCS(val min: Int?,
+                        val max: Int? = null) : Compaction() {
+            override fun getOptions() = mutableMapOf<String, String?>(
+                   "class" to "SizeTieredCompactionStrategy"
+                ).putInt( "max_threshold", max)
+                    .putInt( "min_threshold" ,min)
+        }
+
+        data class LCS(val sstableSizeInMb : Int? = null,
+                       val fanoutSize: Int? = null) : Compaction() {
+            override fun getOptions() =
+                    mutableMapOf<String, String?>("class" to "LeveledCompactionStrategy")
+                            .putInt("sstable_size_in_mb", sstableSizeInMb)
+                            .putInt("fanout_size", fanoutSize)
+
+        }
+
+        data class TWCS(val windowSize: Int? = null,
+                        val windowUnit: WindowUnit? = null) : Compaction() {
+            override fun getOptions() =
+                    mutableMapOf<String, String?>("class" to "TimeWindowCompactionStrategy",
+                            "compaction_window_unit" to (windowUnit?.s ?: "") )
+                            .putInt("compaction_window_size", windowSize)
+        }
+
+        data class Unknown(val raw: String) : Compaction() {
+            override fun getOptions() = mapOf<String, String?>()
+            override fun toCQL() = raw.trim().replace("\"", "'")
+        }
+    }
 
     init {
 
@@ -36,7 +107,8 @@ class SchemaBuilder(var baseStatement : String) {
     }
 
     fun withCompaction(compaction: String) : SchemaBuilder {
-        this.compaction = compaction.trim().replace("\"", "'")
+
+        this.compaction = parseCompaction(compaction).toCQL()
         return this
     }
 
@@ -77,11 +149,11 @@ class SchemaBuilder(var baseStatement : String) {
             sb.append(" AND ")
         }
 
-
-
         sb.append(stuff)
 
-        return sb.toString()
+        val tmp = sb.toString()
+        log.info(tmp)
+        return tmp
     }
 
     fun withRowCache(rowCache: String): SchemaBuilder {
@@ -93,6 +165,54 @@ class SchemaBuilder(var baseStatement : String) {
         this.keyCache = keyCache
         return this
     }
+
+    /**
+     * Helper function for compaction shortcuts
+     * If the functino parses, we return a
+     * @see <a href="https://github.com/thelastpickle/tlp-stress/issues/80">Issue 80 on Github</a>
+     */
+    fun parseCompaction(compaction: String) : Compaction {
+        val parsed = compactionShortcutRegex.find(compaction)
+        if(parsed == null) {
+            return Compaction.Unknown(compaction)
+        }
+        val groups = parsed.groupValues
+        val strategy = groups[1]
+        val options = groups[2].removePrefix(",").split(",").filter{ it.length > 0}
+        log.debug("Parsing $compaction: strategy: $strategy, options: $options / ${options.size}")
+
+        return when(strategy) {
+            "stcs" -> {
+                when(options.size) {
+                    0 -> Compaction.STCS(null, null)
+                    2 -> Compaction.STCS(options[0].toInt(), options[1].toInt())
+                    else -> Compaction.Unknown(compaction)
+                }
+            }
+            /*
+            lcs: leveled compaction, all defaults
+lcs,<sstable_size_in_mb>: leveled, override the default of 160
+lcs,<sstable_size_in_mb>,<fanout_size>: leveled, override the default sstable size of 160 and fanout of 10
+             */
+            "lcs" -> {
+                when(options.size) {
+                    0 -> Compaction.LCS()
+                    1 -> Compaction.LCS(options.get(0).toInt())
+                    2 -> Compaction.LCS(options.get(0).toInt(), options.get(1).toInt())
+                    else -> Compaction.Unknown(compaction)
+                }
+            }
+            "twcs" -> {
+                when(options.size) {
+                    0 -> Compaction.TWCS()
+                    2 -> Compaction.TWCS(options[0].toInt(), WindowUnit.get(options[1]) )
+                    else -> Compaction.Unknown(compaction)
+                }
+            }
+            else -> Compaction.Unknown(compaction)
+        }
+    }
+
 
 
 }

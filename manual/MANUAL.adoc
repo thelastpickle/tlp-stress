@@ -183,7 +183,54 @@ It's possible to specify the read rate of a test as a double.  For example, if y
 
 ==== Compaction
 
-It's possible to change the compaction strategy used.  At the moment this changes the compaction strategy of every table in the test.  This will be addressed in the future to be more flexible.
+It's possible to change the compaction strategy used with the `--compaction flag`.  At the moment this changes the compaction strategy of every table in the test.  This will be addressed in the future to be more flexible.
+
+The `--compaction` flag can accept a raw string along these lines:
+
+```
+--compaction "{'class':'LeveledCompactionStrategy'}"
+```
+
+Alternatively, a shortcut format exists as of version 2.0:
+
+```
+--compaction lcs
+```
+
+The following shorthand formats are available:
+
+.Table Compaction ShortHand
+|===
+|Syntax | Expansion
+|stcs
+a|
+`{'class':'SizeTieredCompactionStrategy'}`
+
+|stcs,4,32
+a|
+`{'class':'SizeTieredCompactionStrategy', 'min_threshold':4, 'max_threshold':32}`
+
+|lcs
+a|
+`{'class':'LeveledCompactionStrategy'}`
+
+|lcs,160
+a|
+`{'class':'LeveledCompactionStrategy', 'sstable_size_in_mb':'160'}`
+
+|lcs,160,10
+a|
+`{'class':'LeveledCompactionStrategy', 'sstable_size_in_mb':'160', 'fanout_size':10}`
+
+|twcs
+a|
+`{'class':'TimeWindowCompactionStrategy'}`
+
+|twcs,1,days
+a|
+`{'class':'TimeWindowCompactionStrategy', 'compaction_window_size':'1', 'compaction_window_unit':'DAYS'}`
+
+|===
 
 
 ==== Compression

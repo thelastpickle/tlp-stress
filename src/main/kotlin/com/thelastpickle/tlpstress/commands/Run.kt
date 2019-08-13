@@ -51,7 +51,7 @@ class Run(val command: String) : IStressCommand {
     @Parameter(required = true)
     var profile = ""
 
-    @Parameter(names = ["--compaction"], description = "Compaction option to use.  Double quotes will auto convert to single for convenience.")
+    @Parameter(names = ["--compaction"], description = "Compaction option to use.  Double quotes will auto convert to single for convenience.  A shorthand is also available: stcs, lcs, twcs.  See the full documentation for all possibilities.")
     var compaction = ""
 
     @Parameter(names = ["--compression"], description = "Compression options")

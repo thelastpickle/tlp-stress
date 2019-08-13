@@ -1,10 +1,14 @@
 package com.thelastpickle.tlpstress
 
+import org.apache.logging.log4j.kotlin.logger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertFails
+import kotlin.test.fail
 
 internal class SchemaBuilderTest {
+    var log = logger()
 
     lateinit var createTable : SchemaBuilder
 
@@ -66,7 +70,85 @@ internal class SchemaBuilderTest {
                 .build()
 
         assertThat(result).doesNotContain("WITH")
+    }
+
+    @Test
+    fun ensureRegexFailsOnStupid() {
+        var result = createTable.compactionShortcutRegex.find("stcsf")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun ensureRegexMatchesBasic() {
+        val result = createTable.compactionShortcutRegex.find("stcs")!!.groupValues
+        assertThat(result[1]).isEqualTo("stcs")
+
+        val result2 = createTable.compactionShortcutRegex.find("lcs")!!.groupValues
+        assertThat(result2[1]).isEqualTo("lcs")
+
+        val result3 = createTable.compactionShortcutRegex.find("twcs")!!.groupValues
+        assertThat(result3[1]).isEqualTo("twcs")
+    }
 
 
+    @Test
+    fun ensureRegexMatchesSTCSWithParams() {
+        val result = createTable.compactionShortcutRegex.find("stcs,4,48")!!.groupValues
+        assertThat(result[2]).isEqualTo(",4,48")
+    }
+
+    @Test
+    fun testParseStcsComapctionReturnsStcs() {
+        when (val compaction = createTable.parseCompaction("stcs")) {
+            is SchemaBuilder.Compaction.STCS -> Unit
+            else -> {
+                fail("Expecting STCS, Got $compaction")
+            }
+
+        }
+    }
+
+    @Test
+    fun testParseLCS() {
+        when (val compaction = createTable.parseCompaction("lcs,120,8")) {
+            is SchemaBuilder.Compaction.LCS -> {
+                assertThat(compaction.fanoutSize).isEqualTo(8)
+                assertThat(compaction.sstableSizeInMb).isEqualTo(120)
+            }
+            else -> {
+                fail("Expecting LCS, Got $compaction")
+            }
+
+        }
+
+    }
+    @Test
+    fun testParseTWCS() {
+        val compaction = createTable.parseCompaction("twcs,1,days")
+        when (compaction) {
+            is SchemaBuilder.Compaction.TWCS -> {
+                assertThat(compaction.windowSize).isEqualTo(1)
+                assertThat(compaction.windowUnit).isEqualTo(SchemaBuilder.WindowUnit.DAYS)
+            }
+            else -> {
+                fail("Expecting TWCS, 1 DAYS, Got $compaction")
+            }
+        }
+        val cql = compaction.toCQL()
+
+    }
+
+    @Test
+    fun tesstFullCompactionShortcut() {
+        val result = createTable.withCompaction("lcs").build()
+        assertThat(result).contains("LeveledCompactionStrategy")
+        assertThat(result).doesNotContain("null")
+
+    }
+
+    @Test
+    fun testTWCSEmptyWindow() {
+        val result = createTable.withCompaction("twcs").build()
+        assertThat(result).doesNotContain("compaction_window_unit")
     }
 }
