@@ -531,7 +531,7 @@ automatically captured by the Dropwizard metrics library.</p>
 <p>The easiest way to get started is to use your favorite package manager.</p>
 </div>
 <div class="paragraph">
-<p>The current version is 1.0.0.</p>
+<p>The current version is 2.0.0.</p>
 </div>
 </div>
 <div class="sect3">
@@ -579,8 +579,8 @@ enabled=1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-1.0.0.tar
-$ tar -xzf tlp-stress-1.0.0.tar</code></pre>
+<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-2.0.0.tar
+$ tar -xzf tlp-stress-2.0.0.tar</code></pre>
 </div>
 </div>
 </div>
@@ -648,8 +648,8 @@ Running
 [Thread 0]: Running the profile for 10000 iterations...
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   4992          26.62             0 |    5008         343.53             0 |       0                0
-   4992          26.62             0 |    5008         343.53             0 |       0                0
+   5101          13.85             0 |    4899          16.17             0 |       0                0
+   5101          13.85             0 |    4899          16.17             0 |       0                0
 Stress complete, 1.</code></pre>
 </div>
 </div>
@@ -688,7 +688,8 @@ Usage: tlp-stress [options] [command] [command options]
             Possible Values: [ANY, ONE, TWO, THREE, QUORUM, ALL, LOCAL_QUORUM, EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE]
           --compaction
             Compaction option to use.  Double quotes will auto convert to
-            single for convenience.
+            single for convenience.  A shorthand is also available: stcs, lcs,
+            twcs.  See the full documentation for all possibilities.
             Default: &lt;empty string&gt;
           --compression
             Compression options
@@ -756,6 +757,9 @@ Usage: tlp-stress [options] [command] [command options]
           --populate
             Pre-population the DB with N rows before starting load test.
             Default: 0
+          --port
+            Override the cql port. Defaults to 9042.
+            Default: 9042
           --prometheusport
             Override the default prometheus port.
             Default: 9500
@@ -915,8 +919,82 @@ For example, running a test for 1 hours and 30 minutes will be done as follows:<
 <div class="sect3">
 <h4 id="_compaction">Compaction</h4>
 <div class="paragraph">
-<p>It&#8217;s possible to change the compaction strategy used.  At the moment this changes the compaction strategy of every table in the test.  This will be addressed in the future to be more flexible.</p>
+<p>It&#8217;s possible to change the compaction strategy used with the <code>--compaction flag</code>.  At the moment this changes the compaction strategy of every table in the test.  This will be addressed in the future to be more flexible.</p>
 </div>
+<div class="paragraph">
+<p>The <code>--compaction</code> flag can accept a raw string along these lines:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>--compaction "{'class':'LeveledCompactionStrategy'}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Alternatively, a shortcut format exists as of version 2.0:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>--compaction lcs</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following shorthand formats are available:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Table Compaction ShortHand</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Syntax</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Expansion</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">stcs</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'SizeTieredCompactionStrategy'}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">stcs,4,32</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'SizeTieredCompactionStrategy', 'min_threshold':4, 'max_threshold':32}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">lcs</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'LeveledCompactionStrategy'}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">lcs,160</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'LeveledCompactionStrategy', 'sstable_size_in_mb':'160'}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">lcs,160,10</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'LeveledCompactionStrategy', 'sstable_size_in_mb':'160', 'fanout_size':10}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">twcs</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'TimeWindowCompactionStrategy'}</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">twcs,1,days</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>{'class':'TimeWindowCompactionStrategy', 'compaction_window_size':'1', 'compaction_window_unit':'DAYS'}</code></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_compression">Compression</h4>
@@ -1016,7 +1094,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-08-06 18:54:40 UTC
+Last updated 2019-08-14 20:33:58 UTC
 </div>
 </div>
 </body>

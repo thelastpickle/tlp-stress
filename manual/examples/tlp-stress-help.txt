@@ -14,7 +14,8 @@ Usage: tlp-stress [options] [command] [command options]
             Possible Values: [ANY, ONE, TWO, THREE, QUORUM, ALL, LOCAL_QUORUM, EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE]
           --compaction
             Compaction option to use.  Double quotes will auto convert to 
-            single for convenience.
+            single for convenience.  A shorthand is also available: stcs, lcs, 
+            twcs.  See the full documentation for all possibilities.
             Default: <empty string>
           --compression
             Compression options
@@ -82,6 +83,9 @@ Usage: tlp-stress [options] [command] [command options]
           --populate
             Pre-population the DB with N rows before starting load test.
             Default: 0
+          --port
+            Override the cql port. Defaults to 9042.
+            Default: 9042
           --prometheusport
             Override the default prometheus port.
             Default: 9500
