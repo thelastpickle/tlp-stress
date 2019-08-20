@@ -22,7 +22,7 @@ class PartitionKeyGenerator(
          *
          */
         fun random(prefix: String = "test") : PartitionKeyGenerator {
-            return PartitionKeyGenerator({max -> ThreadLocalRandom.current().nextLong(1, max) }, prefix)
+            return PartitionKeyGenerator({max -> ThreadLocalRandom.current().nextLong(0, max) }, prefix)
         }
 
         /**
