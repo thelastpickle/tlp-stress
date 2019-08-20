@@ -157,6 +157,11 @@ task buildAll {
 
 assemble.mustRunAfter clean
 
+applicationDistribution.from("LICENSE.txt") {
+    into ""
+}
+
+
 task uploadDeb(type: Exec) {
     group = "Publish"
     workingDir 'build/distributions'
