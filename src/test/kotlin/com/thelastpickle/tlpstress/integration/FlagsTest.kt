@@ -30,7 +30,7 @@ class FlagsTest {
     @Test
     fun csvTest() {
         keyvalue.apply {
-            writeToCsv = "test.csv"
+            csvFile = "test.csv"
         }.execute()
 
     }

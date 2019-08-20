@@ -19,7 +19,9 @@ class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledRepor
     }
 
     fun shutdown() {
-        server.stop()
+        for(reporter in reporters) {
+            reporter.stop()
+        }
     }
 
     init {

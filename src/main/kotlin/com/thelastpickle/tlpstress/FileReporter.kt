@@ -3,15 +3,17 @@ package com.thelastpickle.tlpstress
 import com.codahale.metrics.*
 import com.codahale.metrics.Timer
 import java.io.BufferedOutputStream
+import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPOutputStream
 
 
-class FileReporter(registry: MetricRegistry, outputFile: File, command: String) : ScheduledReporter(registry,
+class FileReporter(registry: MetricRegistry, outputFileName: String, command: String) : ScheduledReporter(registry,
         "file-reporter",
         MetricFilter.ALL,
         TimeUnit.SECONDS,
@@ -25,10 +27,13 @@ class FileReporter(registry: MetricRegistry, outputFile: File, command: String) 
     private val opHeaders = listOf("Count", "Latency (p99)", "1min (req/s)").joinToString(",", postfix = ",")
     private val errorHeaders = listOf("Count", "1min (errors/s)").joinToString(",")
 
-
-    val buffer = outputFile.bufferedWriter()
+    val outputFile = File(outputFileName)
+    val buffer : BufferedWriter
 
     init {
+
+        buffer = if(outputFileName.endsWith(".gz"))  GZIPOutputStream(outputFile.outputStream()).bufferedWriter() else outputFile.bufferedWriter()
+
         buffer.write("# tlp-stress run at $startTime")
         buffer.newLine()
         buffer.write("# $command")
@@ -80,7 +85,11 @@ class FileReporter(registry: MetricRegistry, outputFile: File, command: String) 
                 .joinToString(",", postfix = "\n")
 
         buffer.write(errorRow)
-        buffer.flush()
+    }
 
+    override fun stop() {
+        buffer.flush()
+        buffer.close()
+        super.stop()
     }
 }

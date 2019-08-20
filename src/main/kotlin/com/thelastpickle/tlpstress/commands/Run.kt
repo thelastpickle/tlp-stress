@@ -116,7 +116,7 @@ class Run(val command: String) : IStressCommand {
     var coordinatorOnlyMode = false
 
     @Parameter(names = ["--csv"], description = "Write metrics to this file in CSV format.")
-    var writeToCsv = ""
+    var csvFile = ""
 
     @Parameter(names = ["--paging"], description = "Override the driver's default page size.")
     var paging : Int? = null
@@ -330,9 +330,8 @@ class Run(val command: String) : IStressCommand {
 
         val reporters = mutableListOf<ScheduledReporter>()
 
-        if(writeToCsv.isNotEmpty()) {
-            val fp = File(writeToCsv)
-            reporters.add(FileReporter(registry, fp, command))
+        if(csvFile.isNotEmpty()) {
+            reporters.add(FileReporter(registry, csvFile, command))
         }
         reporters.add(SingleLineConsoleReporter(registry))
 
