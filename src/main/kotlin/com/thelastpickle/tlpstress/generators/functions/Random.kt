@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress.generators.functions
 
+import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import org.apache.commons.text.RandomStringGenerator
 import java.util.concurrent.ThreadLocalRandom
@@ -17,8 +18,8 @@ class Random : FieldGenerator {
     var max = 100000L
 
     override fun setParameters(params: List<String>) {
-        min = params[0].toLong()
-        max = params[1].toLong()
+        min = HumanReadableConverter().convert(params[0])
+        max = HumanReadableConverter().convert(params[1])
     }
 
     override fun getInt(): Int {

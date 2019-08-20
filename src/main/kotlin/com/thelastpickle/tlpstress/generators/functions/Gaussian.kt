@@ -1,4 +1,5 @@
 package com.thelastpickle.tlpstress.generators.functions
+import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.generators.Function
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 
@@ -10,8 +11,8 @@ class Gaussian : FieldGenerator {
     var max: Long = 1000000
 
     override fun setParameters(params: List<String>) {
-        min = params[0].toLong()
-        max = params[1].toLong()
+        min = HumanReadableConverter().convert(params[0])
+        max = HumanReadableConverter().convert(params[1])
     }
 
 
