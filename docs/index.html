@@ -531,7 +531,7 @@ automatically captured by the Dropwizard metrics library.</p>
 <p>The easiest way to get started is to use your favorite package manager.</p>
 </div>
 <div class="paragraph">
-<p>The current version is 2.0.0.</p>
+<p>The current version is 3.0.0.</p>
 </div>
 </div>
 <div class="sect3">
@@ -579,8 +579,8 @@ enabled=1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-2.0.0.tar
-$ tar -xzf tlp-stress-2.0.0.tar</code></pre>
+<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-3.0.0.tar
+$ tar -xzf tlp-stress-3.0.0.tar</code></pre>
 </div>
 </div>
 </div>
@@ -648,8 +648,8 @@ Running
 [Thread 0]: Running the profile for 10000 iterations...
                   Writes                                    Reads                  Errors
   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   5101          13.85             0 |    4899          16.17             0 |       0                0
-   5101          13.85             0 |    4899          16.17             0 |       0                0
+   5018          84.29             0 |    4982          66.17             0 |       0                0
+   5018          84.29             0 |    4982          66.17             0 |       0                0
 Stress complete, 1.</code></pre>
 </div>
 </div>
@@ -810,6 +810,7 @@ Usage: tlp-stress [options] [command] [command options]
 <pre class="highlight"><code>$ bin/tlp-stress list
 Available Workloads:
 
+AllowFiltering
 BasicTimeSeries
 CountersWide
 KeyValue

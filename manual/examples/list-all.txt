@@ -1,6 +1,7 @@
 $ bin/tlp-stress list
 Available Workloads:
 
+AllowFiltering 
 BasicTimeSeries 
 CountersWide 
 KeyValue 
