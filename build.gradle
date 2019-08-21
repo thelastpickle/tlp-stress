@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.google.cloud.tools.jib' version '0.9.11'
+    id 'com.google.cloud.tools.jib' version '1.5.0'
 }
 
 apply plugin: 'idea'
@@ -126,6 +126,13 @@ task generateExamples(type: Exec) {
     commandLine "manual/generate_examples.sh"
     group = "Documentation"
     description = "Generate examples for documentation"
+}
+
+jib {
+    to {
+        image = "thelastpickle/tlp-stress"
+        tags = [version, "latest"]
+    }
 }
 
 ospackage {
