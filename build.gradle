@@ -203,6 +203,7 @@ task uploadTar(type:Exec) {
 
 task uploadAll  {
     group = "Publish"
+    dependsOn "jib"
     dependsOn "uploadDeb"
     dependsOn "uploadRpm"
     dependsOn "uploadTar"
