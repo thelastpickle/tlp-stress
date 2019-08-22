@@ -149,14 +149,17 @@ ospackage {
 buildDeb {
     distribution "weezy,bionic,xenial,jessie"
     requires("openjdk-8-jre")
+    group = "build"
 }
 
 buildRpm {
     requires("java-1.8.0-openjdk")
     user "root"
+    group = "build"
 }
 
 task buildAll {
+    group = "build"
     dependsOn "buildDeb"
     dependsOn "buildRpm"
     dependsOn "distTar"
