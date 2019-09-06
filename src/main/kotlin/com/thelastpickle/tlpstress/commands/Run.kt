@@ -142,6 +142,8 @@ class Run(val command: String) : IStressCommand {
     @DynamicParameter(names = ["--workload.", "-w."], description = "Override workload specific parameters.")
     var workloadParameters: Map<String, String> = mutableMapOf()
 
+    @Parameter(names = ["--no-schema"], description = "Skips schema creation")
+    var noSchema: Boolean = false
 
 
     val log = logger()
@@ -364,19 +366,22 @@ class Run(val command: String) : IStressCommand {
     }
 
     private fun createKeyspace() {
-
-        if(dropKeyspace) {
-            println("Dropping $keyspace")
-            session.execute("DROP KEYSPACE IF EXISTS $keyspace")
+        if(noSchema) {
+            println("Skipping keyspace creation")
         }
+        else {
+            if (dropKeyspace) {
+                println("Dropping $keyspace")
+                session.execute("DROP KEYSPACE IF EXISTS $keyspace")
+            }
 
-        val createKeyspace = """CREATE KEYSPACE
+            val createKeyspace = """CREATE KEYSPACE
             | IF NOT EXISTS $keyspace
             | WITH replication = $replication""".trimMargin()
 
-        println("Creating $keyspace: \n$createKeyspace\n")
-        session.execute(createKeyspace)
-
+            println("Creating $keyspace: \n$createKeyspace\n")
+            session.execute(createKeyspace)
+        }
         session.execute("USE $keyspace")
     }
 
@@ -391,6 +396,9 @@ class Run(val command: String) : IStressCommand {
 
     fun createSchema(plugin: Plugin) {
         println("Creating Tables")
+
+        if(noSchema) return
+
         for (statement in plugin.instance.schema()) {
             val s = SchemaBuilder.create(statement)
                     .withCompaction(compaction)

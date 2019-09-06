@@ -15,7 +15,7 @@ class CountersWide : IStressProfile {
     lateinit var selectAll: PreparedStatement
 
     @WorkloadParameter("Total rows per partition.")
-    val rowsPerPartition = 10000
+    var rowsPerPartition = 10000
 
     override fun prepare(session: Session) {
         increment = session.prepare("UPDATE counter_wide SET value = value + 1 WHERE key = ? and cluster = ?")
