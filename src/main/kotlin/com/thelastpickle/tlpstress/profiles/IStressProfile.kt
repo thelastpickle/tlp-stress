@@ -13,6 +13,7 @@ import com.thelastpickle.tlpstress.generators.Field
 interface IStressRunner {
     fun getNextMutation(partitionKey: PartitionKey) : Operation
     fun getNextSelect(partitionKey: PartitionKey) : Operation
+    fun getNextDelete(partitionKey: PartitionKey) : Operation
     /**
      * Callback after a query executes successfully.
      * Will be used for state tracking on things like LWTs as well as provides an avenue for future work
@@ -95,6 +96,8 @@ sealed class Operation(val bound: BoundStatement) {
     class Mutation(bound: BoundStatement, val callbackPayload: Any? = null ) : Operation(bound)
 
     class SelectStatement(bound: BoundStatement): Operation(bound)
+
+    class Deletion(bound: BoundStatement): Operation(bound)
 
 
 }

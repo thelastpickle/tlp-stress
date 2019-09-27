@@ -59,6 +59,9 @@ class MaterializedViews : IStressProfile {
                 return result
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 

@@ -63,6 +63,9 @@ class BasicTimeSeries : IStressProfile {
                 return Operation.Mutation(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 

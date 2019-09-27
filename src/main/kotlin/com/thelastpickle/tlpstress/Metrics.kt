@@ -36,6 +36,7 @@ class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledRepor
     val errors = metricRegistry.meter("errors")
     val mutations = metricRegistry.timer("mutations")
     val selects = metricRegistry.timer("selects")
+    val deletions = metricRegistry.timer("deletions")
 
     val populate = metricRegistry.timer("populateMutations")
 

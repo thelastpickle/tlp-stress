@@ -37,6 +37,9 @@ class Maps : IStressProfile {
                 return Operation.Mutation(b)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 }

@@ -57,6 +57,32 @@ class ProfileRunner(val context: StressContext,
         }
     }
 
+    val deleteRate: Double
+
+    init {
+        val tmp = context.mainArguments.deleteRate
+
+        if(tmp != null) {
+            deleteRate = tmp
+        }
+        else {
+            deleteRate = profile.getDefaultReadRate()
+        }
+    }
+
+    val rangeDeleteRate: Double
+
+    init {
+        val tmp = context.mainArguments.rangeDeleteRate
+
+        if(tmp != null) {
+            rangeDeleteRate = tmp
+        }
+        else {
+            rangeDeleteRate = profile.getDefaultReadRate()
+        }
+    }
+
     fun print(message: String) {
         println("[Thread ${context.thread}]: $message")
 
@@ -105,7 +131,11 @@ class ProfileRunner(val context: StressContext,
             val op : Operation = if(readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
                 runner.getNextSelect(key)
             } else {
-                runner.getNextMutation(key)
+                if(deleteRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
+                    runner.getNextDelete(key)
+                } else {
+                    runner.getNextMutation(key)
+                }
             }
             
             // if we're using the rate limiter (unlikely) grab a permit
@@ -118,6 +148,7 @@ class ProfileRunner(val context: StressContext,
             val startTime = when(op) {
                 is Operation.Mutation -> context.metrics.mutations.time()
                 is Operation.SelectStatement -> context.metrics.selects.time()
+                is Operation.Deletion -> context.metrics.deletions.time()
             }
 
             val future = context.session.executeAsync(op.bound)

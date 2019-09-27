@@ -61,6 +61,9 @@ class CountersWide : IStressProfile {
                 return Operation.SelectStatement(selectAll.bind(partitionKey.getText()))
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 }

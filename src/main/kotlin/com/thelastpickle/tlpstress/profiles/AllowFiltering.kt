@@ -59,6 +59,9 @@ class AllowFiltering : IStressProfile {
                 return Operation.SelectStatement(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 

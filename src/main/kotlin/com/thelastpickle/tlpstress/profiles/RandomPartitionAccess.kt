@@ -83,6 +83,9 @@ class RandomPartitionAccess : IStressProfile {
 
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
         }
     }
 

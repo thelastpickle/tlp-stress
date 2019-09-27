@@ -79,6 +79,10 @@ class Locking : IStressProfile {
                 return Operation.SelectStatement(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
+
             override fun customPopulateIter() = iterator {
 
                 val generator = ProfileRunner.getGenerator(context, "sequence")

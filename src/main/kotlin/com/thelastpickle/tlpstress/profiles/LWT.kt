@@ -49,6 +49,10 @@ class LWT : IStressProfile {
 
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+            }
+
             override fun onSuccess(op: Operation.Mutation, result: ResultSet?) {
                 val payload = op.callbackPayload!! as CallbackPayload
                 state[payload.id] = payload.value
