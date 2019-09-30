@@ -6,7 +6,7 @@ cd $BASE_STRESS_DIR
 
 JAR=$(find build/libs -name '*-all.jar' | tail -n 1)
 
-java -jar $JAR $@
+java -jar $JAR "$@"
 
 
 
