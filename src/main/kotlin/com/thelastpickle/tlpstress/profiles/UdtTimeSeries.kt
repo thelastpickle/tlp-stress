@@ -35,8 +35,8 @@ class UdtTimeSeries : IStressProfile {
     }
 
     lateinit var insert: PreparedStatement
-    lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
+    lateinit var deletePartitionHead: PreparedStatement
 
     @WorkloadParameter("Limit select to N rows.")
     var limit = 500
@@ -44,6 +44,7 @@ class UdtTimeSeries : IStressProfile {
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO sensor_data_udt (sensor_id, timestamp, data) VALUES (?, ?, ?)")
         getPartitionHead = session.prepare("SELECT * from sensor_data_udt WHERE sensor_id = ? LIMIT ?")
+        deletePartitionHead = session.prepare("DELETE from sensor_data_udt WHERE sensor_id = ?")
     }
 
     /**
@@ -58,7 +59,6 @@ class UdtTimeSeries : IStressProfile {
             val udt = context.session.cluster.getMetadata().getKeyspace(context.session.loggedKeyspace).getUserType("sensor_data_details")
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
-
                 val bound = getPartitionHead.bind(partitionKey.getText(), limit)
                 return Operation.SelectStatement(bound)
             }
@@ -73,7 +73,8 @@ class UdtTimeSeries : IStressProfile {
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+                val bound = deletePartitionHead.bind(partitionKey.getText())
+                return Operation.Deletion(bound)
             }
         }
     }

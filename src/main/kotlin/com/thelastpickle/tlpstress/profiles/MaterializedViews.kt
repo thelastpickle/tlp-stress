@@ -17,6 +17,7 @@ class MaterializedViews : IStressProfile {
         select_base = session.prepare("SELECT * FROM person WHERE name = ?")
         select_by_age = session.prepare("SELECT * FROM person_by_age WHERE age = ?")
         select_by_city = session.prepare("SELECT * FROM person_by_city WHERE city = ?")
+        delete_base = session.prepare("DELETE FROM person WHERE name = ?")
 
 
     }
@@ -60,7 +61,7 @@ class MaterializedViews : IStressProfile {
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+                return Operation.Deletion(delete_base.bind(partitionKey.getText()))
             }
         }
     }
@@ -78,4 +79,5 @@ class MaterializedViews : IStressProfile {
     lateinit var select_base : PreparedStatement
     lateinit var select_by_age : PreparedStatement
     lateinit var select_by_city : PreparedStatement
+    lateinit var delete_base : PreparedStatement
 }

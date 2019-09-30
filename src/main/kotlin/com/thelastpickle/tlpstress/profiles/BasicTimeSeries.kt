@@ -29,16 +29,16 @@ class BasicTimeSeries : IStressProfile {
     }
 
     lateinit var prepared: PreparedStatement
-    lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
+    lateinit var deletePartitionHead: PreparedStatement
 
     @WorkloadParameter("Number of rows to fetch back on SELECT queries")
     var limit = 500
 
     override fun prepare(session: Session) {
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
-        getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
         getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
+        deletePartitionHead = session.prepare("DELETE from sensor_data WHERE sensor_id = ?")
     }
 
     /**
@@ -51,7 +51,6 @@ class BasicTimeSeries : IStressProfile {
         return object : IStressRunner {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
-
                 val bound = getPartitionHead.bind(partitionKey.getText(), limit)
                 return Operation.SelectStatement(bound)
             }
@@ -64,7 +63,8 @@ class BasicTimeSeries : IStressProfile {
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                throw UnsupportedOperationException("Deletions are not implemented for this workload")
+                val bound = deletePartitionHead.bind(partitionKey.getText())
+                return Operation.Deletion(bound)
             }
         }
     }
