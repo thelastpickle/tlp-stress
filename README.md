@@ -1,6 +1,6 @@
 # tlp-stress: A workload centric stress tool and framework
 
-This project is a work in progress. 
+This project is a work in progress.
 
 Please see our [Google Group](https://groups.google.com/d/forum/tlp-dev-tools) for discussion.
 
@@ -15,7 +15,7 @@ Clone this repo, then build with gradle:
     git clone https://github.com/thelastpickle/tlp-stress.git
     cd tlp-stress
     ./gradlew assemble
-    
+
 Use the shell script wrapper to start and get help:
 
     bin/tlp-stress -h
@@ -37,5 +37,10 @@ Time series workload, using TWCS:
 
 Time series workload with a run lasting 1h and 30mins:
 
-    bin/tlp-stress run BasicTimeSeries -d "1h 30m"
+    bin/tlp-stress run BasicTimeSeries -d "1h30m"
 
+Time series workload with Cassandra Authentication enabled:
+
+    bin/tlp-stress run BasicTimeSeries -d '30m' -U '<username>' -P '<password>'
+    **Note**: The quotes are mandatory around the username/password
+    if they contain special chararacters, which is pretty common for password
