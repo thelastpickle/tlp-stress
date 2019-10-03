@@ -147,10 +147,7 @@ class Run(val command: String) : IStressCommand {
 
     @Parameter(names = ["--deleterate", "--deletes"], description = "Deletion Rate, 0-1.  Workloads may have their own defaults.  Default is dependent on workload.")
     var deleteRate : Double? = null
-
-    @Parameter(names = ["--rangedeleterate", "--rangedeletes"], description = "Range Deletion Rate, 0-1.  Workloads may have their own defaults.  Default is dependent on workload.")
-    var rangeDeleteRate : Double? = null
-
+    
     val log = logger()
 
     /**

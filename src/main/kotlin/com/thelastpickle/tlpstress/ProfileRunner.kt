@@ -70,19 +70,6 @@ class ProfileRunner(val context: StressContext,
         }
     }
 
-    val rangeDeleteRate: Double
-
-    init {
-        val tmp = context.mainArguments.rangeDeleteRate
-
-        if(tmp != null) {
-            rangeDeleteRate = tmp
-        }
-        else {
-            rangeDeleteRate = profile.getDefaultReadRate()
-        }
-    }
-
     fun print(message: String) {
         println("[Thread ${context.thread}]: $message")
 
@@ -127,15 +114,13 @@ class ProfileRunner(val context: StressContext,
             // others can be randomly injected by the runner
             // I should be able to just tell the runner to inject gossip failures in any test
             // without having to write that code in the profile
-
-            val op : Operation = if(readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
+            val nextOp = ThreadLocalRandom.current().nextInt(0, 100)
+            val op : Operation = if(readRate * 100 > nextOp) {
                 runner.getNextSelect(key)
+            } else if((readRate * 100) + (deleteRate * 100) > nextOp) {
+                runner.getNextDelete(key)
             } else {
-                if(deleteRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
-                    runner.getNextDelete(key)
-                } else {
-                    runner.getNextMutation(key)
-                }
+                runner.getNextMutation(key)
             }
             
             // if we're using the rate limiter (unlikely) grab a permit
