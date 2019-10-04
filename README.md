@@ -1,5 +1,7 @@
 # tlp-stress: A workload centric stress tool and framework
 
+[![CircleCI](https://circleci.com/gh/thelastpickle/tlp-stress.svg?style=svg)](https://circleci.com/gh/thelastpickle/tlp-stress)
+
 This project is a work in progress. 
 
 Please see our [Google Group](https://groups.google.com/d/forum/tlp-dev-tools) for discussion.
