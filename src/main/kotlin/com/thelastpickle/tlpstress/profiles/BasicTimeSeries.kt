@@ -9,6 +9,7 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.lang.UnsupportedOperationException
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
@@ -34,7 +35,6 @@ class BasicTimeSeries : IStressProfile {
     lateinit var prepared: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
     lateinit var delete: PreparedStatement
-    lateinit var deletePartitionHead: PreparedStatement
     lateinit var cassandraVersion: VersionNumber
 
     @WorkloadParameter("Number of rows to fetch back on SELECT queries")
@@ -51,8 +51,7 @@ class BasicTimeSeries : IStressProfile {
         if (cassandraVersion.compareTo(VersionNumber.parse("3.0")) >= 0) {
             delete = session.prepare("DELETE from sensor_data WHERE sensor_id = ? and timestamp < maxTimeuuid(?)")
         } else {
-            println("Cassandra version $cassandraVersion does not support range deletes, falling back to partition deletes.")
-            deletePartitionHead = session.prepare("DELETE from sensor_data WHERE sensor_id = ?")
+            throw UnsupportedOperationException("Cassandra version $cassandraVersion does not support range deletes (only available in 3.0+).")
         }
     }
 
@@ -78,14 +77,8 @@ class BasicTimeSeries : IStressProfile {
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                if (cassandraVersion!!.compareTo(VersionNumber.parse("3.0")) >= 0) {
-                    // Range deletes are only supported post Cassandra 3.0
-                    val bound = delete.bind(partitionKey.getText(), Timestamp.valueOf(LocalDateTime.now().minusSeconds(deleteDepth.toLong())))
-                    return Operation.Deletion(bound)
-                } else {
-                    val bound = deletePartitionHead.bind(partitionKey.getText())
-                    return Operation.Deletion(bound)
-                }
+                val bound = delete.bind(partitionKey.getText(), Timestamp.valueOf(LocalDateTime.now().minusSeconds(deleteDepth.toLong())))
+                return Operation.Deletion(bound)
             }
         }
     }
