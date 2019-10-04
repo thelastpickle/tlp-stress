@@ -14,11 +14,13 @@ class KeyValue : IStressProfile {
 
     lateinit var insert: PreparedStatement
     lateinit var select: PreparedStatement
+    lateinit var delete: PreparedStatement
 
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO keyvalue (key, value) VALUES (?, ?)")
         select = session.prepare("SELECT * from keyvalue WHERE key = ?")
+        delete = session.prepare("DELETE from keyvalue WHERE key = ?")
     }
 
     override fun schema(): List<String> {
@@ -51,6 +53,10 @@ class KeyValue : IStressProfile {
                 return Operation.Mutation(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val bound = delete.bind(partitionKey.getText())
+                return Operation.Deletion(bound)
+            }
         }
     }
 

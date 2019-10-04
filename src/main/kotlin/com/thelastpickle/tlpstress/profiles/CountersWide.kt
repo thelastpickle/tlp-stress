@@ -13,6 +13,7 @@ class CountersWide : IStressProfile {
     lateinit var increment: PreparedStatement
     lateinit var selectOne: PreparedStatement
     lateinit var selectAll: PreparedStatement
+    lateinit var deleteOne: PreparedStatement
 
     @WorkloadParameter("Total rows per partition.")
     var rowsPerPartition = 10000
@@ -21,6 +22,7 @@ class CountersWide : IStressProfile {
         increment = session.prepare("UPDATE counter_wide SET value = value + 1 WHERE key = ? and cluster = ?")
         selectOne = session.prepare("SELECT * from counter_wide WHERE key = ? AND cluster = ?")
         selectAll = session.prepare("SELECT * from counter_wide WHERE key = ?")
+        deleteOne = session.prepare("DELETE from counter_wide WHERE key = ? AND cluster = ?")
     }
 
     override fun schema(): List<String> {
@@ -61,6 +63,10 @@ class CountersWide : IStressProfile {
                 return Operation.SelectStatement(selectAll.bind(partitionKey.getText()))
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
+                return Operation.Deletion(deleteOne.bind(partitionKey.getText(), clusteringKey))
+            }
         }
     }
 }

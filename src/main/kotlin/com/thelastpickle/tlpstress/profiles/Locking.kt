@@ -30,6 +30,7 @@ class Locking : IStressProfile {
     lateinit var insert: PreparedStatement
     lateinit var update: PreparedStatement
     lateinit var select: PreparedStatement
+    lateinit var delete: PreparedStatement
 
     var log = logger()
 
@@ -37,6 +38,7 @@ class Locking : IStressProfile {
         insert = session.prepare("INSERT INTO lwtupdates (item_id, name, status) VALUES (?, ?, 0)")
         update = session.prepare("UPDATE lwtupdates set status = ? WHERE item_id = ? IF status = ?")
         select = session.prepare("SELECT * from lwtupdates where item_id = ?")
+        delete = session.prepare("DELETE from lwtupdates where item_id = ?")
     }
 
     override fun schema(): List<String> {
@@ -77,6 +79,11 @@ class Locking : IStressProfile {
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = select.bind(partitionKey.getText())
                 return Operation.SelectStatement(bound)
+            }
+
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val bound = delete.bind(partitionKey.getText())
+                return Operation.Deletion(bound)
             }
 
             override fun customPopulateIter() = iterator {

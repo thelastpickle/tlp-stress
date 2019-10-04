@@ -2,6 +2,8 @@
 
 This project is a work in progress.
 
+[![CircleCI](https://circleci.com/gh/thelastpickle/tlp-stress.svg?style=svg)](https://circleci.com/gh/thelastpickle/tlp-stress)
+
 Please see our [Google Group](https://groups.google.com/d/forum/tlp-dev-tools) for discussion.
 
 cassandra-stress is a configuration-based tool for doing benchmarks and testing simple datamodels for Apache Cassandra.  Unfortunately it can be difficult to configure a workload.  There are faily common data models and workloads seen on Apache Cassandra, this tool aims to provide a means of executing configurable, pre-defined profiles.

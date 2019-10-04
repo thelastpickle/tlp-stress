@@ -51,7 +51,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         val state = AtomicInteger()
 
         // this is a little weird, but we should show the same headers for writes & selects
-        val queries = listOf(timers!!["mutations"]!!, timers["selects"]!!)
+        val queries = listOf(timers!!["mutations"]!!, timers["selects"]!!, timers["deletions"]!!)
 
         for(queryType in queries) {
             with(queryType) {
@@ -115,13 +115,15 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         print(" ".repeat(paddingEachSide))
         print(termColors.blue("Reads"))
         print(" ".repeat(paddingEachSide))
-
+        print(termColors.blue("Deletes"))
+        print(" ".repeat(paddingEachSide))
+        print(" ".repeat(paddingEachSide))
         print(termColors.red("Errors"))
 
         println()
         var i = 0
 
-        for(x in 0..1) {
+        for(x in 0..2) {
 
             for (h in opHeaders) {
 

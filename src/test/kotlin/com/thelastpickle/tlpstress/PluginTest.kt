@@ -46,6 +46,11 @@ internal class PluginTest {
                     val b = mockk<BoundStatement>()
                     return Operation.SelectStatement(b)
                 }
+
+                override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                    val b = mockk<BoundStatement>()
+                    return Operation.Deletion(b)
+                }
             }
         }
 

@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress
 
 import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
+import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
 import org.apache.logging.log4j.kotlin.logger
 import java.time.LocalDateTime
@@ -57,6 +58,19 @@ class ProfileRunner(val context: StressContext,
         }
     }
 
+    val deleteRate: Double
+
+    init {
+        val tmp = context.mainArguments.deleteRate
+
+        if(tmp != null) {
+            deleteRate = tmp
+        }
+        else {
+            deleteRate = profile.getDefaultReadRate()
+        }
+    }
+
     fun print(message: String) {
         println("[Thread ${context.thread}]: $message")
 
@@ -101,12 +115,8 @@ class ProfileRunner(val context: StressContext,
             // others can be randomly injected by the runner
             // I should be able to just tell the runner to inject gossip failures in any test
             // without having to write that code in the profile
-
-            val op : Operation = if(readRate * 100 > ThreadLocalRandom.current().nextInt(0, 100)) {
-                runner.getNextSelect(key)
-            } else {
-                runner.getNextMutation(key)
-            }
+            val nextOp = ThreadLocalRandom.current().nextInt(0, 100)
+            val op : Operation = getNextOperation(nextOp, runner, key)
             
             // if we're using the rate limiter (unlikely) grab a permit
             context.rateLimiter?.run {
@@ -118,6 +128,7 @@ class ProfileRunner(val context: StressContext,
             val startTime = when(op) {
                 is Operation.Mutation -> context.metrics.mutations.time()
                 is Operation.SelectStatement -> context.metrics.selects.time()
+                is Operation.Deletion -> context.metrics.deletions.time()
             }
 
             val future = context.session.executeAsync(op.bound)
@@ -128,6 +139,16 @@ class ProfileRunner(val context: StressContext,
 
         // block until all the queries are finished
         sem.acquireUninterruptibly(context.permits)
+    }
+
+    private fun getNextOperation(nextOp: Int, runner: IStressRunner, key: PartitionKey): Operation {
+        return if (readRate * 100 > nextOp) {
+            runner.getNextSelect(key)
+        } else if ((readRate * 100) + (deleteRate * 100) > nextOp) {
+            runner.getNextDelete(key)
+        } else {
+            runner.getNextMutation(key)
+        }
     }
 
     /**

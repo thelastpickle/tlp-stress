@@ -41,10 +41,12 @@ class FileReporter(registry: MetricRegistry, outputFileName: String, command: St
 
         buffer.write(",,Mutations,,,")
         buffer.write("Reads,,,")
+        buffer.write("Deletes,,,")
         buffer.write("Errors,")
         buffer.newLine()
 
         buffer.write("Timestamp, Elapsed Time,")
+        buffer.write(opHeaders)
         buffer.write(opHeaders)
         buffer.write(opHeaders)
         buffer.write(errorHeaders)
@@ -79,6 +81,12 @@ class FileReporter(registry: MetricRegistry, outputFileName: String, command: St
                 .joinToString(",", postfix = ",")
 
         buffer.write(readRow)
+
+        val deleteRow = timers["deletions"]!!
+                .getMetricsList()
+                .joinToString(",", postfix = ",")
+
+        buffer.write(deleteRow)
 
         val errors = meters!!["errors"]!!
         val errorRow = listOf(errors.count, errors.oneMinuteRate)

@@ -21,10 +21,12 @@ class AllowFiltering : IStressProfile {
 
     lateinit var insert : PreparedStatement
     lateinit var select: PreparedStatement
+    lateinit var delete: PreparedStatement
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO allow_filtering (partition_id, row_id, value, payload) values (?, ?, ?, ?)")
         select = session.prepare("SELECT * from allow_filtering WHERE partition_id = ? and value = ? ALLOW FILTERING")
+        delete = session.prepare("DELETE from allow_filtering WHERE partition_id = ? and row_id = ?")
     }
 
     override fun schema(): List<String> {
@@ -59,6 +61,11 @@ class AllowFiltering : IStressProfile {
                 return Operation.SelectStatement(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val rowId = random.nextInt(0, rows)
+                val bound = delete.bind(partitionKey.getText(), rowId)
+                return Operation.Deletion(bound)
+            }
         }
     }
 

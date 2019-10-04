@@ -11,6 +11,8 @@ class LWT : IStressProfile {
     lateinit var insert : PreparedStatement
     lateinit var update: PreparedStatement
     lateinit var select: PreparedStatement
+    lateinit var delete: PreparedStatement
+    lateinit var deletePartition: PreparedStatement
 
     override fun schema(): List<String> {
         return arrayListOf("""CREATE TABLE IF NOT EXISTS lwt (id text primary key, value int) """)
@@ -20,6 +22,8 @@ class LWT : IStressProfile {
         insert = session.prepare("INSERT INTO lwt (id, value) VALUES (?, ?) IF NOT EXISTS")
         update = session.prepare("UPDATE lwt SET value = ? WHERE id = ? IF value = ?")
         select = session.prepare("SELECT * from lwt WHERE id = ?")
+        delete = session.prepare("DELETE from lwt WHERE id = ? IF value = ?")
+        deletePartition = session.prepare("DELETE from lwt WHERE id = ? IF EXISTS")
     }
 
 
@@ -46,7 +50,18 @@ class LWT : IStressProfile {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 return Operation.SelectStatement(select.bind(partitionKey.getText()))
+            }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val currentValue = state[partitionKey.getText()]
+                val newValue: Int
+
+                val deletion = if(currentValue != null) {
+                    delete.bind(partitionKey.getText(), currentValue)
+                } else {
+                    deletePartition.bind(partitionKey.getText())
+                }
+                return Operation.Deletion(deletion)
             }
 
             override fun onSuccess(op: Operation.Mutation, result: ResultSet?) {

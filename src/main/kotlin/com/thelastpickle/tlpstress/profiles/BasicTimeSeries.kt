@@ -2,12 +2,16 @@ package com.thelastpickle.tlpstress.profiles
 
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
+import com.datastax.driver.core.VersionNumber
 import com.datastax.driver.core.utils.UUIDs
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.lang.UnsupportedOperationException
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 
 /**
@@ -29,16 +33,26 @@ class BasicTimeSeries : IStressProfile {
     }
 
     lateinit var prepared: PreparedStatement
-    lateinit var getRow: PreparedStatement
     lateinit var getPartitionHead: PreparedStatement
+    lateinit var delete: PreparedStatement
+    lateinit var cassandraVersion: VersionNumber
 
     @WorkloadParameter("Number of rows to fetch back on SELECT queries")
     var limit = 500
 
+    @WorkloadParameter("Deletion range in seconds. Range tombstones will cover all rows older than the given value.")
+    var deleteDepth = 30
+
     override fun prepare(session: Session) {
+        println("Using a limit of $limit for reads and deleting data older than $deleteDepth seconds (if enabled).")
+        cassandraVersion = session.cluster.metadata.allHosts.map { host -> host.cassandraVersion }.min()!!
         prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
-        getRow = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? AND timestamp = ? ")
         getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
+        if (cassandraVersion.compareTo(VersionNumber.parse("3.0")) >= 0) {
+            delete = session.prepare("DELETE from sensor_data WHERE sensor_id = ? and timestamp < maxTimeuuid(?)")
+        } else {
+            throw UnsupportedOperationException("Cassandra version $cassandraVersion does not support range deletes (only available in 3.0+).")
+        }
     }
 
     /**
@@ -51,7 +65,6 @@ class BasicTimeSeries : IStressProfile {
         return object : IStressRunner {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
-
                 val bound = getPartitionHead.bind(partitionKey.getText(), limit)
                 return Operation.SelectStatement(bound)
             }
@@ -63,6 +76,10 @@ class BasicTimeSeries : IStressProfile {
                 return Operation.Mutation(bound)
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val bound = delete.bind(partitionKey.getText(), Timestamp.valueOf(LocalDateTime.now().minusSeconds(deleteDepth.toLong())))
+                return Operation.Deletion(bound)
+            }
         }
     }
 

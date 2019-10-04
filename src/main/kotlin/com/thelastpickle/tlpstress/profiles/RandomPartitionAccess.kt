@@ -16,11 +16,12 @@ class RandomPartitionAccess : IStressProfile {
     @WorkloadParameter(description = "Number of rows per partition, defaults to 100")
     var rows = 100
 
-    @WorkloadParameter("Select random row or the entire partition.  Acceptable values: row, partition")
+    @WorkloadParameter("Select and delete random row or the entire partition.  Acceptable values: row, partition")
     var select = "row"
 
     lateinit var insert : PreparedStatement
     lateinit var query : PreparedStatement
+    lateinit var delete : PreparedStatement
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO random_access (partition_id, row_id, value) values (?, ?, ?)")
@@ -37,7 +38,20 @@ class RandomPartitionAccess : IStressProfile {
             }
             else ->
                 throw RuntimeException("select must be row or partition.")
+        }
 
+        delete = when(select) {
+
+            "partition" -> {
+                println("Preparing full partition deletes")
+                session.prepare("DELETE FROM random_access WHERE partition_id = ?")
+            }
+            "row" -> {
+                println("Preparing single row deletes")
+                session.prepare("DELETE FROM random_access WHERE partition_id = ? and row_id = ?")
+            }
+            else ->
+                throw RuntimeException("select must be row or partition.")
         }
     }
 
@@ -83,6 +97,19 @@ class RandomPartitionAccess : IStressProfile {
 
             }
 
+            override fun getNextDelete(partitionKey: PartitionKey): Operation {
+                val bound = when(select) {
+                    "partition" ->
+                        delete.bind(partitionKey.getText())
+                    "row" -> {
+                        val rowId = random.nextInt(0, rows)
+                        delete.bind(partitionKey.getText(), rowId)
+                    }
+                    else -> throw RuntimeException("not even sure how you got here")
+
+                }
+                return Operation.Deletion(bound)
+            }
         }
     }
 
