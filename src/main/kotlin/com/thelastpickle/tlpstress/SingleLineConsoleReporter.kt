@@ -112,12 +112,15 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         print(" ".repeat(paddingEachSide))
         print( termColors.blue("Writes"))
         print(" ".repeat(paddingEachSide))
+
         print(" ".repeat(paddingEachSide))
         print(termColors.blue("Reads"))
         print(" ".repeat(paddingEachSide))
+
+        print(" ".repeat(paddingEachSide))
         print(termColors.blue("Deletes"))
         print(" ".repeat(paddingEachSide))
-        print(" ".repeat(paddingEachSide))
+
         print(termColors.red("Errors"))
 
         println()

@@ -67,7 +67,7 @@ class ProfileRunner(val context: StressContext,
             deleteRate = tmp
         }
         else {
-            deleteRate = profile.getDefaultReadRate()
+            deleteRate = 0.0
         }
     }
 
