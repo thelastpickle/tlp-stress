@@ -107,7 +107,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
            widthOfEachOperation += getWidth(i)
         }
 
-        val paddingEachSide = (widthOfEachOperation - "Writes".length) / 2
+        val paddingEachSide = (widthOfEachOperation - "Writes".length) / 2 - 1
 
         print(" ".repeat(paddingEachSide))
         print( termColors.blue("Writes"))
@@ -121,6 +121,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         print(termColors.blue("Deletes"))
         print(" ".repeat(paddingEachSide))
 
+        print(" ".repeat(6))
         print(termColors.red("Errors"))
 
         println()
