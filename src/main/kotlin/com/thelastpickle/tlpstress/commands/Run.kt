@@ -150,6 +150,9 @@ class Run(val command: String) : IStressCommand {
     
     val log = logger()
 
+    @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
+    var maxRequestsPerConnection : Int = 32768
+
     /**
      * Lazily generate query options
      */
@@ -172,8 +175,8 @@ class Run(val command: String) : IStressCommand {
                 .withPoolingOptions(PoolingOptions()
                         .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
                         .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, 2000))
+                        .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
+                        .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection))
         if(ssl) {
             builder = builder.withSSL()
         }
