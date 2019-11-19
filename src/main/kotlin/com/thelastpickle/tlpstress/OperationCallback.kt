@@ -2,7 +2,6 @@ package com.thelastpickle.tlpstress
 
 import com.datastax.driver.core.ResultSet
 import com.google.common.util.concurrent.FutureCallback
-import java.util.*
 import com.codahale.metrics.Timer
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -36,6 +35,14 @@ class OperationCallback(val context: StressContext,
     override fun onSuccess(result: ResultSet?) {
         semaphore.release()
         startTime.stop()
+        if(result == null)
+            error("Unexpected result")
+
+        if(op is Operation.SelectStatement) {
+            while(!result.isFullyFetched ) {
+               result.fetchMoreResults()
+            }
+        }
 
         // we only do the callback for mutations
         // might extend this to select, but I can't see a reason for it now
