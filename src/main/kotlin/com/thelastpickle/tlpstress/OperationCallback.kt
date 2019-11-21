@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress
 
+import com.codahale.metrics.Meter
 import com.datastax.driver.core.ResultSet
 import com.google.common.util.concurrent.FutureCallback
 import com.codahale.metrics.Timer
@@ -13,7 +14,7 @@ import java.util.concurrent.Semaphore
  * This was moved out of the inline ProfileRunner to make populate mode easier
  * as well as reduce clutter
  */
-class OperationCallback(val context: StressContext,
+class OperationCallback(val errors: Meter,
                         val semaphore: Semaphore,
                         val startTime: Timer.Context,
                         val runner: IStressRunner,
@@ -26,7 +27,7 @@ class OperationCallback(val context: StressContext,
 
     override fun onFailure(t: Throwable?) {
         semaphore.release()
-        context.metrics.errors.mark()
+        errors.mark()
         startTime.stop()
 
         log.error { t }

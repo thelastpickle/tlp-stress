@@ -132,7 +132,7 @@ class ProfileRunner(val context: StressContext,
             }
 
             val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op) )
+            Futures.addCallback(future, OperationCallback(context.metrics.errors, sem, startTime, runner, op) )
 
             operations++
         }
@@ -170,7 +170,7 @@ class ProfileRunner(val context: StressContext,
 
             val startTime = context.metrics.populate.time()
             val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            Futures.addCallback(future, OperationCallback(context.metrics.errors, sem, startTime, runner, op))
         }
 
         when(profile.getPopulateOption(context.mainArguments)) {
