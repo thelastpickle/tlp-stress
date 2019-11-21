@@ -34,7 +34,7 @@ class NoSplitter : IParameterSplitter {
 
 
 @Parameters(commandDescription = "Run a tlp-stress profile")
-class Run(val command: String) : IStressCommand {
+class Run(val command: String = "") : IStressCommand {
 
     @Parameter(names = ["--host"])
     var host = System.getenv("TLP_STRESS_CASSANDRA_HOST") ?: "127.0.0.1"

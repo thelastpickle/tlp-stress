@@ -17,7 +17,8 @@ class OperationCallback(val context: StressContext,
                         val semaphore: Semaphore,
                         val startTime: Timer.Context,
                         val runner: IStressRunner,
-                        val op: Operation) : FutureCallback<ResultSet> {
+                        val op: Operation,
+                        var pageRequests : Long = 0) : FutureCallback<ResultSet> {
 
     companion object {
         val log = logger()
@@ -40,7 +41,9 @@ class OperationCallback(val context: StressContext,
 
         if(op is Operation.SelectStatement) {
             while(!result.isFullyFetched ) {
-               result.fetchMoreResults()
+                result.fetchMoreResults()
+                result.availableWithoutFetching
+                pageRequests++
             }
         }
 
