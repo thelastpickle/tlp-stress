@@ -1,22 +1,47 @@
 package com.thelastpickle.tlpstress.integration
 
+import com.codahale.metrics.Meter
+import com.codahale.metrics.Timer
+import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
+import com.thelastpickle.tlpstress.OperationCallback
+import com.thelastpickle.tlpstress.profiles.IStressRunner
+import com.thelastpickle.tlpstress.profiles.Operation
+import io.mockk.mockk
+import org.apache.logging.log4j.kotlin.logger
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.concurrent.Semaphore
+import kotlin.test.fail
 
 class PaginationTest {
     lateinit var session : Session
     lateinit var testUtils: TestUtils
 
-    @BeforeAll
+    var log = logger()
+
+    class SimpleCallback(val sem: Semaphore) : FutureCallback<ResultSet> {
+        override fun onSuccess(result: ResultSet?) {
+            sem.release()
+        }
+
+        override fun onFailure(t: Throwable) {
+            fail("Was unable to execute query needed for test setup")
+        }
+
+    }
+
+    @BeforeEach
     fun setupSession() {
-        testUtils = TestUtils.connect()
+        testUtils = TestUtils.connect(pageSize = 10)
         session = testUtils.session
     }
 
-    @AfterAll
+    @AfterEach
     fun closeSession() {
         session.close()
     }
@@ -24,23 +49,43 @@ class PaginationTest {
     @Test
     fun testPaginateGetsAllRows() {
 
-        val table = """CREATE TABLE pagination_test (
+        val table = """CREATE TABLE IF NOT EXISTS pagination_test (
             | id int,
             | c int,
             | primary key(id, c)
             |) with clustering order by (c DESC)
         """.trimMargin()
 
+        log.info(table)
+
         session.execute(table)
 
         val statement = session.prepare("INSERT INTO pagination_test (id, c) VALUES (?, ?)")
 
-        for(x in 0..10000) {
+        val sem = Semaphore(20)
+        for(x in 0..100) {
+            sem.acquire()
             val bound = statement.bind(0, x)
-            session.executeAsync(bound)
+            val future = session.executeAsync(bound)
+            Futures.addCallback(future, SimpleCallback(sem))
         }
+        sem.acquireUninterruptibly(20)
+        sem.release(20)
 
-        val future = session.execute("SELECT * from pagination_test WHERE id = 0")
+        val runner = mockk<IStressRunner>()
+
+        val bound = session.prepare("SELECT * from pagination_test WHERE id = ?").bind(0)
+
+        val future = session.executeAsync(bound)
+
+        val callback = OperationCallback(Meter(), sem, Timer().time(), runner, Operation.SelectStatement(bound))
+
+        Futures.addCallback(future, callback)
+
+        sem.acquireUninterruptibly()
+
+        assertThat(callback.pageRequests).isGreaterThanOrEqualTo(10)
+
 
 
     }
