@@ -59,18 +59,22 @@ class PaginationTest {
         log.info(table)
 
         session.execute(table)
+        session.execute("TRUNCATE pagination_test")
 
         val statement = session.prepare("INSERT INTO pagination_test (id, c) VALUES (?, ?)")
 
-        val sem = Semaphore(20)
+        val semCount = 20
+        val sem = Semaphore(semCount)
         for(x in 0..100) {
             sem.acquire()
             val bound = statement.bind(0, x)
             val future = session.executeAsync(bound)
             Futures.addCallback(future, SimpleCallback(sem))
         }
-        sem.acquireUninterruptibly(20)
-        sem.release(20)
+
+        sem.acquireUninterruptibly(semCount)
+        sem.release(semCount)
+        log.debug("$semCount rows inserted")
 
         val runner = mockk<IStressRunner>()
 
@@ -84,6 +88,7 @@ class PaginationTest {
 
         sem.acquireUninterruptibly()
 
+        log.debug("pages read: ${callback.pageRequests}")
         assertThat(callback.pageRequests).isGreaterThanOrEqualTo(10)
         assertThat(callback.pageRequests).isLessThanOrEqualTo(12)
 
