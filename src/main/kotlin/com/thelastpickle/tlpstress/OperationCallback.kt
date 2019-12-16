@@ -42,7 +42,8 @@ class OperationCallback(val errors: Meter,
 
         if(op is Operation.SelectStatement) {
             while(!result.isFullyFetched ) {
-                result.fetchMoreResults()
+                val tmp = result.fetchMoreResults()
+                tmp.get()
                 pageRequests++
             }
         }
