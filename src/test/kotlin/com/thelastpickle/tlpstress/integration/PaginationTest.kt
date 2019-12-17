@@ -43,7 +43,9 @@ class PaginationTest {
 
     @AfterEach
     fun closeSession() {
+        session.cluster.close()
         session.close()
+
     }
 
     @Test
@@ -79,6 +81,7 @@ class PaginationTest {
         val runner = mockk<IStressRunner>()
 
         val bound = session.prepare("SELECT * from pagination_test WHERE id = ?").bind(0)
+        bound.setFetchSize(10)
 
         val future = session.executeAsync(bound)
 
