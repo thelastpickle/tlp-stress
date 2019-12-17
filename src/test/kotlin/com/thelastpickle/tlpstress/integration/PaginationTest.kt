@@ -2,6 +2,7 @@ package com.thelastpickle.tlpstress.integration
 
 import com.codahale.metrics.Meter
 import com.codahale.metrics.Timer
+import com.datastax.driver.core.ConsistencyLevel
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.google.common.util.concurrent.FutureCallback
@@ -70,6 +71,7 @@ class PaginationTest {
         for(x in 0..100) {
             sem.acquire()
             val bound = statement.bind(0, x)
+            bound.setConsistencyLevel(ConsistencyLevel.QUORUM)
             val future = session.executeAsync(bound)
             Futures.addCallback(future, SimpleCallback(sem))
         }
@@ -81,6 +83,7 @@ class PaginationTest {
         val runner = mockk<IStressRunner>()
 
         val bound = session.prepare("SELECT * from pagination_test WHERE id = ?").bind(0)
+        bound.setConsistencyLevel(ConsistencyLevel.QUORUM)
         bound.setFetchSize(10)
 
         val future = session.executeAsync(bound)
