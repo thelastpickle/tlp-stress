@@ -92,9 +92,7 @@ class PaginationTest {
         sem.acquireUninterruptibly()
 
         log.debug("pages read: ${callback.pageRequests}")
-        assertThat(callback.pageRequests).isGreaterThanOrEqualTo(10)
-        assertThat(callback.pageRequests).isLessThanOrEqualTo(12)
-
+        assertThat(callback.pageRequests).isEqualTo(10)
 
 
     }
