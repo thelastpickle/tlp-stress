@@ -89,8 +89,8 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
             sudo pip install pyYaml ccm
-            ccm create cassandra_30 --no-switch -v 3.0.17
-            ccm create cassandra_311 --no-switch -v 3.11.4
+            ccm create cassandra_30 --no-switch -v 3.0.19
+            ccm create cassandra_311 --no-switch -v 3.11.5
 
       - save_cache:
           key: ccm
@@ -105,7 +105,7 @@ jobs:
     steps:
       - checkout
       - install_ccm:
-          version: 3.0.17
+          version: 3.0.19
 
   cassandra_311:
     <<: *base_job
@@ -113,7 +113,7 @@ jobs:
     steps:
       - checkout
       - install_ccm:
-          version: 3.11.4
+          version: 3.11.5
 
   build_packages:
     <<: *base_job
