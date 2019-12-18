@@ -66,7 +66,7 @@ class PaginationTest {
 
         val statement = session.prepare("INSERT INTO pagination_test (id, c) VALUES (?, ?)")
 
-        val semCount = 20
+        val semCount = 10
         val sem = Semaphore(semCount)
         var total = 0
         for(x in 0..100) {

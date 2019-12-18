@@ -55,7 +55,9 @@ commands:
             ccm checklogerror
       - run:
           name: "Run tests"
-          command: ./gradlew test
+          command: ./gradlew test --stacktrace
+      - store_test_results:
+          path: ./build/reports/tests/test/
 
   gradle_test:
     description: "Run gradle test and deal with caches"
