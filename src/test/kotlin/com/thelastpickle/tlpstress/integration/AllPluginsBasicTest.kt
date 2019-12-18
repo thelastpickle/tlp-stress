@@ -1,6 +1,7 @@
 package com.thelastpickle.tlpstress.integration
 
 import com.datastax.driver.core.Cluster
+import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.Plugin
 import com.thelastpickle.tlpstress.commands.Run
 import org.junit.jupiter.api.AfterEach
@@ -23,9 +24,7 @@ class AllPluginsBasicTest {
 
     val ip = System.getenv("TLP_STRESS_CASSANDRA_IP") ?: "127.0.0.1"
 
-    val connection = Cluster.builder()
-            .addContactPoint(ip)
-            .build().connect()
+    lateinit var connection : Session
 
     lateinit var run : Run
 
@@ -45,6 +44,10 @@ class AllPluginsBasicTest {
 
     @BeforeEach
     fun cleanup() {
+        connection = Cluster.builder()
+                .addContactPoint(ip)
+                .build().connect()
+
         connection.execute("DROP KEYSPACE IF EXISTS tlp_stress")
         run = Run("placeholder")
     }
