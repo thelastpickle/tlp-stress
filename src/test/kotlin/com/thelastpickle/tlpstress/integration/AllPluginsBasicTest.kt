@@ -64,7 +64,7 @@ class AllPluginsBasicTest {
             profile = plugin.name
             iterations = 200
             rate = 50L
-            concurrency = 20L
+            concurrency = 5L
             partitionValues = 1000
             prometheusPort = prometheusPort++
         }.execute()
