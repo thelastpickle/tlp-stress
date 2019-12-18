@@ -62,9 +62,9 @@ class AllPluginsBasicTest {
         run.apply {
             host = ip
             profile = plugin.name
-            iterations = 1000
-            rate = 100L
-            concurrency = 10L
+            iterations = 200
+            rate = 50L
+            concurrency = 20L
             partitionValues = 1000
             prometheusPort = prometheusPort++
         }.execute()

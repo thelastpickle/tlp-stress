@@ -68,17 +68,19 @@ class PaginationTest {
 
         val semCount = 20
         val sem = Semaphore(semCount)
+        var total = 0
         for(x in 0..100) {
             sem.acquire()
             val bound = statement.bind(0, x)
             bound.setConsistencyLevel(ConsistencyLevel.QUORUM)
             val future = session.executeAsync(bound)
             Futures.addCallback(future, SimpleCallback(sem))
+            total++
         }
 
         sem.acquireUninterruptibly(semCount)
         sem.release(semCount)
-        log.debug("$semCount rows inserted")
+        log.debug("$total rows inserted")
 
         val runner = mockk<IStressRunner>()
 
