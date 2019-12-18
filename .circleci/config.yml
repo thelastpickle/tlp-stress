@@ -53,7 +53,9 @@ commands:
             sleep 5
             ccm status
             ccm checklogerror
-            ./gradlew test
+      - run:
+          name: "Run tests"
+          command: ./gradlew test
 
   gradle_test:
     description: "Run gradle test and deal with caches"
