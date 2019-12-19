@@ -51,21 +51,14 @@ commands:
             done
 
       - run:
-          name: "Start Cassandra"
+          name: "Run Tests"
           command: |
             ccm start -v
             sleep 5
-
-      - run:
-          name: "Check Cassandra"
-          command: |
             ccm status
             ccm checklogerror
             tail -n 50 /home/circleci/.ccm/test/node1/logs/system.log
-
-      - run:
-          name: "Run tests"
-          command: ./gradlew test --stacktrace
+            ./gradlew test --stacktrace
 
       - store_test_results:
           path: /home/circleci/repo/build/reports/tests/test/
