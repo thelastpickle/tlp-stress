@@ -34,7 +34,7 @@ commands:
       - run: sudo apt-get update -qq
       - run: sudo apt-get install -y libjna-java python-dev python-pip libyaml-dev nodejs
       - run: sudo pip install pyYaml ccm
-      - run: ccm create test -n 1 -v << parameters.version >>
+      - run: ccm create test -n 3 -v << parameters.version >>
       - run:
           name: "Adjust cluster parameters"
           command: |
