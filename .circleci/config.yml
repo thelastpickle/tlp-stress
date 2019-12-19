@@ -61,7 +61,7 @@ commands:
             ./gradlew test --stacktrace
 
       - store_test_results:
-          path: /home/circleci/repo/build/build/test-results
+          path: /home/circleci/repo/build/test-results
 
   gradle_test:
     description: "Run gradle test and deal with caches"
