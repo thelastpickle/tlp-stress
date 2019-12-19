@@ -49,15 +49,26 @@ commands:
               sed -i 's/# file_cache_size_in_mb: 512/file_cache_size_in_mb: 1/' ~/.ccm/test/node$i/conf/cassandra.yaml
               sed -i 's/enable_materialized_views: false/enable_materialized_views: true/' ~/.ccm/test/node$i/conf/cassandra.yaml
             done
+
+      - run:
+          name: "Start Cassandra"
+          command: |
             ccm start -v
             sleep 5
+
+      - run:
+          name: "Check Cassandra"
+          command: |
             ccm status
             ccm checklogerror
+            tail -n 50 .ccm/test/node1/logs/system.log
+
       - run:
           name: "Run tests"
           command: ./gradlew test --stacktrace
+          
       - store_test_results:
-          path: ./build/reports/tests/test/
+          path: ./repo/build/reports/tests/test/
 
   gradle_test:
     description: "Run gradle test and deal with caches"
