@@ -61,14 +61,14 @@ commands:
           command: |
             ccm status
             ccm checklogerror
-            tail -n 50 .ccm/test/node1/logs/system.log
+            tail -n 50 /home/circleci/.ccm/test/node1/logs/system.log
 
       - run:
           name: "Run tests"
           command: ./gradlew test --stacktrace
-          
+
       - store_test_results:
-          path: ./repo/build/reports/tests/test/
+          path: /home/circleci/.ccm/test/node1/logs/system.log
 
   gradle_test:
     description: "Run gradle test and deal with caches"
