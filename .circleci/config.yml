@@ -68,7 +68,7 @@ commands:
           command: ./gradlew test --stacktrace
 
       - store_test_results:
-          path: /home/circleci/.ccm/test/node1/logs/system.log
+          path: /home/circleci/repo/build/reports/tests/test/
 
   gradle_test:
     description: "Run gradle test and deal with caches"
@@ -112,7 +112,9 @@ jobs:
           paths:
             - ~/.ccm/repository
 
-      - run: ./gradlew testClasses
+      - run:
+          name: "run I guess"
+          command: ./gradlew testClasses
 
   cassandra_30:
     <<: *base_job
