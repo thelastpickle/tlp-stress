@@ -52,6 +52,7 @@ class PaginationTest {
     @Test
     fun testPaginateGetsAllRows() {
 
+        val drop = "DROP TABLE IF EXISTS pagination_test"
         val table = """CREATE TABLE IF NOT EXISTS pagination_test (
             | id int,
             | c int,
@@ -61,8 +62,8 @@ class PaginationTest {
 
         log.info(table)
 
+        session.execute(drop)
         session.execute(table)
-        session.execute("TRUNCATE pagination_test")
 
         val statement = session.prepare("INSERT INTO pagination_test (id, c) VALUES (?, ?)")
 
