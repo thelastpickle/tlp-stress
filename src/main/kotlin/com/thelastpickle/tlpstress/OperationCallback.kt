@@ -44,15 +44,22 @@ class OperationCallback(val errors: Meter,
         if(op is Operation.SelectStatement) {
             log.info { "select statement, might need to fetch more"}
             while(!result.isFullyFetched ) {
-                log.info { ""}
+                log.info { "We need to fetch more" }
                 val tmp = result.fetchMoreResults()
+                
+                if(tmp.isCancelled || tmp.isDone) {
+                    log.info {"Cancelled or done"}
+                    break
+                }
                 log.info { "Waiting on fetch "}
-                tmp.get()
-                log.info { "Fetch OK, $pageRequests"}
+
+                val moreResults = tmp.get()
+
+                log.info { "Fetch OK, request # $pageRequests"}
                 pageRequests++
             }
         }
-        
+
         log.info { "releasing semaphore" }
 
         semaphore.release()
