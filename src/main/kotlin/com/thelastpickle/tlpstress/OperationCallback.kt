@@ -43,8 +43,11 @@ class OperationCallback(val errors: Meter,
         // for the pagination
         if(op is Operation.SelectStatement) {
             log.info { "select statement, might need to fetch more"}
+
             while(!result.isFullyFetched ) {
                 log.info { "We need to fetch more" }
+                log.info { result.executionInfo.pagingState.toString() }
+
                 val tmp = result.fetchMoreResults()
 
                 if(tmp.isCancelled || tmp.isDone) {
