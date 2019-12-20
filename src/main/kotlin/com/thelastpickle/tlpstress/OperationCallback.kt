@@ -35,11 +35,12 @@ class OperationCallback(val errors: Meter,
     }
 
     override fun onSuccess(result: ResultSet?) {
-        semaphore.release()
-        startTime.stop()
         if(result == null)
             error("Unexpected result")
 
+        // this needs to happen before the semaphore is released and the timer is stopped
+        // otherwise we end up prematurely releasing the semaphore and recording a time that's not accounting
+        // for the pagination
         if(op is Operation.SelectStatement) {
             while(!result.isFullyFetched ) {
                 val tmp = result.fetchMoreResults()
@@ -47,6 +48,9 @@ class OperationCallback(val errors: Meter,
                 pageRequests++
             }
         }
+
+        semaphore.release()
+        startTime.stop()
 
         // we only do the callback for mutations
         // might extend this to select, but I can't see a reason for it now

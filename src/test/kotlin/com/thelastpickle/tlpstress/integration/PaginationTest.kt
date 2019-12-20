@@ -81,7 +81,7 @@ class PaginationTest {
 
         sem.acquireUninterruptibly(semCount)
         sem.release(semCount)
-        log.debug("$total rows inserted")
+        log.info("$total rows inserted")
 
         val runner = mockk<IStressRunner>()
 
@@ -91,11 +91,12 @@ class PaginationTest {
 
         val future = session.executeAsync(bound)
 
-        val callback = OperationCallback(Meter(), sem, Timer().time(), runner, Operation.SelectStatement(bound))
+        val sem2 = Semaphore(1)
+        val callback = OperationCallback(Meter(), sem2, Timer().time(), runner, Operation.SelectStatement(bound))
 
         Futures.addCallback(future, callback)
 
-        sem.acquireUninterruptibly()
+        sem2.acquireUninterruptibly()
 
         log.debug("pages read: ${callback.pageRequests}")
         assertThat(callback.pageRequests).isEqualTo(10).withFailMessage("Expected 10 pages, got ${callback.pageRequests}")
