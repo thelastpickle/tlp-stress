@@ -99,7 +99,6 @@ class PaginationTest {
 
         log.info("Waiting on semaphore")
         sem2.acquireUninterruptibly()
-        log.info("Semaphore acquired, we should have all the data")
 
         log.info("pages read: ${callback.pageRequests}")
         assertThat(callback.pageRequests).isEqualTo(10).withFailMessage("Expected 10 pages, got ${callback.pageRequests}")
