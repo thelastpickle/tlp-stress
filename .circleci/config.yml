@@ -58,7 +58,7 @@ commands:
             ccm status
             ccm checklogerror
             tail -n 50 /home/circleci/.ccm/test/node1/logs/system.log
-            ./gradlew test --stacktrace
+            ./gradlew test --stacktrace --info
 
       - store_test_results:
           path: /home/circleci/repo/build/test-results
@@ -106,7 +106,7 @@ jobs:
             - ~/.ccm/repository
 
       - run:
-          name: "run I guess"
+          name: "Generate Test Classes"
           command: ./gradlew testClasses
 
   cassandra_30:

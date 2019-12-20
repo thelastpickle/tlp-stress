@@ -89,6 +89,7 @@ class PaginationTest {
         bound.setConsistencyLevel(ConsistencyLevel.QUORUM)
         bound.setFetchSize(10)
 
+        log.info("selecting from pagination_test")
         val future = session.executeAsync(bound)
 
         val sem2 = Semaphore(1)
@@ -96,9 +97,11 @@ class PaginationTest {
 
         Futures.addCallback(future, callback)
 
+        log.info("Waiting on semaphore")
         sem2.acquireUninterruptibly()
+        log.info("Semaphore acquired, we should have all the data")
 
-        log.debug("pages read: ${callback.pageRequests}")
+        log.info("pages read: ${callback.pageRequests}")
         assertThat(callback.pageRequests).isEqualTo(10).withFailMessage("Expected 10 pages, got ${callback.pageRequests}")
 
 
