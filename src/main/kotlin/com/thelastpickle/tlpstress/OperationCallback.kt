@@ -42,12 +42,18 @@ class OperationCallback(val errors: Meter,
         // otherwise we end up prematurely releasing the semaphore and recording a time that's not accounting
         // for the pagination
         if(op is Operation.SelectStatement) {
+            log.info { "select statement, might need to fetch more"}
             while(!result.isFullyFetched ) {
+                log.info { ""}
                 val tmp = result.fetchMoreResults()
+                log.info { "Waiting on fetch "}
                 tmp.get()
+                log.info { "Fetch OK, $pageRequests"}
                 pageRequests++
             }
         }
+        
+        log.info { "releasing semaphore" }
 
         semaphore.release()
         startTime.stop()
