@@ -42,9 +42,7 @@ class OperationCallback(val errors: Meter,
         // otherwise we end up prematurely releasing the semaphore and recording a time that's not accounting
         // for the pagination
         if(op is Operation.SelectStatement) {
-            log.info("onSuccess: Select")
             while(!result.isFullyFetched ) {
-                log.info("paging")
                 val tmp = result.fetchMoreResults()
                 tmp.get()
                 pageRequests++
