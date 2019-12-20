@@ -92,7 +92,9 @@ class PaginationTest {
         log.info("selecting from pagination_test")
         val future = session.executeAsync(bound)
 
+        // we need a semaphore with a single permit so the OperationCallback can release the permit.
         val sem2 = Semaphore(1)
+        sem2.acquire()
         val callback = OperationCallback(Meter(), sem2, Timer().time(), runner, Operation.SelectStatement(bound))
 
         Futures.addCallback(future, callback)
