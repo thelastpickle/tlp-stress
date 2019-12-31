@@ -8,7 +8,12 @@ Please see our [Google Group](https://groups.google.com/d/forum/tlp-dev-tools) f
 
 cassandra-stress is a configuration-based tool for doing benchmarks and testing simple datamodels for Apache Cassandra.  Unfortunately it can be difficult to configure a workload.  There are faily common data models and workloads seen on Apache Cassandra, this tool aims to provide a means of executing configurable, pre-defined profiles.
 
-Full docs are here (sort of, work in progress): http://thelastpickle.com/tlp-stress/
+Full docs are here: http://thelastpickle.com/tlp-stress/
+
+# Installation
+
+The easiest way to get started on Linux is to use system packages.  Instructions for installation can be found here: http://thelastpickle.com/tlp-stress/#_installation
+
 
 # Building
 
@@ -16,7 +21,7 @@ Clone this repo, then build with gradle:
 
     git clone https://github.com/thelastpickle/tlp-stress.git
     cd tlp-stress
-    ./gradlew assemble
+    ./gradlew shadowJar
 
 Use the shell script wrapper to start and get help:
 
