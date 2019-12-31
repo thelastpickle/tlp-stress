@@ -23,6 +23,7 @@ import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
 import java.io.File
+import java.lang.RuntimeException
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -196,9 +197,6 @@ class Run(val command: String) : IStressCommand {
 
         val cluster = builder.build()
 
-        // set up the keyspace
-//        val commandArgs = parser.getParsedPlugin()!!.arguments
-
         // get all the initial schema
         println("Creating schema")
 
@@ -219,9 +217,9 @@ class Run(val command: String) : IStressCommand {
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
-        createKeyspace()
+        val plugin = Plugin.getPlugins().get(profile) ?: error("$profile profile does not exist")
 
-        val plugin = Plugin.getPlugins().get(profile)!!
+        createKeyspace()
 
         val rateLimiter = getRateLimiter()
 
@@ -253,8 +251,6 @@ class Run(val command: String) : IStressCommand {
                 println("Running")
                 it.run()
             }.count()
-
-            // hopefully at this point we have a valid stress profile to run
 
             Thread.sleep(1000)
 
