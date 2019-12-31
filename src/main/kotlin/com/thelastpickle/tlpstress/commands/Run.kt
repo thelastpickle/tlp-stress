@@ -23,6 +23,7 @@ import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
 import java.io.File
+import java.lang.RuntimeException
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -219,9 +220,9 @@ class Run(val command: String) : IStressCommand {
 
         Preconditions.checkArgument(partitionKeyGenerator in setOf("random", "normal", "sequence"), "Partition generator Supports random, normal, and sequence.")
 
-        createKeyspace()
+        val plugin = Plugin.getPlugins().get(profile) ?: error("$profile profile does not exist")
 
-        val plugin = Plugin.getPlugins().get(profile)!!
+        createKeyspace()
 
         val rateLimiter = getRateLimiter()
 
