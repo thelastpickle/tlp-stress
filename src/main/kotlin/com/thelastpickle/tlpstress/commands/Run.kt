@@ -219,6 +219,16 @@ class Run(val command: String) : IStressCommand {
 
         val plugin = Plugin.getPlugins().get(profile) ?: error("$profile profile does not exist")
 
+        // Check the workload parameters exist in the workload before we start testing.
+        workloadParameters.forEach {(key) -> (
+            try {
+                plugin.getProperty(key)
+            }
+            catch (nsee: java.util.NoSuchElementException) {
+                error("Workload $profile has no parameter '$key'. Please run the 'info' command to see the list of available parameters for this workload.")
+            }
+        )}
+
         createKeyspace()
 
         val rateLimiter = getRateLimiter()
