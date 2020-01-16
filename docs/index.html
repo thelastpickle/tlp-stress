@@ -443,6 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Jon Haddad</span><br>
 <span id="email" class="email"><a href="mailto:jon@thelastpickle.com">jon@thelastpickle.com</a></span><br>
+<span id="revdate">Anthony Grasso &lt;anthony@thelastpickle.com&gt;</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -463,6 +464,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_running_a_stress_test_for_a_given_duration_instead_of_a_number_of_operations">Running a stress test for a given duration instead of a number of operations</a></li>
 <li><a href="#_logging">Logging</a></li>
 <li><a href="#_exporting_metrics">Exporting Metrics</a></li>
+<li><a href="#_workload_restrictions">Workload Restrictions</a></li>
 </ul>
 </li>
 <li><a href="#_developer_docs">Developer Docs</a>
@@ -531,7 +533,7 @@ automatically captured by the Dropwizard metrics library.</p>
 <p>The easiest way to get started is to use your favorite package manager.</p>
 </div>
 <div class="paragraph">
-<p>The current version is 3.0.0.</p>
+<p>The current version is 4.0.0.</p>
 </div>
 </div>
 <div class="sect3">
@@ -579,8 +581,8 @@ enabled=1</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-3.0.0.tar
-$ tar -xzf tlp-stress-3.0.0.tar</code></pre>
+<pre class="highlight"><code>$ curl -L -O "https://dl.bintray.com/thelastpickle/tlp-tools-tarball/tlp-stress-4.0.0.tar
+$ tar -xzf tlp-stress-4.0.0.tar</code></pre>
 </div>
 </div>
 </div>
@@ -646,10 +648,10 @@ Preparing statements.
 Starting main runner
 Running
 [Thread 0]: Running the profile for 10000 iterations...
-                  Writes                                    Reads                  Errors
-  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
-   5018          84.29             0 |    4982          66.17             0 |       0                0
-   5018          84.29             0 |    4982          66.17             0 |       0                0
+                 Writes                                  Reads                                  Deletes                       Errors
+  Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  Latency (p99)  1min (req/s) |   Count  1min (errors/s)
+   5101          56.02             0 |    4899          28.78             0 |       0              0             0 |       0                0
+   5101          56.02             0 |    4899          28.78             0 |       0              0             0 |       0                0
 Stress complete, 1.</code></pre>
 </div>
 </div>
@@ -713,6 +715,9 @@ Usage: tlp-stress [options] [command] [command options]
           --dc
             The data center to which requests should be sent
             Default: &lt;empty string&gt;
+          --deleterate, --deletes
+            Deletion Rate, 0-1.  Workloads may have their own defaults.
+            Default is dependent on workload.
           --drop
             Drop the keyspace before starting.
             Default: false
@@ -742,6 +747,12 @@ Usage: tlp-stress [options] [command] [command options]
           --keyspace
             Keyspace to use
             Default: tlp_stress
+          --max-requests
+            Sets the max requests per connection
+            Default: 32768
+          --no-schema
+            Skips schema creation
+            Default: false
           --paging
             Override the driver's default page size.
           --partitiongenerator, --pg
@@ -819,6 +830,7 @@ Locking
 Maps
 MaterializedViews
 RandomPartitionAccess
+Sets
 UdtTimeSeries
 
 You can run any of these workloads by running tlp-cluster run WORKLOAD.</code></pre>
@@ -914,7 +926,13 @@ For example, running a test for 1 hours and 30 minutes will be done as follows:<
 <div class="sect3">
 <h4 id="_read_rate">Read Rate</h4>
 <div class="paragraph">
-<p>It&#8217;s possible to specify the read rate of a test as a double.  For example, if you want to use 1% reads, you&#8217;d specify <code>-r .01</code>.</p>
+<p>It&#8217;s possible to specify the read rate of a test as a double.  For example, if you want to use 1% reads, you&#8217;d specify <code>-r .01</code>. The sum of the read rate and delete rate must be less than or equal to 1.0.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_rate">Delete Rate</h4>
+<div class="paragraph">
+<p>It&#8217;s possible to specify the delete rate of a test as a double.  For example, if you want to use 1% deletes, you&#8217;d specify <code>--deleterate .01</code>. The sum of the read rate and delete rate must be less than or equal to 1.0.</p>
 </div>
 </div>
 <div class="sect3">
@@ -1060,6 +1078,12 @@ workload to specify which fields can be used this way.</p>
 <p>tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9501.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_workload_restrictions">Workload Restrictions</h3>
+<div class="paragraph">
+<p>The <code>BasicTimeSeries</code> workload only supports Cassandra versions 3.0 and above. This is because range deletes are used by this workload during runtime. Range deletes are only support in Cassandra versions 3.0. An exception will is thrown if this workload is used and a Cassandra version less than 3.0 is detected during runtime.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1095,7 +1119,7 @@ workload to specify which fields can be used this way.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-08-14 20:33:58 UTC
+Last updated 2020-01-16 06:31:41 UTC
 </div>
 </div>
 </body>

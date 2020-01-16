@@ -39,6 +39,9 @@ Usage: tlp-stress [options] [command] [command options]
           --dc
             The data center to which requests should be sent
             Default: <empty string>
+          --deleterate, --deletes
+            Deletion Rate, 0-1.  Workloads may have their own defaults.  
+            Default is dependent on workload.
           --drop
             Drop the keyspace before starting.
             Default: false
@@ -68,6 +71,12 @@ Usage: tlp-stress [options] [command] [command options]
           --keyspace
             Keyspace to use
             Default: tlp_stress
+          --max-requests
+            Sets the max requests per connection
+            Default: 32768
+          --no-schema
+            Skips schema creation
+            Default: false
           --paging
             Override the driver's default page size.
           --partitiongenerator, --pg

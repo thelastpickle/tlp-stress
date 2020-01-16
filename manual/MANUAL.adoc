@@ -1,5 +1,6 @@
 = tlp-stress
 Jon Haddad <jon@thelastpickle.com>
+Anthony Grasso <anthony@thelastpickle.com>
 :toc: left
 :icon: font
 
@@ -179,7 +180,11 @@ A very useful feature is controlling how many partitions are read and written to
 
 ==== Read Rate
 
-It's possible to specify the read rate of a test as a double.  For example, if you want to use 1% reads, you'd specify `-r .01`.
+It's possible to specify the read rate of a test as a double.  For example, if you want to use 1% reads, you'd specify `-r .01`. The sum of the read rate and delete rate must be less than or equal to 1.0.
+
+==== Delete Rate
+
+It's possible to specify the delete rate of a test as a double.  For example, if you want to use 1% deletes, you'd specify `--deleterate .01`. The sum of the read rate and delete rate must be less than or equal to 1.0.
 
 ==== Compaction
 
@@ -281,6 +286,9 @@ The Debian package installs a basic configuration file to `/etc/tlp-stress/log4j
 
 tlp-stress automatically runs an HTTP server exporting metrics in Prometheus format on port 9501.
 
+=== Workload Restrictions
+
+The `BasicTimeSeries` workload only supports Cassandra versions 3.0 and above. This is because range deletes are used by this workload during runtime. Range deletes are only support in Cassandra versions 3.0. An exception will is thrown if this workload is used and a Cassandra version less than 3.0 is detected during runtime.
 
 == Developer Docs
 

@@ -10,6 +10,7 @@ Locking
 Maps 
 MaterializedViews 
 RandomPartitionAccess 
+Sets 
 UdtTimeSeries 
 
 You can run any of these workloads by running tlp-cluster run WORKLOAD.
