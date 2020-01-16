@@ -229,6 +229,19 @@ class Run(val command: String) : IStressCommand {
             }
         )}
 
+        /**
+         * Check to make sure that readRate + deleteRate <= 1.0 before we start testing.
+         *
+         * Resolve the final value for the readRate and deleteRate, then check their sum. Note that the readRate is supplied
+         * by the profile when the commandline option is unspecified.
+         */
+        val tmpReadRate = readRate ?: plugin.instance.getDefaultReadRate()
+        val tmpDeleteRate = deleteRate ?: 0.0
+
+        if ((tmpReadRate + tmpDeleteRate) > 1.0) {
+            error("The readRate + deleteRate must be <= 1.0. Values supplied were: readRate = $tmpReadRate and deleteRate = $tmpDeleteRate.")
+        }
+
         createKeyspace()
 
         val rateLimiter = getRateLimiter()
