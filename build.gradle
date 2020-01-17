@@ -212,6 +212,15 @@ task uploadAll  {
     dependsOn "uploadTar"
 }
 
+task release {
+    dependsOn "clean"
+    dependsOn "buildAll"
+    dependsOn "uploadAll"
+}
+
+uploadAll.mustRunAfter "buildAll"
+buildAll.mustRunAfter "clean"
+
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
