@@ -14,6 +14,7 @@ buildscript {
 
 plugins {
     id 'com.google.cloud.tools.jib' version '1.8.0'
+    id("org.nosphere.apache.rat") version "0.6.0"
 }
 
 apply plugin: 'idea'
@@ -210,6 +211,10 @@ task uploadAll  {
     dependsOn "uploadDeb"
     dependsOn "uploadRpm"
     dependsOn "uploadTar"
+}
+
+rat {
+    excludes.add("build/**")
 }
 
 wrapper {
