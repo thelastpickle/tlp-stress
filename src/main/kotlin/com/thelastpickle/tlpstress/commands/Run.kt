@@ -148,11 +148,13 @@ class Run(val command: String) : IStressCommand {
 
     @Parameter(names = ["--deleterate", "--deletes"], description = "Deletion Rate, 0-1.  Workloads may have their own defaults.  Default is dependent on workload.")
     var deleteRate : Double? = null
-    
     val log = logger()
 
     @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
     var maxRequestsPerConnection : Int = 32768
+
+    @Parameter(names = ["--connections"], description = "Sets the number of connections per host")
+    var connections : Int = 8
 
     /**
      * Lazily generate query options
@@ -174,8 +176,8 @@ class Run(val command: String) : IStressCommand {
                 .withCredentials(username, password)
                 .withQueryOptions(options)
                 .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
+                        .setConnectionsPerHost(HostDistance.LOCAL, connections, connections)
+                        .setConnectionsPerHost(HostDistance.REMOTE, connections, connections)
                         .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
                         .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection))
         if(ssl) {
@@ -437,4 +439,3 @@ class Run(val command: String) : IStressCommand {
     }
 
 
-}
