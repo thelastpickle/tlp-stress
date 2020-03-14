@@ -13,8 +13,6 @@ Usage: tlp-stress [options] [command] [command options]
             Default: LOCAL_ONE
             Possible Values: [ANY, ONE, TWO, THREE, QUORUM, ALL, LOCAL_QUORUM, EACH_QUORUM, SERIAL, LOCAL_SERIAL, LOCAL_ONE]
           --compaction
-            Compaction option to use.  Double quotes will auto convert to 
-            single for convenience.  A shorthand is also available: stcs, lcs, 
             twcs.  See the full documentation for all possibilities.
             Default: <empty string>
           --compression
@@ -24,13 +22,9 @@ Usage: tlp-stress [options] [command] [command options]
             Concurrent queries allowed.  Increase for larger clusters.
             Default: 100
           --coordinatoronly, --co
-            Coordinator only made.  This will cause tlp-stress to round robin 
-            between nodes without tokens.  Requires using -Djoin_ring=false in 
-            cassandra-env.sh.  When using this option you must only provide a 
             coordinator to --host.
             Default: false
           --cql
-            Additional CQL to run after the schema is created.  Use for DDL 
             modifications such as creating indexes.
             Default: []
           --csv
@@ -40,7 +34,6 @@ Usage: tlp-stress [options] [command] [command options]
             The data center to which requests should be sent
             Default: <empty string>
           --deleterate, --deletes
-            Deletion Rate, 0-1.  Workloads may have their own defaults.  
             Default is dependent on workload.
           --drop
             Drop the keyspace before starting.
@@ -49,8 +42,6 @@ Usage: tlp-stress [options] [command] [command options]
             Duration of the stress test.  Expressed in format 1d 3h 15m
             Default: 0
           --field.
-            Override a field's data generator.  Example usage: 
-            --field.tablename.fieldname='book(100,200)' 
             Syntax: --field.key=value
             Default: {}
           -h, --help
@@ -59,7 +50,6 @@ Usage: tlp-stress [options] [command] [command options]
 
             Default: 127.0.0.1
           --id
-            Identifier for this run, will be used in partition keys.  Make 
             unique for when starting concurrent runners.
             Default: 001
           --iterations, -i, -n
@@ -74,13 +64,15 @@ Usage: tlp-stress [options] [command] [command options]
           --max-requests
             Sets the max requests per connection
             Default: 32768
+          --connections
+            Sets the number of connections per host
+            Default: 8
           --no-schema
             Skips schema creation
             Default: false
           --paging
             Override the driver's default page size.
           --partitiongenerator, --pg
-            Method of generating partition keys.  Supports random, normal 
             (gaussian), and sequence.
             Default: random
           --partitions, -p
@@ -102,7 +94,6 @@ Usage: tlp-stress [options] [command] [command options]
             Rate limiter, accepts human numbers. 0 = disabled
             Default: 0
           --readrate, --reads, -r
-            Read Rate, 0-1.  Workloads may have their own defaults.  Default 
             is dependent on workload.
           --replication
             Replication options
@@ -135,5 +126,3 @@ Usage: tlp-stress [options] [command] [command options]
 
     fields      null
       Usage: fields
-
-
