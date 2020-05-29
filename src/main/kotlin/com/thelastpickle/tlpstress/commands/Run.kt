@@ -148,6 +148,7 @@ class Run(val command: String) : IStressCommand {
 
     @Parameter(names = ["--deleterate", "--deletes"], description = "Deletion Rate, 0-1.  Workloads may have their own defaults.  Default is dependent on workload.")
     var deleteRate : Double? = null
+
     val log = logger()
 
     @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
@@ -296,7 +297,7 @@ class Run(val command: String) : IStressCommand {
 
     }
 
-    
+
 
     private fun getRateLimiter() = if(rate > 0) {
             RateLimiter.create(rate.toDouble())
@@ -439,3 +440,4 @@ class Run(val command: String) : IStressCommand {
     }
 
 
+}
