@@ -341,12 +341,10 @@ class Run(val command: String) : IStressCommand {
             ProfileRunner.create(context, plugin.instance)
         }
 
-        val executed = runners.parallelStream().map {
-            println("Preparing statements.")
-            it.prepare()
-        }.count()
+        println("Preparing statements.")
+        val executed = runners.first().prepare()
 
-        println("$executed threads prepared.")
+        println("Statements prepared.")
         return runners
     }
 

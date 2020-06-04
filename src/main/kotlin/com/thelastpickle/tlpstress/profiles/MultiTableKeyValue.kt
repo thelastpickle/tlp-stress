@@ -13,18 +13,15 @@ import com.thelastpickle.tlpstress.generators.functions.Random
 
 class MultiTableKeyValue : IStressProfile {
 
-    lateinit var insert: MutableList<PreparedStatement>
-    lateinit var select: MutableList<PreparedStatement>
-    lateinit var delete: MutableList<PreparedStatement>
+    var insert: MutableList<PreparedStatement> = mutableListOf()
+    var select: MutableList<PreparedStatement> = mutableListOf()
+    var delete: MutableList<PreparedStatement> = mutableListOf()
 
     @WorkloadParameter("Number of tables to spread the load on.")
     var nbTables = 1
 
     override fun prepare(session: Session) {
-        insert = mutableListOf()
-        select = mutableListOf()
-        delete = mutableListOf()
-        for (i in 1..nbTables) {
+        for (i in 0 until nbTables) {
             insert.add(session.prepare("INSERT INTO keyvalue$i (key, value) VALUES (?, ?)"))
             select.add(session.prepare("SELECT * from keyvalue$i WHERE key = ?"))
             delete.add(session.prepare("DELETE from keyvalue$i WHERE key = ?"))
@@ -32,12 +29,12 @@ class MultiTableKeyValue : IStressProfile {
     }
 
     override fun schema(): List<String> {
-        val listOfTables = listOf<String>()
-        for (i in 1..nbTables) {
-            val table = """CREATE TABLE IF NOT EXISTS keyvalue$i (
+        val listOfTables = mutableListOf<String>()
+        for (i in 0 until nbTables) {
+            listOfTables.add("""CREATE TABLE IF NOT EXISTS keyvalue$i (
                             key text PRIMARY KEY,
                             value text
-                            )""".trimIndent()
+                            )""".trimIndent())
         }
         return listOfTables
     }
@@ -47,26 +44,31 @@ class MultiTableKeyValue : IStressProfile {
     }
 
     override fun getRunner(context: StressContext): IStressRunner {
+        var ops = 0
 
         val value = context.registry.getGenerator("keyvalue", "value")
 
         return object : IStressRunner {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
-                val bound = select[(System.currentTimeMillis() % nbTables).toInt()].bind(partitionKey.getText())
+                val bound = select[getNextTableId()].bind(partitionKey.getText())
                 return Operation.SelectStatement(bound)
             }
 
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val data = value.getText()
-                val bound = insert[(System.currentTimeMillis() % nbTables).toInt()].bind(partitionKey.getText(),  data)
+                val bound = insert[getNextTableId()].bind(partitionKey.getText(),  data)
 
                 return Operation.Mutation(bound)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                val bound = delete[(System.currentTimeMillis() % nbTables).toInt()].bind(partitionKey.getText())
+                val bound = delete[getNextTableId()].bind(partitionKey.getText())
                 return Operation.Deletion(bound)
+            }
+
+            private fun getNextTableId(): Int {
+                return ++ops % nbTables
             }
         }
     }
