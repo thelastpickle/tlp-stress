@@ -1,6 +1,5 @@
 package com.thelastpickle.tlpstress
 
-import com.google.common.util.concurrent.Futures
 import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
@@ -131,8 +130,15 @@ class ProfileRunner(val context: StressContext,
                 is Operation.Deletion -> context.metrics.deletions.time()
             }
 
-            val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op) )
+            val operationCallback = OperationCallback(context, sem, startTime, runner, op)
+            context.session.executeAsync(op.bound)
+                    .whenComplete { asyncResultSet, throwable ->
+                        if (null != throwable) {
+                            operationCallback.onFailure(throwable)
+                        } else {
+                            operationCallback.onSuccess(asyncResultSet)
+                        }
+                    }.toCompletableFuture().get()
 
             operations++
         }
@@ -169,8 +175,15 @@ class ProfileRunner(val context: StressContext,
             sem.acquire()
 
             val startTime = context.metrics.populate.time()
-            val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            val operationCallback = OperationCallback(context, sem, startTime, runner, op)
+            context.session.executeAsync(op.bound)
+                    .whenComplete { asyncResultSet, throwable ->
+                        if (null != throwable) {
+                            operationCallback.onFailure(throwable)
+                        } else {
+                            operationCallback.onSuccess(asyncResultSet)
+                        }
+                    }.toCompletableFuture().get()
         }
 
         when(profile.getPopulateOption(context.mainArguments)) {

@@ -1,13 +1,13 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.Host
+import com.datastax.oss.driver.api.core.metadata.Node
 import com.google.common.base.Predicate
 
-class CoordinatorHostPredicate : Predicate<Host> {
-    override fun apply(input: Host?): Boolean {
+class CoordinatorHostPredicate : Predicate<Node> {
+    override fun apply(input: Node?): Boolean {
         if(input == null)
             return false
-        return input.tokens == null || input.tokens.size == 0
+        return true
     }
 }
 

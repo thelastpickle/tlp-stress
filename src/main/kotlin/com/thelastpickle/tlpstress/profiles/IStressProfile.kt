@@ -1,8 +1,9 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.Session
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet
+import com.datastax.oss.driver.api.core.cql.BoundStatement
+import com.datastax.oss.driver.api.core.cql.ResultSet
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.PopulateOption
 import com.thelastpickle.tlpstress.StressContext
@@ -19,7 +20,7 @@ interface IStressRunner {
      * Will be used for state tracking on things like LWTs as well as provides an avenue for future work
      * doing post-workload correctness checks
      */
-    fun onSuccess(op: Operation.Mutation, result: ResultSet?) { }
+    fun onSuccess(op: Operation.Mutation, result: AsyncResultSet?) { }
 
     fun customPopulateIter() : Iterator<Operation.Mutation> {
         return listOf<Operation.Mutation>().iterator()
@@ -38,7 +39,7 @@ interface IStressProfile {
      * the class should track all prepared statements internally
      * and pass them on to the Runner
      */
-    fun prepare(session: Session)
+    fun prepare(session: CqlSession)
     /**
      * returns a bunch of DDL statements
      * this can be create table, index, materialized view, etc

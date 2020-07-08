@@ -1,12 +1,15 @@
 package com.thelastpickle.tlpstress.integration
 
-import com.datastax.driver.core.Cluster
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader
 import com.thelastpickle.tlpstress.Plugin
 import com.thelastpickle.tlpstress.commands.Run
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.net.InetSocketAddress
 
 
 @Retention(AnnotationRetention.RUNTIME)
@@ -22,9 +25,13 @@ class AllPluginsBasicTest {
 
     val ip = System.getenv("TLP_STRESS_CASSANDRA_IP") ?: "127.0.0.1"
 
-    val connection = Cluster.builder()
-            .addContactPoint(ip)
-            .build().connect()
+    val config = DriverConfigLoader.programmaticBuilder()
+            .withString(DefaultDriverOption.LOAD_BALANCING_POLICY_CLASS, "DcInferringLoadBalancingPolicy").build()
+
+    val session = CqlSession.builder()
+            .addContactPoint(InetSocketAddress(ip, 9042))
+            .withConfigLoader(config)
+            .build()
 
     lateinit var run : Run
 
@@ -44,7 +51,7 @@ class AllPluginsBasicTest {
 
     @BeforeEach
     fun cleanup() {
-        connection.execute("DROP KEYSPACE IF EXISTS tlp_stress")
+        session.execute("DROP KEYSPACE IF EXISTS tlp_stress")
         run = Run("placeholder")
     }
 

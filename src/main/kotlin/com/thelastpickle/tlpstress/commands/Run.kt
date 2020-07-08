@@ -6,14 +6,13 @@ import com.beust.jcommander.Parameters
 import com.beust.jcommander.converters.IParameterSplitter
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.ScheduledReporter
-import com.datastax.driver.core.*
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy
-import com.datastax.driver.core.policies.HostFilterPolicy
-import com.datastax.driver.core.policies.RoundRobinPolicy
+import com.datastax.oss.driver.api.core.ConsistencyLevel
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.RateLimiter
 import com.thelastpickle.tlpstress.*
-import com.thelastpickle.tlpstress.Metrics
 import com.thelastpickle.tlpstress.converters.ConsistencyLevelConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
@@ -22,9 +21,9 @@ import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
-import java.io.File
-import java.lang.RuntimeException
+import java.net.InetSocketAddress
 import kotlin.concurrent.fixedRateTimer
+
 
 class NoSplitter : IParameterSplitter {
     override fun split(value: String?): MutableList<String> {
@@ -113,7 +112,7 @@ class Run(val command: String) : IStressCommand {
     @Parameter(names = ["--partitiongenerator", "--pg"], description = "Method of generating partition keys.  Supports random, normal (gaussian), and sequence.")
     var partitionKeyGenerator: String = "random"
 
-    @Parameter(names = ["--coordinatoronly", "--co"], description = "Coordinator only made.  This will cause tlp-stress to round robin between nodes without tokens.  Requires using -Djoin_ring=false in cassandra-env.sh.  When using this option you must only provide a coordinator to --host.")
+    @Parameter(names = ["--coordinatoronly", "--co"], description = "Coordinator only mode.  This will cause tlp-stress to round robin between nodes without tokens.  Requires using -Djoin_ring=false in cassandra-env.sh.  When using this option you must only provide a coordinator to --host.")
     var coordinatorOnlyMode = false
 
     @Parameter(names = ["--csv"], description = "Write metrics to this file in CSV format.")
@@ -154,55 +153,46 @@ class Run(val command: String) : IStressCommand {
     @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
     var maxRequestsPerConnection : Int = 32768
 
-    /**
-     * Lazily generate query options
-     */
-    val options by lazy {
-        val tmp = QueryOptions().setConsistencyLevel(consistencyLevel)
-        if(paging != null) {
-            println("Using custom paging size of $paging")
-            tmp.setFetchSize(paging!!)
-        }
-        tmp
-    }
-
     val session by lazy {
 
-        var builder = Cluster.builder()
-                .addContactPoint(host)
-                .withPort(cqlPort)
-                .withCredentials(username, password)
-                .withQueryOptions(options)
-                .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, 4, 8)
-                        .setConnectionsPerHost(HostDistance.REMOTE, 4, 8)
-                        .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
-                        .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection))
-        if(ssl) {
-            builder = builder.withSSL()
+        val configBuilder = DriverConfigLoader.programmaticBuilder()
+                .withString(DefaultDriverOption.REQUEST_CONSISTENCY, consistencyLevel.name())
+                .withInt(DefaultDriverOption.CONNECTION_POOL_LOCAL_SIZE, 8)
+                .withInt(DefaultDriverOption.CONNECTION_MAX_REQUESTS, maxRequestsPerConnection)
+                .withString(DefaultDriverOption.LOAD_BALANCING_POLICY_CLASS, "DcInferringLoadBalancingPolicy")
+
+        if (null != paging) {
+            println("Using custom paging size of $paging")
+            configBuilder.withInt(DefaultDriverOption.REQUEST_PAGE_SIZE, paging!!)
         }
+        val config = configBuilder.build()
 
-        if (dc != "") {
-            builder.withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder()
-                    .withLocalDc(dc)
-                    .withUsedHostsPerRemoteDc(0)
-                    .build())
-        }
+        var builder = CqlSession.builder()
+                .addContactPoint(InetSocketAddress(host, cqlPort))
+                .withAuthCredentials(username, password)
+                .withConfigLoader(config)
+//        if(ssl) {
+//            builder = builder.withSSL()
+//        }
 
-        if(coordinatorOnlyMode) {
-            println("Using experimental coordinator only mode.")
-            val policy = HostFilterPolicy(RoundRobinPolicy(), CoordinatorHostPredicate())
-            builder = builder.withLoadBalancingPolicy(policy)
-        }
+//        if (dc != "") {
+//            builder.withLoadBalancingPolicy(DCAwareRoundRobinPolicy.builder()
+//                    .withLocalDc(dc)
+//                    .withUsedHostsPerRemoteDc(0)
+//                    .build())
+//        }
+//
+//        if(coordinatorOnlyMode) {
+//            // TODO: we only have info about token ranges after we connected to the cluster
+//            println("Using experimental coordinator only mode.")
+//            builder = builder.withNodeFilter(CoordinatorHostPredicate())
+//        }
 
-        val cluster = builder.build()
-
+        val session = builder.build()
         // get all the initial schema
         println("Creating schema")
 
         println("Executing $iterations operations with consistency level $consistencyLevel")
-
-        val session = cluster.connect()
 
         println("Connected")
         session

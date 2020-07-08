@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.FieldGenerator
@@ -17,7 +17,7 @@ class KeyValue : IStressProfile {
     lateinit var delete: PreparedStatement
 
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO keyvalue (key, value) VALUES (?, ?)")
         select = session.prepare("SELECT * from keyvalue WHERE key = ?")
         delete = session.prepare("DELETE from keyvalue WHERE key = ?")

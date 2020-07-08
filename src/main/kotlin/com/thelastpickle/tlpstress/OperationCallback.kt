@@ -1,9 +1,7 @@
 package com.thelastpickle.tlpstress
 
-import com.datastax.driver.core.ResultSet
-import com.google.common.util.concurrent.FutureCallback
-import java.util.*
 import com.codahale.metrics.Timer
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
 import org.apache.logging.log4j.kotlin.logger
@@ -18,13 +16,13 @@ class OperationCallback(val context: StressContext,
                         val semaphore: Semaphore,
                         val startTime: Timer.Context,
                         val runner: IStressRunner,
-                        val op: Operation) : FutureCallback<ResultSet> {
+                        val op: Operation) {
 
     companion object {
         val log = logger()
     }
 
-    override fun onFailure(t: Throwable?) {
+    fun onFailure(t: Throwable?) {
         semaphore.release()
         context.metrics.errors.mark()
         startTime.stop()
@@ -33,7 +31,7 @@ class OperationCallback(val context: StressContext,
 
     }
 
-    override fun onSuccess(result: ResultSet?) {
+    fun onSuccess(result: AsyncResultSet?) {
         semaphore.release()
         startTime.stop()
 
@@ -42,6 +40,5 @@ class OperationCallback(val context: StressContext,
         if(op is Operation.Mutation) {
             runner.onSuccess(op, result)
         }
-
     }
 }
