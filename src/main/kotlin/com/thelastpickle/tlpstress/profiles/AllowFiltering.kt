@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
@@ -23,7 +23,7 @@ class AllowFiltering : IStressProfile {
     lateinit var select: PreparedStatement
     lateinit var delete: PreparedStatement
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO allow_filtering (partition_id, row_id, value, payload) values (?, ?, ?, ?)")
         select = session.prepare("SELECT * from allow_filtering WHERE partition_id = ? and value = ? ALLOW FILTERING")
         delete = session.prepare("DELETE from allow_filtering WHERE partition_id = ? and row_id = ?")

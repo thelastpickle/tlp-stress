@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.PopulateOption
 import com.thelastpickle.tlpstress.ProfileRunner
@@ -34,7 +34,7 @@ class Locking : IStressProfile {
 
     var log = logger()
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO lwtupdates (item_id, name, status) VALUES (?, ?, 0)")
         update = session.prepare("UPDATE lwtupdates set status = ? WHERE item_id = ? IF status = ?")
         select = session.prepare("SELECT * from lwtupdates where item_id = ?")

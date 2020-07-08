@@ -1,7 +1,9 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
+import com.datastax.oss.driver.api.core.type.codec.TypeCodecs
+import com.datastax.oss.driver.internal.core.type.codec.SetCodec
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.Field
@@ -15,7 +17,7 @@ class Sets : IStressProfile {
     lateinit var select : PreparedStatement
     lateinit var deleteElement : PreparedStatement
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO sets (key, values) VALUES (?, ?)")
         update = session.prepare("UPDATE sets SET values = values + ? WHERE key = ?")
         select = session.prepare("SELECT * from sets WHERE key = ?")
@@ -39,7 +41,7 @@ class Sets : IStressProfile {
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val value = payload.getText()
                 val bound = update.bind()
-                        .setSet(0, setOf(value))
+                        .setSet(0, setOf(value), value.javaClass)
                         .setString(1, partitionKey.getText())
 
                 return Operation.Mutation(bound)

@@ -1,7 +1,7 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.*
@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO person (name, age, city) values (?, ?, ?)")
         select_base = session.prepare("SELECT * FROM person WHERE name = ?")
         select_by_age = session.prepare("SELECT * FROM person_by_age WHERE age = ?")

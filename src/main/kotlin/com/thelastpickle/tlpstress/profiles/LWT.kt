@@ -1,8 +1,9 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.datastax.driver.core.PreparedStatement
-import com.datastax.driver.core.ResultSet
-import com.datastax.driver.core.Session
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.cql.AsyncResultSet
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
+import com.datastax.oss.driver.api.core.cql.ResultSet
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 
@@ -18,7 +19,7 @@ class LWT : IStressProfile {
         return arrayListOf("""CREATE TABLE IF NOT EXISTS lwt (id text primary key, value int) """)
     }
 
-    override fun prepare(session: Session) {
+    override fun prepare(session: CqlSession) {
         insert = session.prepare("INSERT INTO lwt (id, value) VALUES (?, ?) IF NOT EXISTS")
         update = session.prepare("UPDATE lwt SET value = ? WHERE id = ? IF value = ?")
         select = session.prepare("SELECT * from lwt WHERE id = ?")
@@ -64,7 +65,7 @@ class LWT : IStressProfile {
                 return Operation.Deletion(deletion)
             }
 
-            override fun onSuccess(op: Operation.Mutation, result: ResultSet?) {
+            override fun onSuccess(op: Operation.Mutation, result: AsyncResultSet?) {
                 val payload = op.callbackPayload!! as CallbackPayload
                 state[payload.id] = payload.value
 

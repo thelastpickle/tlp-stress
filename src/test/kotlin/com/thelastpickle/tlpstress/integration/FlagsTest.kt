@@ -1,9 +1,12 @@
 package com.thelastpickle.tlpstress.integration
 
-import com.datastax.driver.core.Cluster
+import com.datastax.oss.driver.api.core.CqlSession
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader
 import com.thelastpickle.tlpstress.commands.Run
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.net.InetSocketAddress
 
 /**
  * Simple tests for various flags that don't required dedicated testing
@@ -11,9 +14,13 @@ import org.junit.jupiter.api.Test
 class FlagsTest {
     val ip = System.getenv("TLP_STRESS_CASSANDRA_IP") ?: "127.0.0.1"
 
-    val connection = Cluster.builder()
-            .addContactPoint(ip)
-            .build().connect()
+    val config = DriverConfigLoader.programmaticBuilder()
+            .withString(DefaultDriverOption.LOAD_BALANCING_POLICY_CLASS, "DcInferringLoadBalancingPolicy").build()
+
+    val session = CqlSession.builder()
+            .addContactPoint(InetSocketAddress(ip, 9042))
+            .withConfigLoader(config)
+            .build()
 
     var keyvalue = Run("placeholder")
 
