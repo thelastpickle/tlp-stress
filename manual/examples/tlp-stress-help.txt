@@ -74,8 +74,11 @@ Usage: tlp-stress [options] [command] [command options]
           --max-requests
             Sets the max requests per connection
             Default: 32768
-          --connections
-            Sets the number of connections per host
+          --core-connections
+            Sets the number of core connections per host
+            Default: 8
+          --max-connections
+            Sets the number of max connections per host
             Default: 8
           --no-schema
             Skips schema creation
