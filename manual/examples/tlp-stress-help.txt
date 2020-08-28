@@ -76,7 +76,7 @@ Usage: tlp-stress [options] [command] [command options]
             Default: 32768
           --core-connections
             Sets the number of core connections per host
-            Default: 8
+            Default: 4
           --max-connections
             Sets the number of max connections per host
             Default: 8
