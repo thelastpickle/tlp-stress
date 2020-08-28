@@ -154,8 +154,11 @@ class Run(val command: String) : IStressCommand {
     @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
     var maxRequestsPerConnection : Int = 32768
 
-    @Parameter(names = ["--connections"], description = "Sets the number of connections per host")
-    var connections : Int = 8
+    @Parameter(names = ["--core-connections"], description = "Sets the number of core connections per host")
+    var coreConnections : Int = 4
+
+    @Parameter(names = ["--max-connections"], description = "Sets the number of max connections per host")
+    var maxConnections : Int = 8
 
     /**
      * Lazily generate query options
@@ -177,8 +180,8 @@ class Run(val command: String) : IStressCommand {
                 .withCredentials(username, password)
                 .withQueryOptions(options)
                 .withPoolingOptions(PoolingOptions()
-                        .setConnectionsPerHost(HostDistance.LOCAL, connections, connections)
-                        .setConnectionsPerHost(HostDistance.REMOTE, connections, connections)
+                        .setConnectionsPerHost(HostDistance.LOCAL, coreConnections, maxConnections)
+                        .setConnectionsPerHost(HostDistance.REMOTE, coreConnections, maxConnections)
                         .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
                         .setMaxRequestsPerConnection(HostDistance.REMOTE, maxRequestsPerConnection))
         if(ssl) {
