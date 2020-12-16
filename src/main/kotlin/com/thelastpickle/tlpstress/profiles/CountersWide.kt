@@ -5,6 +5,7 @@ import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.roundToLong
 
@@ -49,23 +50,21 @@ class CountersWide : IStressProfile {
 
                 val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
                 val tmp = increment.bind(partitionKey.getText(), clusteringKey)
-                return Operation.Mutation(tmp)
+                return Operation.Mutation(tmp, context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 iterations++
-
                 if (iterations % 2 == 0L) {
                     val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
-                    return Operation.SelectStatement(selectOne.bind(partitionKey.getText(), clusteringKey))
+                    return Operation.SelectStatement(selectOne.bind(partitionKey.getText(), clusteringKey), context)
                 }
-
-                return Operation.SelectStatement(selectAll.bind(partitionKey.getText()))
+                return Operation.SelectStatement(selectAll.bind(partitionKey.getText()), context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val clusteringKey = (ThreadLocalRandom.current().nextGaussian() * rowsPerPartition.toDouble()).roundToLong()
-                return Operation.Deletion(deleteOne.bind(partitionKey.getText(), clusteringKey))
+                return Operation.Deletion(deleteOne.bind(partitionKey.getText(), clusteringKey), context)
             }
         }
     }

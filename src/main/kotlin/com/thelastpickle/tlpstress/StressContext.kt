@@ -13,6 +13,7 @@ data class StressContext(val session: Session,
                          val metrics: Metrics,
                          val permits: Int,
                          val registry: Registry,
-                         val rateLimiter: RateLimiter?)
+                         val rateLimiter: RateLimiter?,
+                         val combineMetrics: Boolean)
 
 

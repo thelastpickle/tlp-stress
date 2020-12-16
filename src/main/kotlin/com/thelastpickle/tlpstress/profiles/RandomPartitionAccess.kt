@@ -9,6 +9,7 @@ import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.generators.FieldFactory
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class RandomPartitionAccess : IStressProfile {
@@ -78,7 +79,7 @@ class RandomPartitionAccess : IStressProfile {
                 val rowId = random.nextInt(0, rows)
                 val bound = insert.bind(partitionKey.getText(),
                     rowId, value.getText())
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
@@ -93,8 +94,7 @@ class RandomPartitionAccess : IStressProfile {
                     else -> throw RuntimeException("not even sure how you got here")
 
                 }
-                return Operation.SelectStatement(bound)
-
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
@@ -108,7 +108,7 @@ class RandomPartitionAccess : IStressProfile {
                     else -> throw RuntimeException("not even sure how you got here")
 
                 }
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
         }
     }

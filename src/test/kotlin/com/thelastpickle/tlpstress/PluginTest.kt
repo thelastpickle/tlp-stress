@@ -39,17 +39,17 @@ internal class PluginTest {
             return object : IStressRunner {
                 override fun getNextMutation(partitionKey: PartitionKey): Operation {
                     val b = mockk<BoundStatement>()
-                    return Operation.Mutation(b)
+                    return Operation.Mutation(b, context)
                 }
 
                 override fun getNextSelect(partitionKey: PartitionKey): Operation {
                     val b = mockk<BoundStatement>()
-                    return Operation.SelectStatement(b)
+                    return Operation.SelectStatement(b, context)
                 }
 
                 override fun getNextDelete(partitionKey: PartitionKey): Operation {
                     val b = mockk<BoundStatement>()
-                    return Operation.Deletion(b)
+                    return Operation.Deletion(b, context)
                 }
             }
         }

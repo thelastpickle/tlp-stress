@@ -11,6 +11,7 @@ import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.functions.Random
 import java.util.concurrent.ThreadLocalRandom
 
+
 class AllowFiltering : IStressProfile {
 
     @WorkloadParameter(description = "Number of rows per partition")
@@ -49,22 +50,21 @@ class AllowFiltering : IStressProfile {
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val rowId = random.nextInt(0, rows)
                 val value = random.nextInt(0, maxValue)
-
                 val bound = insert.bind(partitionKey.getText(), rowId, value, payload.getText())
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
 
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val value = random.nextInt(0, maxValue)
                 val bound = select.bind(partitionKey.getText(), value)
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val rowId = random.nextInt(0, rows)
                 val bound = delete.bind(partitionKey.getText(), rowId)
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
         }
     }

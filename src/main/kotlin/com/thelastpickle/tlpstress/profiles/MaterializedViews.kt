@@ -8,6 +8,7 @@ import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.FirstName
 import com.thelastpickle.tlpstress.generators.functions.LastName
 import com.thelastpickle.tlpstress.generators.functions.USCities
+import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 class MaterializedViews : IStressProfile {
@@ -44,16 +45,16 @@ class MaterializedViews : IStressProfile {
 
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
-                return Operation.Mutation(insert.bind(partitionKey.getText(), num, cities.getText()))
+                return Operation.Mutation(insert.bind(partitionKey.getText(), num, cities.getText()), context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val num = ThreadLocalRandom.current().nextInt(1, 110)
                 val result = when(select_count % 2L) {
                     0L ->
-                        Operation.SelectStatement(select_by_age.bind(num))
+                        Operation.SelectStatement(select_by_age.bind(num), context)
                     else ->
-                        Operation.SelectStatement(select_by_city.bind("test"))
+                        Operation.SelectStatement(select_by_city.bind("test"), context)
 
                 }
                 select_count++
@@ -61,7 +62,7 @@ class MaterializedViews : IStressProfile {
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
-                return Operation.Deletion(delete_base.bind(partitionKey.getText()))
+                return Operation.Deletion(delete_base.bind(partitionKey.getText()), context)
             }
         }
     }

@@ -1,13 +1,10 @@
 package com.thelastpickle.tlpstress.profiles
 
-import com.beust.jcommander.Parameter
 import com.datastax.driver.core.PreparedStatement
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
-import com.thelastpickle.tlpstress.profiles.IStressProfile
-import com.thelastpickle.tlpstress.profiles.IStressRunner
-import com.thelastpickle.tlpstress.profiles.Operation
+import java.util.*
 
 
 class Maps : IStressProfile {
@@ -31,17 +28,17 @@ class Maps : IStressProfile {
     override fun getRunner(context: StressContext): IStressRunner {
         return object : IStressRunner {
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
-                return Operation.Mutation(insert.bind("key", "value", partitionKey.getText()))
+                return Operation.Mutation(insert.bind("key", "value", partitionKey.getText()), context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val b = select.bind(partitionKey.getText())
-                return Operation.SelectStatement(b)
+                return Operation.SelectStatement(b, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val b = delete.bind(partitionKey.getText())
-                return Operation.Deletion(b)
+                return Operation.Deletion(b, context)
             }
         }
     }

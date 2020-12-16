@@ -5,6 +5,7 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.thelastpickle.tlpstress.PartitionKey
 import com.thelastpickle.tlpstress.StressContext
+import java.util.*
 
 class LWT : IStressProfile {
 
@@ -45,11 +46,11 @@ class LWT : IStressProfile {
                     insert.bind(partitionKey.getText(), newValue)
                 }
                 val payload = CallbackPayload(partitionKey.getText(), newValue)
-                return Operation.Mutation(mutation, payload)
+                return Operation.Mutation(mutation, context, payload)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
-                return Operation.SelectStatement(select.bind(partitionKey.getText()))
+                return Operation.SelectStatement(select.bind(partitionKey.getText()), context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
@@ -61,7 +62,7 @@ class LWT : IStressProfile {
                 } else {
                     deletePartition.bind(partitionKey.getText())
                 }
-                return Operation.Deletion(deletion)
+                return Operation.Deletion(deletion, context)
             }
 
             override fun onSuccess(op: Operation.Mutation, result: ResultSet?) {

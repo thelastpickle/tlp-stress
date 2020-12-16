@@ -9,7 +9,7 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.dropwizard.DropwizardExports
 import io.prometheus.client.exporter.HTTPServer
 
-class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>, val httpPort : Int) {
+class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledReporter>, val httpPort : Int, val combineMetrics: Boolean) {
 
     val server: HTTPServer
 
@@ -37,6 +37,8 @@ class Metrics(metricRegistry: MetricRegistry, val reporters: List<ScheduledRepor
     val mutations = metricRegistry.timer("mutations")
     val selects = metricRegistry.timer("selects")
     val deletions = metricRegistry.timer("deletions")
+    val all = metricRegistry.timer(if (combineMetrics) "all" else "dummy")
+
 
     val populate = metricRegistry.timer("populateMutations")
 

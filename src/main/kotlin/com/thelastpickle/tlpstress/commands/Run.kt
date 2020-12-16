@@ -19,12 +19,14 @@ import com.thelastpickle.tlpstress.converters.HumanReadableConverter
 import com.thelastpickle.tlpstress.converters.HumanReadableTimeConverter
 import com.thelastpickle.tlpstress.generators.ParsedFieldFunction
 import com.thelastpickle.tlpstress.generators.Registry
+import com.thelastpickle.tlpstress.profiles.Operation
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
-import java.io.File
-import java.lang.RuntimeException
+import java.util.*
+import java.util.concurrent.ForkJoinPool
 import kotlin.concurrent.fixedRateTimer
+
 
 class NoSplitter : IParameterSplitter {
     override fun split(value: String?): MutableList<String> {
@@ -154,6 +156,11 @@ class Run(val command: String) : IStressCommand {
     @Parameter(names = ["--max-requests"], description = "Sets the max requests per connection")
     var maxRequestsPerConnection : Int = 32768
 
+    @Parameter(names = ["--combine-metrics"], description = "Combine Write/Read/Deletion metrics into a single one.")
+    var combineMetrics : Boolean = false
+
+    private val statementQueue : Queue<Operation> = LinkedList<Operation>()
+
     /**
      * Lazily generate query options
      */
@@ -210,7 +217,8 @@ class Run(val command: String) : IStressCommand {
 
 
     override fun execute() {
-
+        // Size the fork join pool appropriately, using an additional thread for statement generation
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", (threads + 1).toString())
         Preconditions.checkArgument(!(duration > 0 && iterations > 0L), "Duration and iterations shouldn't be both set at the same time. Please pick just one.")
         iterations = if (duration == 0L && iterations == 0L) DEFAULT_ITERATIONS else iterations // apply the default if the number of iterations wasn't set
 
@@ -261,15 +269,16 @@ class Run(val command: String) : IStressCommand {
         var runnersExecuted = 0L
 
         try {
+            val statementGenerator = createStatementGenerator(plugin, metrics, fieldRegistry, rateLimiter)
             // run the prepare for each
-            val runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
-
+            var runners = createRunners(plugin, metrics, fieldRegistry, rateLimiter)
+            runners = runners.plus(statementGenerator)
             populateData(plugin, runners, metrics)
 
             println("Starting main runner")
 
             metrics.startReporting()
-
+            ProfileRunner.statementGeneratorIsRunning = true
             runnersExecuted = runners.parallelStream().map {
                 println("Running")
                 it.run()
@@ -334,17 +343,23 @@ class Run(val command: String) : IStressCommand {
 
     }
 
+    private fun createStatementGenerator(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): ProfileRunner {
+        val context = StressContext(session, this, 0, metrics, concurrency.toInt(), fieldRegistry, rateLimiter, combineMetrics)
+        val statementGenerator = ProfileRunner.createStatementGenerator(context, plugin.instance)
+
+        println("Preparing statements.")
+        val executed = statementGenerator.prepare()
+
+        return statementGenerator
+    }
+
     private fun createRunners(plugin: Plugin, metrics: Metrics, fieldRegistry: Registry, rateLimiter: RateLimiter?): List<ProfileRunner> {
         val runners = IntRange(0, threads - 1).map {
             println("Connecting")
-            val context = StressContext(session, this, it, metrics, concurrency.toInt(), fieldRegistry, rateLimiter)
+            val context = StressContext(session, this, it + 1, metrics, concurrency.toInt(), fieldRegistry, rateLimiter, combineMetrics)
             ProfileRunner.create(context, plugin.instance)
         }
 
-        println("Preparing statements.")
-        val executed = runners.first().prepare()
-
-        println("Statements prepared.")
         return runners
     }
 
@@ -355,11 +370,11 @@ class Run(val command: String) : IStressCommand {
         val reporters = mutableListOf<ScheduledReporter>()
 
         if(csvFile.isNotEmpty()) {
-            reporters.add(FileReporter(registry, csvFile, command))
+            reporters.add(FileReporter(registry, csvFile, command, combineMetrics))
         }
         reporters.add(SingleLineConsoleReporter(registry))
 
-        return Metrics(registry, reporters, prometheusPort)
+        return Metrics(registry, reporters, prometheusPort, combineMetrics)
     }
 
     private fun createFieldRegistry(plugin: Plugin): Registry {

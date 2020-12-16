@@ -5,9 +5,10 @@ import com.thelastpickle.tlpstress.profiles.IStressProfile
 import com.thelastpickle.tlpstress.profiles.IStressRunner
 import com.thelastpickle.tlpstress.profiles.Operation
 import org.apache.logging.log4j.kotlin.logger
+import java.lang.RuntimeException
+import java.time.Instant
 import java.time.LocalDateTime
-import java.util.concurrent.Semaphore
-import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.*
 
 class PartitionKeyGeneratorException(e: String) : Exception()
 
@@ -17,16 +18,30 @@ class PartitionKeyGeneratorException(e: String) : Exception()
  * Logs all errors along the way
  * Keeps track of useful metrics, per thread
  */
+
+const val STATEMENT_TIMEOUT_IN_MILLISECONDS: Long = 12000L
+const val POPULATE_CONCURRENCY: Int = 200
+val statementQueue: BlockingQueue<Operation> = LinkedBlockingQueue<Operation>();
+
 class ProfileRunner(val context: StressContext,
                     val profile: IStressProfile,
-                    val partitionKeyGenerator: PartitionKeyGenerator) {
+                    val partitionKeyGenerator: PartitionKeyGenerator,
+                    val isStatementGenerator: Boolean) {
 
     companion object {
+        var statementGeneratorIsRunning = false
         fun create(context: StressContext, profile: IStressProfile) : ProfileRunner {
 
             val partitionKeyGenerator = getGenerator(context, context.mainArguments.partitionKeyGenerator)
 
-            return ProfileRunner(context, profile, partitionKeyGenerator)
+            return ProfileRunner(context, profile, partitionKeyGenerator, false)
+        }
+
+        fun createStatementGenerator(context: StressContext, profile: IStressProfile) : ProfileRunner {
+
+            val partitionKeyGenerator = getGenerator(context, context.mainArguments.partitionKeyGenerator)
+
+            return ProfileRunner(context, profile, partitionKeyGenerator, true)
         }
 
         fun getGenerator(context: StressContext, name: String) : PartitionKeyGenerator {
@@ -43,7 +58,6 @@ class ProfileRunner(val context: StressContext,
 
         val log = logger()
     }
-
 
     val readRate: Double
 
@@ -81,26 +95,29 @@ class ProfileRunner(val context: StressContext,
 
      */
     fun run() {
-
         if (context.mainArguments.duration == 0L) {
             print("Running the profile for ${context.mainArguments.iterations} iterations...")
         } else {
             print("Running the profile for ${context.mainArguments.duration}min...")
         }
-        executeOperations(context.mainArguments.iterations, context.mainArguments.duration)
+        if (isStatementGenerator) {
+            generateOperations(context.mainArguments.iterations, context.mainArguments.duration)
+            statementGeneratorIsRunning = false
+        } else {
+            executeStatements()
+        }
+
     }
 
     /**
-     * Used for both pre-populating data and for performing the actual runner
+     * Used to generate statements and post them into the statement queue
      */
-    private fun executeOperations(iterations: Long, duration: Long) {
+    private fun generateOperations(iterations: Long, duration: Long) {
 
         val desiredEndTime = LocalDateTime.now().plusMinutes(duration)
         var operations = 0
-        // create a semaphore local to the thread to limit the query concurrency
-        val sem = Semaphore(context.permits)
-
         val runner = profile.getRunner(context)
+        val maxStatementQueueSize = context.thread*context.permits*10
 
         // we use MAX_VALUE since it's essentially infinite if we give a duration
         val totalValues = if (duration > 0) Long.MAX_VALUE else iterations
@@ -118,27 +135,49 @@ class ProfileRunner(val context: StressContext,
             val nextOp = ThreadLocalRandom.current().nextInt(0, 100)
             val op : Operation = getNextOperation(nextOp, runner, key)
             
-            // if we're using the rate limiter (unlikely) grab a permit
-            context.rateLimiter?.run {
-                acquire(1)
+            // if we're using the rate limiter grab a permit
+            if (context.rateLimiter == null) {
+                // No rate limiting, backpressure will be applied on the queue size
+                // The queue is allowed to contain ten times the number of concurrent requests times the number of threads
+                // This should give a big enough buffer
+                while (statementQueue.size >= maxStatementQueueSize.coerceAtLeast(1000)) {
+                    Thread.sleep(10)
+                }
+            } else {
+                context.rateLimiter.acquire(1)
             }
-
-            sem.acquire()
-
-            val startTime = when(op) {
-                is Operation.Mutation -> context.metrics.mutations.time()
-                is Operation.SelectStatement -> context.metrics.selects.time()
-                is Operation.Deletion -> context.metrics.deletions.time()
-            }
-
-            val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op) )
-
+            statementQueue.add(op)
             operations++
         }
+    }
 
+    /**
+     * Used for both pre-populating data and for performing the actual runner
+     */
+    private fun executeStatements() {
+        val semaphore = Semaphore(context.permits)
+        val runner = profile.getRunner(context)
+
+        var op: Operation? = null
+        while (true) {
+            op = statementQueue.poll(1, TimeUnit.SECONDS)
+            if (op != null) {
+                semaphore.acquire()
+                if (op.startTimestamp + STATEMENT_TIMEOUT_IN_MILLISECONDS < Instant.now().toEpochMilli()) {
+                    // the query already spent too much time in the queue
+                    OperationCallback(context, op.startTime, runner, op, semaphore).onFailure(RuntimeException("Operation timed out"))
+                } else {
+                    val future = context.session.executeAsync(op.bound)
+                    Futures.addCallback(future, OperationCallback(context, op.startTime, runner, op, semaphore))
+                }
+            } else {
+                if (!ProfileRunner.statementGeneratorIsRunning) {
+                    break
+                }
+            }
+        }
         // block until all the queries are finished
-        sem.acquireUninterruptibly(context.permits)
+        semaphore.acquireUninterruptibly(context.permits)
     }
 
     private fun getNextOperation(nextOp: Int, runner: IStressRunner, key: PartitionKey): Operation {
@@ -160,17 +199,14 @@ class ProfileRunner(val context: StressContext,
     fun populate(numRows: Long) {
 
         val runner = profile.getRunner(context)
-        val sem = Semaphore(context.permits)
+        val semaphore = Semaphore(POPULATE_CONCURRENCY)
 
         fun executePopulate(op: Operation.Mutation) {
-            context.rateLimiter?.run {
-                acquire(1)
-            }
-            sem.acquire()
+            semaphore.acquire()
 
             val startTime = context.metrics.populate.time()
             val future = context.session.executeAsync(op.bound)
-            Futures.addCallback(future, OperationCallback(context, sem, startTime, runner, op))
+            Futures.addCallback(future, OperationCallback(context, startTime, runner, op, semaphore))
         }
 
         when(profile.getPopulateOption(context.mainArguments)) {
@@ -193,7 +229,7 @@ class ProfileRunner(val context: StressContext,
 
             }
         }
-        sem.acquireUninterruptibly(context.permits)
+        semaphore.acquireUninterruptibly(POPULATE_CONCURRENCY)
     }
 
 
