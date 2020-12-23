@@ -17,10 +17,17 @@ import com.thelastpickle.tlpstress.generators.functions.Random
 class UdtTimeSeries : IStressProfile {
 
     override fun schema(): List<String> {
+        var dataColumns = ""
+        for (i in 2..nbDataColumns) {
+            dataColumns += ", data${i} text"
+        }
+
+        val dropTable = """DROP TABLE IF EXISTS sensor_data_udt"""
+
+        val dropUdt = """DROP TYPE IF EXISTS sensor_data_details"""
+
         val queryUdt = """CREATE TYPE IF NOT EXISTS sensor_data_details (
-                          data1 text,
-                          data2 text,
-                          data3 text
+                          data1 text $dataColumns
                         )""".trimIndent()
 
         val queryTable = """CREATE TABLE IF NOT EXISTS sensor_data_udt (
@@ -31,7 +38,7 @@ class UdtTimeSeries : IStressProfile {
                             WITH CLUSTERING ORDER BY (timestamp DESC)
                            """.trimIndent()
 
-        return listOf(queryUdt, queryTable)
+        return listOf(dropTable, dropUdt, queryUdt, queryTable)
     }
 
     lateinit var insert: PreparedStatement
@@ -40,6 +47,15 @@ class UdtTimeSeries : IStressProfile {
 
     @WorkloadParameter("Limit select to N rows.")
     var limit = 500
+
+    @WorkloadParameter("Number of data columns.")
+    var nbDataColumns = 1
+
+    @WorkloadParameter("Minimum number of characters per data column")
+    var minChars = 100
+
+    @WorkloadParameter("Maximum number of characters per data column")
+    var maxChars = 200
 
     override fun prepare(session: Session) {
         insert = session.prepare("INSERT INTO sensor_data_udt (sensor_id, timestamp, data) VALUES (?, ?, ?)")
@@ -64,9 +80,11 @@ class UdtTimeSeries : IStressProfile {
             }
 
             override fun getNextMutation(partitionKey: PartitionKey) : Operation {
-                val data = dataField.getText()
-                val chunks = data.chunked(data.length/3)
-                val udtValue = udt.newValue().setString("data1", chunks[0]).setString("data2", chunks[1]).setString("data3", chunks[2])
+                val udtValue = udt.newValue().setString("data1", dataField.getText())
+                var dataColumns = ""
+                for (i in 2..nbDataColumns) {
+                    udtValue.setString("data$i", dataField.getText())
+                }
                 val timestamp = UUIDs.timeBased()
                 val bound = insert.bind(partitionKey.getText(),timestamp, udtValue)
                 return Operation.Mutation(bound)
@@ -80,7 +98,8 @@ class UdtTimeSeries : IStressProfile {
     }
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {
-        return mapOf(Field("sensor_data", "data") to Random().apply {min=100; max=200})
+        println("Using between $minChars and $maxChars characters")
+        return mapOf(Field("sensor_data", "data") to Random().apply {min=minChars.toLong(); max=maxChars.toLong()})
     }
 
 

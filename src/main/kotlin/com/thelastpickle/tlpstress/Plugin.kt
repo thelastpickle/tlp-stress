@@ -30,7 +30,7 @@ data class Plugin (val name: String,
         val log = logger()
 
         fun getPlugins() : Map<String, Plugin> {
-            val r = Reflections("com.thelastpickle.tlpstress")
+            val r = Reflections("com.thelastpickle.tlpstress.profiles")
             val modules = r.getSubTypesOf(IStressProfile::class.java)
 
 
