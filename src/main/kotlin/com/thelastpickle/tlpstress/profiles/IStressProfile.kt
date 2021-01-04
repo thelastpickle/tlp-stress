@@ -1,5 +1,6 @@
 package com.thelastpickle.tlpstress.profiles
 
+import com.codahale.metrics.Timer
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
@@ -9,6 +10,7 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.commands.Run
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
+import java.time.Instant
 
 interface IStressRunner {
     fun getNextMutation(partitionKey: PartitionKey) : Operation
@@ -88,16 +90,23 @@ interface IStressProfile {
 }
 
 
-sealed class Operation(val bound: BoundStatement) {
+sealed class Operation(val bound: BoundStatement, val context: StressContext) {
+    abstract val startTime: Timer.Context
     // we're going to track metrics on the mutations differently
     // inserts will also carry data that might be saved for later validation
     // clustering keys won't be realistic to compute in the framework
+    val startTimestamp: Long = Instant.now().toEpochMilli()
+    class Mutation(bound: BoundStatement, context: StressContext, val callbackPayload: Any? = null) : Operation(bound, context) {
+        override val startTime: Timer.Context = if (context.combineMetrics) context.metrics.all.time() else context.metrics.mutations.time()
+    }
 
-    class Mutation(bound: BoundStatement, val callbackPayload: Any? = null ) : Operation(bound)
+    class SelectStatement(bound: BoundStatement, context: StressContext): Operation(bound, context) {
+        override val startTime: Timer.Context = if (context.combineMetrics) context.metrics.all.time() else context.metrics.selects.time()
+    }
 
-    class SelectStatement(bound: BoundStatement): Operation(bound)
-
-    class Deletion(bound: BoundStatement): Operation(bound)
+    class Deletion(bound: BoundStatement, context: StressContext): Operation(bound, context) {
+        override val startTime: Timer.Context = if (context.combineMetrics) context.metrics.all.time() else context.metrics.deletions.time()
+    }
 
 
 }

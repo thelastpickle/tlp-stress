@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPOutputStream
 
 
-class FileReporter(registry: MetricRegistry, outputFileName: String, command: String) : ScheduledReporter(registry,
+class FileReporter(registry: MetricRegistry, outputFileName: String, command: String, combineMetrics: Boolean) : ScheduledReporter(registry,
         "file-reporter",
         MetricFilter.ALL,
         TimeUnit.SECONDS,
@@ -38,17 +38,23 @@ class FileReporter(registry: MetricRegistry, outputFileName: String, command: St
         buffer.newLine()
         buffer.write("# $command")
         buffer.newLine()
-
-        buffer.write(",,Mutations,,,")
-        buffer.write("Reads,,,")
-        buffer.write("Deletes,,,")
+        if (combineMetrics) {
+            buffer.write(",,All Ops,,,")
+        } else {
+            buffer.write(",,Mutations,,,")
+            buffer.write("Reads,,,")
+            buffer.write("Deletes,,,")
+        }
         buffer.write("Errors,")
         buffer.newLine()
 
         buffer.write("Timestamp, Elapsed Time,")
         buffer.write(opHeaders)
-        buffer.write(opHeaders)
-        buffer.write(opHeaders)
+        if (!combineMetrics) {
+            buffer.write(opHeaders)
+            buffer.write(opHeaders)
+            buffer.write(opHeaders)
+        }
         buffer.write(errorHeaders)
         buffer.newLine()
     }
@@ -70,23 +76,32 @@ class FileReporter(registry: MetricRegistry, outputFileName: String, command: St
 
         buffer.write(timestamp + "," + elapsedTime + ",")
 
-        val writeRow = timers!!["mutations"]!!
-                .getMetricsList()
-                .joinToString(",", postfix = ",")
+        if (timers!!.containsKey("all")) {
+            val allRow = timers!!["all"]!!
+                    .getMetricsList()
+                    .joinToString(",", postfix = ",")
 
-        buffer.write(writeRow)
+            buffer.write(allRow)
+        } else {
 
-        val readRow = timers["selects"]!!
-                .getMetricsList()
-                .joinToString(",", postfix = ",")
+            val writeRow = timers!!["mutations"]!!
+                    .getMetricsList()
+                    .joinToString(",", postfix = ",")
 
-        buffer.write(readRow)
+            buffer.write(writeRow)
 
-        val deleteRow = timers["deletions"]!!
-                .getMetricsList()
-                .joinToString(",", postfix = ",")
+            val readRow = timers["selects"]!!
+                    .getMetricsList()
+                    .joinToString(",", postfix = ",")
 
-        buffer.write(deleteRow)
+            buffer.write(readRow)
+
+            val deleteRow = timers["deletions"]!!
+                    .getMetricsList()
+                    .joinToString(",", postfix = ",")
+
+            buffer.write(deleteRow)
+}
 
         val errors = meters!!["errors"]!!
         val errorRow = listOf(errors.count, errors.oneMinuteRate)

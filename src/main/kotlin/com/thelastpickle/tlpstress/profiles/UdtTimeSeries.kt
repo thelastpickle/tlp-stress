@@ -8,6 +8,7 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.WorkloadParameter
 import com.thelastpickle.tlpstress.generators.*
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.util.*
 
 
 /**
@@ -76,7 +77,7 @@ class UdtTimeSeries : IStressProfile {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = getPartitionHead.bind(partitionKey.getText(), limit)
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextMutation(partitionKey: PartitionKey) : Operation {
@@ -87,12 +88,12 @@ class UdtTimeSeries : IStressProfile {
                 }
                 val timestamp = UUIDs.timeBased()
                 val bound = insert.bind(partitionKey.getText(),timestamp, udtValue)
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val bound = deletePartitionHead.bind(partitionKey.getText())
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
         }
     }

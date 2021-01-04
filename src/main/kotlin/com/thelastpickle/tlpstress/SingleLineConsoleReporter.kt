@@ -46,12 +46,14 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
 
 
         if(lines % 10L == 0L)
-            printHeader()
+            printHeader(timers)
 
         val state = AtomicInteger()
 
-        // this is a little weird, but we should show the same headers for writes & selects
-        val queries = listOf(timers!!["mutations"]!!, timers["selects"]!!, timers["deletions"]!!)
+        var queries = listOf(timers!!["mutations"]!!, timers["selects"]!!, timers["deletions"]!!)
+        if (timers.containsKey("all")) {
+            queries = listOf(timers!!["all"]!!)
+        }
 
         for(queryType in queries) {
             with(queryType) {
@@ -99,7 +101,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         print(tmp)
     }
 
-    fun printHeader() {
+    fun printHeader(timers: SortedMap<String, Timer>?) {
 
         var widthOfEachOperation = 0
 
@@ -108,18 +110,25 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         }
 
         val paddingEachSide = (widthOfEachOperation - "Writes".length) / 2 - 1
+        var headers = 0..2
+        if (timers!!.containsKey("all")) {
+            headers = 0..0
+            print(" ".repeat(paddingEachSide))
+            print(termColors.blue("All Ops"))
+            print(" ".repeat(paddingEachSide))
+        } else {
+            print(" ".repeat(paddingEachSide))
+            print(termColors.blue("Writes"))
+            print(" ".repeat(paddingEachSide))
 
-        print(" ".repeat(paddingEachSide))
-        print( termColors.blue("Writes"))
-        print(" ".repeat(paddingEachSide))
+            print(" ".repeat(paddingEachSide))
+            print(termColors.blue("Reads"))
+            print(" ".repeat(paddingEachSide))
 
-        print(" ".repeat(paddingEachSide))
-        print(termColors.blue("Reads"))
-        print(" ".repeat(paddingEachSide))
-
-        print(" ".repeat(paddingEachSide))
-        print(termColors.blue("Deletes"))
-        print(" ".repeat(paddingEachSide))
+            print(" ".repeat(paddingEachSide))
+            print(termColors.blue("Deletes"))
+            print(" ".repeat(paddingEachSide))
+        }
 
         print(" ".repeat(6))
         print(termColors.red("Errors"))
@@ -127,7 +136,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
         println()
         var i = 0
 
-        for(x in 0..2) {
+        for(x in headers) {
 
             for (h in opHeaders) {
 
@@ -152,7 +161,7 @@ class SingleLineConsoleReporter(registry: MetricRegistry) : ScheduledReporter(re
             val colWidth = getWidth(i, h)
             val required = colWidth - h.length
 
-            val tmp = " ".repeat(required) + termColors.underline(h)
+            val tmp = " ".repeat(required) + termColors.underline(h) + " "
 
             print(tmp)
             i++

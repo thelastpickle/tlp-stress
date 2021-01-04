@@ -8,6 +8,7 @@ import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.generators.FieldFactory
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.util.*
 
 
 class KeyValue : IStressProfile {
@@ -43,19 +44,18 @@ class KeyValue : IStressProfile {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = select.bind(partitionKey.getText())
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextMutation(partitionKey: PartitionKey): Operation {
                 val data = value.getText()
                 val bound = insert.bind(partitionKey.getText(),  data)
-
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val bound = delete.bind(partitionKey.getText())
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
         }
     }

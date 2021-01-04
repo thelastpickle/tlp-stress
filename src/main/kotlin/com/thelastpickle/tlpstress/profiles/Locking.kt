@@ -8,6 +8,7 @@ import com.thelastpickle.tlpstress.ProfileRunner
 import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.commands.Run
 import org.apache.logging.log4j.kotlin.logger
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -73,17 +74,17 @@ class Locking : IStressProfile {
 
                 val bound = update.bind(newState, partitionKey.getText(), newState)
                 state[partitionKey.getText()] = newState
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = select.bind(partitionKey.getText())
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val bound = delete.bind(partitionKey.getText())
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
 
             override fun customPopulateIter() = iterator {
@@ -91,7 +92,7 @@ class Locking : IStressProfile {
                 val generator = ProfileRunner.getGenerator(context, "sequence")
                 for(partitionKey in generator.generateKey(context.mainArguments.partitionValues, context.mainArguments.partitionValues)) {
                     val bound = insert.bind(partitionKey.getText(), "test")
-                    yield(Operation.Mutation(bound))
+                    yield(Operation.Mutation(bound, context))
                 }
 
             }

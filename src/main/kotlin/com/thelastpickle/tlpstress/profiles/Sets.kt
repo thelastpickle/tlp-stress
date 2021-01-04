@@ -7,6 +7,7 @@ import com.thelastpickle.tlpstress.StressContext
 import com.thelastpickle.tlpstress.generators.Field
 import com.thelastpickle.tlpstress.generators.FieldGenerator
 import com.thelastpickle.tlpstress.generators.functions.Random
+import java.util.*
 
 class Sets : IStressProfile {
 
@@ -42,17 +43,17 @@ class Sets : IStressProfile {
                         .setSet(0, setOf(value))
                         .setString(1, partitionKey.getText())
 
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = select.bind(partitionKey.getText())
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val bound = deleteElement.bind(setOf(partitionKey.getText()), partitionKey.getText())
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
 
         }

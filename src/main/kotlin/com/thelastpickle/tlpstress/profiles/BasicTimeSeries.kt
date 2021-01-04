@@ -12,6 +12,7 @@ import com.thelastpickle.tlpstress.generators.functions.Random
 import java.lang.UnsupportedOperationException
 import java.sql.Timestamp
 import java.time.LocalDateTime
+import java.util.*
 
 
 /**
@@ -91,7 +92,7 @@ class BasicTimeSeries : IStressProfile {
 
             override fun getNextSelect(partitionKey: PartitionKey): Operation {
                 val bound = getPartitionHead.bind(partitionKey.getText(), limit)
-                return Operation.SelectStatement(bound)
+                return Operation.SelectStatement(bound, context)
             }
 
             override fun getNextMutation(partitionKey: PartitionKey) : Operation {
@@ -102,12 +103,12 @@ class BasicTimeSeries : IStressProfile {
                     values.add(dataFields[i-1].getText())
                 }
                 val bound = prepared.bind(*values.toTypedArray())
-                return Operation.Mutation(bound)
+                return Operation.Mutation(bound, context)
             }
 
             override fun getNextDelete(partitionKey: PartitionKey): Operation {
                 val bound = delete.bind(partitionKey.getText(), Timestamp.valueOf(LocalDateTime.now().minusSeconds(deleteDepth.toLong())))
-                return Operation.Deletion(bound)
+                return Operation.Deletion(bound, context)
             }
         }
     }
