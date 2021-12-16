@@ -25,7 +25,7 @@ apply plugin: 'nebula.ospackage-application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.thelastpickle'
-version '4.0.0'
+version '5.0.0'
 
 sourceCompatibility = 1.8
 
