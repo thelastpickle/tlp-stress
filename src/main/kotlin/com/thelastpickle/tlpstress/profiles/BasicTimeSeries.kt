@@ -21,10 +21,17 @@ import java.time.LocalDateTime
 class BasicTimeSeries : IStressProfile {
 
     override fun schema(): List<String> {
+
+        var dataColumns = ""
+        for (i in 2..nbDataColumns) {
+            dataColumns += "data${i} text,"
+        }
+
         val query = """CREATE TABLE IF NOT EXISTS sensor_data (
                             sensor_id text,
                             timestamp timeuuid,
                             data text,
+                            $dataColumns
                             primary key(sensor_id, timestamp))
                             WITH CLUSTERING ORDER BY (timestamp DESC)
                            """.trimIndent()
@@ -43,10 +50,25 @@ class BasicTimeSeries : IStressProfile {
     @WorkloadParameter("Deletion range in seconds. Range tombstones will cover all rows older than the given value.")
     var deleteDepth = 30
 
+    @WorkloadParameter("Number of data columns.")
+    var nbDataColumns = 1
+
+    @WorkloadParameter("Minimum number of characters per data column")
+    var minChars = 100
+
+    @WorkloadParameter("Maximum number of characters per data column")
+    var maxChars = 200
+
     override fun prepare(session: Session) {
         println("Using a limit of $limit for reads and deleting data older than $deleteDepth seconds (if enabled).")
         cassandraVersion = session.cluster.metadata.allHosts.map { host -> host.cassandraVersion }.min()!!
-        prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data) VALUES (?, ?, ?)")
+        var dataColumns = ""
+        var questionMarks = ""
+        for (i in 2..nbDataColumns) {
+            dataColumns += ",data${i}"
+            questionMarks += ", ?"
+        }
+        prepared = session.prepare("INSERT INTO sensor_data (sensor_id, timestamp, data $dataColumns) VALUES (?, ?, ? $questionMarks)")
         getPartitionHead = session.prepare("SELECT * from sensor_data WHERE sensor_id = ? LIMIT ?")
         if (cassandraVersion.compareTo(VersionNumber.parse("3.0")) >= 0) {
             delete = session.prepare("DELETE from sensor_data WHERE sensor_id = ? and timestamp < maxTimeuuid(?)")
@@ -60,7 +82,10 @@ class BasicTimeSeries : IStressProfile {
      */
     override fun getRunner(context: StressContext): IStressRunner {
 
-        val dataField = context.registry.getGenerator("sensor_data", "data")
+        val dataFields = mutableListOf(context.registry.getGenerator("sensor_data", "data"))
+        for (i in 2..nbDataColumns) {
+            dataFields.add(context.registry.getGenerator("sensor_data", "data$i"))
+        }
 
         return object : IStressRunner {
 
@@ -70,9 +95,13 @@ class BasicTimeSeries : IStressProfile {
             }
 
             override fun getNextMutation(partitionKey: PartitionKey) : Operation {
-                val data = dataField.getText()
+                val data = dataFields[0].getText()
                 val timestamp = UUIDs.timeBased()
-                val bound = prepared.bind(partitionKey.getText(),timestamp, data)
+                val values = mutableListOf<Any>(partitionKey.getText(),timestamp, data)
+                for (i in 2..nbDataColumns) {
+                    values.add(dataFields[i-1].getText())
+                }
+                val bound = prepared.bind(*values.toTypedArray())
                 return Operation.Mutation(bound)
             }
 
@@ -84,7 +113,12 @@ class BasicTimeSeries : IStressProfile {
     }
 
     override fun getFieldGenerators(): Map<Field, FieldGenerator> {
-        return mapOf(Field("sensor_data", "data") to Random().apply { min=100; max=200 })
+        val fields = mutableMapOf<Field, FieldGenerator>()
+        fields[Field("sensor_data", "data")] = Random().apply { min=minChars.toLong(); max=maxChars.toLong() }
+        for (i in 2..nbDataColumns) {
+            fields[Field("sensor_data", "data$i")] = Random().apply { min=minChars.toLong(); max=maxChars.toLong() }
+        }
+        return fields
     }
 
 
