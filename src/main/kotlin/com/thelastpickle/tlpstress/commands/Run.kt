@@ -22,8 +22,6 @@ import com.thelastpickle.tlpstress.generators.Registry
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarStyle
 import org.apache.logging.log4j.kotlin.logger
-import java.io.File
-import java.lang.RuntimeException
 import kotlin.concurrent.fixedRateTimer
 
 class NoSplitter : IParameterSplitter {
@@ -264,7 +262,7 @@ class Run(val command: String) : IStressCommand {
 
         // Both of the following are set in the try block, so this is OK
         val metrics = createMetrics()
-        var runnersExecuted = 0L
+        var runnersExecuted = 0
 
         try {
             // run the prepare for each
@@ -276,10 +274,12 @@ class Run(val command: String) : IStressCommand {
 
             metrics.startReporting()
 
-            runnersExecuted = runners.parallelStream().map {
+            runnersExecuted = runners.size
+
+            runners.parallelStream().forEach {
                 println("Running")
                 it.run()
-            }.count()
+            }
 
             Thread.sleep(1000)
 
@@ -324,9 +324,9 @@ class Run(val command: String) : IStressCommand {
                 }
 
                 // calling it on the runner
-                runners.parallelStream().map {
+                runners.parallelStream().forEach {
                     it.populate(populate)
-                }.count()
+                }
 
                 // have we really reached 100%?
                 Thread.sleep(1000)
@@ -347,12 +347,12 @@ class Run(val command: String) : IStressCommand {
             ProfileRunner.create(context, plugin.instance)
         }
 
-        val executed = runners.parallelStream().map {
+       runners.parallelStream().forEach {
             println("Preparing statements.")
             it.prepare()
-        }.count()
+        }
 
-        println("$executed threads prepared.")
+        println("${runners.size} threads prepared.")
         return runners
     }
 
