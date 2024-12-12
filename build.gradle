@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.google.cloud.tools.jib' version '1.8.0'
+    id 'com.google.cloud.tools.jib' version '3.4.3'
 }
 
 apply plugin: 'idea'
@@ -25,7 +25,7 @@ apply plugin: 'nebula.ospackage-application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.thelastpickle'
-version '4.0.0'
+version '5.0.0'
 
 sourceCompatibility = 1.8
 
@@ -129,9 +129,18 @@ task generateExamples(type: Exec) {
 }
 
 jib {
+    from {
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
+    }
     to {
         image = "thelastpickle/tlp-stress"
         tags = [version, "latest"]
+
     }
 }
 
