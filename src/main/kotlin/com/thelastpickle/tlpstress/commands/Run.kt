@@ -324,9 +324,9 @@ class Run(val command: String) : IStressCommand {
                 }
 
                 // calling it on the runner
-                runners.parallelStream().map {
+                runners.parallelStream().forEach {
                     it.populate(populate)
-                }.count()
+                }
 
                 // have we really reached 100%?
                 Thread.sleep(1000)
